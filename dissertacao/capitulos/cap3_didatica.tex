@@ -1,0 +1,349 @@
+\chapter{Elaboração de questões em Matemática: referenciais didáticos}
+\label{cap:didatica}
+
+% =====================================================================
+% PAPEL DESTE CAPÍTULO (registro didático):
+%   Responde "o que é uma questão boa e como sei disso".
+%   Cada referencial DERIVA implicações; a lista formatada dos SEIS
+%   critérios de qualidade existe APENAS na Seção 3.4 (casa canônica).
+%   O par "TBR na entrada, SOLO na avaliação" é dito UMA vez, em 3.2.3.
+% =====================================================================
+
+A arquitetura multiagente descrita no capítulo anterior sustenta-se sobre dois conceitos que ainda
+carecem de fundamentação explícita: a especificação de entrada que o professor fornece ao sistema e a
+rubrica utilizada pelo agente crítico didático para avaliar as questões geradas. Ambos precisam estar
+ancorados em referenciais teóricos da educação matemática reconhecidos pela comunidade acadêmica e
+coerentes com os objetivos do Ensino Médio brasileiro. Este capítulo apresenta, em quatro seções
+articuladas, os pilares pedagógicos do sistema --- a perspectiva de Polya; a Teoria das Situações
+Didáticas de Brousseau; as taxonomias cognitivas de Bloom e SOLO; e as habilidades de Matemática da
+BNCC do Ensino Médio --- e encerra com a consolidação desses referenciais em critérios de qualidade
+operacionalizáveis (Seção~\ref{sec:criterios}).
+
+\section{Resolução de problemas e elaboração de questões}
+\label{sec:resolucao}
+
+A resolução de problemas ocupa posição central no ensino de Matemática há décadas. No Brasil, essa
+centralidade está expressa tanto nos Parâmetros Curriculares Nacionais \citep{brasil1998pcn} quanto na
+Base Nacional Comum Curricular \citep{brasil2018bncc}, que reafirmou o desenvolvimento do raciocínio
+lógico e da capacidade de resolução de situações-problema como competências essenciais da área.
+Antes de apresentar a perspectiva de Polya, é necessário estabelecer uma distinção que atravessa toda
+a tradição do campo: a diferença entre \textbf{exercício} e \textbf{problema}.
+
+Um exercício é uma tarefa cuja via de resolução é imediatamente reconhecível pelo estudante: basta
+aplicar um algoritmo já aprendido, sem necessidade de decisão estratégica. Um problema, por sua vez, é
+uma situação em que o resolvedor não dispõe, de imediato, de um caminho garantido para a solução;
+existe uma lacuna entre o que se sabe e o que se quer determinar, e superá-la exige planejamento e
+raciocínio. Para \citet{dante2003didatica}, o exercício é essencialmente uma atividade de
+\emph{aplicação} de habilidade conhecida, ao passo que o problema necessariamente envolve invenção ou
+criação significativa por parte de quem o resolve. Essa distinção não é absoluta: uma mesma tarefa pode
+ser exercício para quem domina o procedimento e problema genuíno para quem ainda não o construiu --- o
+que define o caráter de um problema não é sua dificuldade intrínseca, mas o grau de mobilização
+cognitiva que ele exige.
+
+\subsection{A perspectiva de Polya}
+\label{sub:polya}
+
+Em 1945, o matemático húngaro George Pólya publicou \emph{How to Solve It}
+\citep{polya1945howtosolveit}, obra que se tornaria referência fundamental para a educação matemática
+e que no Brasil circula principalmente pela tradução \emph{A Arte de Resolver Problemas}
+\citep{polya1995arte}. A proposta central é que o processo de resolução pode ser descrito, ensinado e
+aprendido por meio de uma estrutura heurística de quatro etapas.
+
+A primeira etapa é \textbf{compreender o problema}: identificar com clareza o que é dado, o que é
+pedido e quais condições conectam os dados à incógnita. A segunda é \textbf{elaborar um plano} ---
+estabelecer a conexão entre os dados e a solução, reconhecendo um problema análogo, introduzindo
+notação auxiliar ou decompondo o problema em partes; é nessa etapa que reside o núcleo criativo da
+resolução. A terceira é \textbf{executar o plano}, colocando a estratégia em prática e verificando cada
+passo. A quarta é \textbf{examinar a solução obtida}: ao revisitar a resolução, o estudante verifica se
+o resultado é plausível e se a abordagem pode ser generalizada --- razão pela qual questões bem
+elaboradas devem admitir uma solução verificável por via independente.
+
+\paragraph{Implicações para a elaboração de questões.} A heurística de Polya, embora concebida como
+guia para o resolvedor, implica exigências precisas para a elaboração de questões formativas. Para que
+o estudante possa \emph{compreender o problema}, o enunciado precisa apresentar os dados, o que é
+pedido e as condições sem ambiguidades (\emph{clareza do enunciado}). Para que precise \emph{elaborar um
+plano}, o enunciado não pode sinalizar tão explicitamente o procedimento que dispense a decisão
+estratégica (\emph{não-trivialidade do caminho de solução}). E a etapa de \emph{exame da solução}
+pressupõe que a resposta possa ser examinada e confirmada por via independente (\emph{determinação e
+verificabilidade da solução}). Essas três exigências são consolidadas, junto com as demais, na
+Seção~\ref{sec:criterios}; elas também fundamentam, de forma simétrica, a necessidade do Agente
+Verificador Simbólico, que realiza de forma determinística a verificação passo a passo para as classes
+de questões tratáveis simbolicamente.
+
+\subsection{Teoria das Situações Didáticas}
+\label{sub:tsd}
+
+A Teoria das Situações Didáticas (TSD), desenvolvida por Guy Brousseau a partir da década de 1970
+\citep{brousseau1997tsd}, oferece um quadro complementar ao de Polya. Enquanto a heurística de Polya
+descreve o processo cognitivo do resolvedor individual, a TSD descreve a estrutura da situação que o
+professor projeta: o ambiente de aprendizagem e as condições que tornam possível a construção do saber
+pelo próprio estudante.
+
+O conceito fundante é o de \textbf{situação didática}, o conjunto de relações estabelecidas entre o
+estudante, um ambiente e um sistema educativo, com a intenção de que o estudante se aproprie de um
+saber. Dentro dessa estrutura, o conceito de \textbf{\emph{milieu}} é central: tudo aquilo que age
+sobre o estudante ou que é acionado por ele --- o problema proposto, os dados fornecidos, as respostas
+já obtidas. O \emph{milieu} funciona como um sistema antagonista que oferece resistência e
+retroalimentação às ações do estudante, permitindo que ele verifique, por seus próprios meios, se suas
+decisões são adequadas. É precisamente essa resistência que torna a aprendizagem possível.
+
+O terceiro conceito central é o \textbf{contrato didático}: o conjunto de expectativas mútuas, em sua
+maior parte implícitas, que regulam a relação pedagógica. Brousseau identifica nele efeitos perversos
+de relevância direta para a elaboração de questões, sendo o mais conhecido o \textbf{efeito Topaze}:
+diante de um estudante em dificuldade, o professor tende a oferecer pistas cada vez mais explícitas até
+que a resposta se torne evidente, transferindo para si a responsabilidade intelectual que deveria ser
+do estudante. Transposto para a elaboração de questões, esse efeito aparece em enunciados
+excessivamente detalhados que conduzem o estudante à solução por um caminho previamente pavimentado.
+
+Quanto à tipologia, Brousseau descreve quatro tipos de situação pelos quais uma sequência didática bem
+projetada deve passar: \emph{ação} (o estudante age mobilizando estratégias ainda implícitas),
+\emph{formulação} (precisa comunicar suas estratégias, explicitando-as em linguagem), \emph{validação}
+(deve convencer um interlocutor produzindo argumentos próximos da demonstração) e
+\emph{institucionalização} (o professor formaliza o saber construído, conectando-o ao conhecimento
+estabelecido). É necessário reconhecer que a TSD foi concebida para descrever sequências didáticas
+completas, e não itens avaliativos isolados; aplicar sua tipologia diretamente a uma questão individual
+seria um forçamento teórico. O que a teoria oferece a este trabalho é um vocabulário preciso para
+articular o que torna uma questão pedagogicamente rica: uma boa questão constrói um \emph{milieu}
+informativo e resistente --- fornece os dados necessários para agir, mas não antecipa a estratégia ---
+e evita o efeito Topaze. Essas implicações se traduzem em dois critérios --- a adequação do
+\emph{milieu} e a ausência de condução excessiva ---, consolidados na Seção~\ref{sec:criterios}.
+
+\section{Taxonomias cognitivas}
+\label{sec:taxonomias}
+
+Os referenciais da seção anterior oferecem critérios qualitativos para avaliar uma questão, mas não
+fornecem uma escala que permita \emph{graduar} sua complexidade de forma sistemática. Para isso, o
+campo desenvolveu as \textbf{taxonomias cognitivas}: classificações hierárquicas dos processos mentais
+exigidos por diferentes tipos de tarefa.
+
+\subsection{Taxonomia de Bloom revisada}
+\label{sub:bloom}
+
+A taxonomia original de objetivos educacionais, proposta por Benjamin Bloom e colaboradores em 1956,
+foi revisada em 2001 sob a liderança de Lorin Anderson \citep{anderson2001taxonomy}. É essa versão
+revisada, conhecida como Taxonomia de Bloom Revisada (TBR), que é adotada nesta dissertação. Sua
+principal inovação é a introdução de um \emph{framework} bidimensional: a \textbf{dimensão do
+conhecimento} (factual, conceitual, procedimental e metacognitivo) classifica \emph{o que} o estudante
+precisa aprender; a \textbf{dimensão dos processos cognitivos} classifica \emph{o que ele faz
+mentalmente} com esse conhecimento. Para a Matemática do Ensino Médio, as categorias de conhecimento
+mais relevantes são a conceitual e a procedimental.
+
+A dimensão dos processos cognitivos organiza-se em seis categorias de complexidade crescente.
+\textbf{Lembrar} corresponde à recuperação de informação armazenada; \textbf{entender}, a construir
+significado (interpretar, exemplificar, comparar); \textbf{aplicar}, a executar um procedimento em uma
+situação específica; \textbf{analisar}, a decompor o material e determinar como as partes se
+relacionam; \textbf{avaliar}, a emitir julgamentos com base em critérios; e \textbf{criar}, a reunir
+elementos para formar um todo novo e coerente. A hierarquia não é absoluta nem linear, mas indica uma
+progressão geral que orienta o planejamento de avaliações equilibradas.
+
+No contexto da Matemática do Ensino Médio, \citet{miranda2015taxonomia} mostrou que as questões
+elaboradas por professores concentram-se maciçamente nos três primeiros níveis --- lembrar, entender e
+aplicar ---, com presença muito reduzida de itens nos níveis superiores. Esse resultado converge com o
+diagnóstico da BNCC, que aponta a necessidade de superar o modelo de avaliação centrado na reprodução
+de procedimentos em direção ao desenvolvimento de competências de raciocínio e argumentação. Para o
+sistema desta dissertação, a TBR fornece o vocabulário com que o professor declara o nível cognitivo
+desejado; o detalhamento de como esse parâmetro opera no fluxo de execução é apresentado na
+Seção~\ref{sub:sintese-tax}.
+
+\subsection{Taxonomia SOLO}
+\label{sub:solo}
+
+A Taxonomia SOLO (\emph{Structure of Observed Learning Outcomes}) foi proposta por John Biggs e Kevin
+Collis em 1982 \citep{biggs1982solo} para classificar a \emph{qualidade das respostas} produzidas por
+estudantes. Enquanto a TBR parte da perspectiva do professor --- o que se pretende que o estudante
+aprenda ---, a SOLO parte da perspectiva da resposta observada: dado o que o estudante produziu, qual é
+a estrutura dessa produção? Essa diferença de orientação torna as duas taxonomias complementares, e não
+concorrentes.
+
+A SOLO organiza-se em cinco níveis. No nível \textbf{pré-estrutural}, o estudante não demonstra
+compreensão relevante da tarefa. No \textbf{uniestrutural}, identifica um único aspecto relevante, mas
+não o articula com outros. No \textbf{multiestrutural}, mobiliza vários aspectos, mas os trata de forma
+independente, sem integração. No \textbf{relacional}, os diferentes aspectos são articulados em uma
+estrutura coerente, de modo que o estudante demonstra compreensão integrada do problema. No
+\textbf{abstrato ampliado}, vai além dos limites do problema dado, generalizando a estrutura para novos
+contextos. A distinção decisiva é a que separa a passagem \emph{quantitativa} (do pré-estrutural ao
+multiestrutural --- acumular elementos) da \emph{qualitativa} (do multiestrutural ao relacional ---
+reorganizar os elementos em uma estrutura integrada).
+
+Aplicada à elaboração de questões, a SOLO oferece um diagnóstico que o modelo de Bloom não captura com
+a mesma clareza. Uma questão de função quadrática que pede apenas o cálculo das raízes pela fórmula de
+Bhaskara admite uma resposta multiestrutural correta; uma questão que pede ao estudante que justifique
+\emph{por que} o discriminante determina o número de raízes reais exige uma resposta relacional. Ambas
+podem ser classificadas no nível \emph{aplicar} da TBR e ainda assim exigir estruturas de resposta
+radicalmente diferentes --- e é essa diferença que a SOLO torna visível.
+
+\subsection{Síntese operacional}
+\label{sub:sintese-tax}
+
+% CASA CANÔNICA do par "TBR na entrada, SOLO na avaliação". No rascunho
+% esse mesmo argumento aparecia em 3.2.1, 3.2.2, 3.2.3 e 3.3.3; aqui ele
+% é dito UMA vez e referenciado nos demais pontos.
+
+A adoção conjunta das duas taxonomias responde a complementaridade funcional, não a exaustividade
+teórica: a TBR responde a ``qual processo cognitivo a questão deve exigir?'' --- voltada ao \emph{design}
+da tarefa ---; a SOLO responde a ``qual é a estrutura da resposta que a questão efetivamente
+demanda?'' --- voltada à qualidade do produto. A escolha por essas duas, em vez de outras igualmente
+reconhecidas, apoia-se em dois critérios: a compatibilidade com o vocabulário curricular brasileiro ---
+a TBR já é referenciada implicitamente pela BNCC --- e o uso documentado de ambas em pesquisas
+brasileiras com questões do Ensino Médio.
+
+No sistema desta dissertação, essa complementaridade é operacionalizada em dois momentos do fluxo de
+execução: a \textbf{TBR compõe a especificação de entrada} --- o professor seleciona um dos seis
+processos cognitivos como parâmetro obrigatório, incorporado ao \emph{prompt} do Agente Gerador --- e a
+\textbf{SOLO informa a avaliação} --- o Agente Crítico Didático verifica se a estrutura da resposta
+esperada é compatível com o nível declarado. Uma questão especificada como \emph{analisar} deve exigir
+resposta de nível relacional ou abstrato ampliado; se a resposta esperada for correta já no nível
+multiestrutural, isso é sinalizado como inconsistência, e o orquestrador devolve a questão ao gerador
+com instrução de revisão. Essa verificação cruzada --- TBR na entrada, SOLO na avaliação --- fecha o
+ciclo de garantia de qualidade cognitiva do sistema.
+
+\section{BNCC do Ensino Médio}
+\label{sec:bncc}
+
+Os referenciais anteriores fornecem os critérios pedagógicos e cognitivos da elaboração de questões.
+Para torná-los operacionais, é preciso ancorá-los ao currículo concreto do Ensino Médio brasileiro ---
+ancoragem fornecida pela Base Nacional Comum Curricular (BNCC), homologada em 2018
+\citep{brasil2018bncc}, que organiza as habilidades de Matemática em um sistema de códigos que permite
+ao professor especificar, de forma precisa, qual conteúdo e qual expectativa de aprendizagem estão em
+jogo em cada questão gerada.
+
+\subsection{Estrutura geral}
+\label{sub:bncc-estrutura}
+
+A BNCC do Ensino Médio organiza o currículo em quatro áreas do conhecimento, das quais interessa aqui a
+de Matemática e suas Tecnologias. Cada área define \textbf{competências específicas} --- capacidades
+amplas a serem desenvolvidas --- e as desdobra em \textbf{habilidades} concretas, identificadas por
+códigos alfanuméricos. Além da formação básica comum, a BNCC prevê os \textbf{itinerários formativos};
+no âmbito desta dissertação, o recorte recai sobre a formação básica comum da área de Matemática,
+obrigatória para todos os estudantes, ficando os itinerários, por sua implementação heterogênea, fora
+do escopo.
+
+A estrutura tem uma consequência direta para o sistema: o código de habilidade --- da forma
+\texttt{EM13MATxxx}, em que os dois primeiros algarismos após \texttt{MAT} identificam a competência e
+os últimos a habilidade --- funciona como identificador único e não ambíguo da expectativa de
+aprendizagem associada a cada questão gerada, permitindo rastrear qual conteúdo ela aborda e como se
+posiciona no currículo.
+
+\subsection{Habilidades de Matemática}
+\label{sub:bncc-habilidades}
+
+% CORRIGIDO: o rascunho dizia "quatro unidades temáticas" mas listava
+% três. O texto discute exatamente estas três. CONFERIR a nomenclatura
+% e a contagem contra o documento da BNCC antes da versão final.
+A área de Matemática e suas Tecnologias organiza seus conteúdos em três unidades temáticas:
+\textbf{Números e Álgebra}, \textbf{Geometria e Medidas} e \textbf{Probabilidade e Estatística}
+% CONFERIR contagem/nomenclatura na BNCC
+\citep{brasil2018bncc}. A unidade \textbf{Números e Álgebra} abrange a interpretação e o uso de funções
+(polinomiais, exponenciais, logarítmicas e trigonométricas), progressões aritméticas e geométricas e a
+análise de situações de variação de grandezas; é a unidade com maior densidade de habilidades e maior
+abrangência para a geração de questões com diferentes níveis cognitivos. A unidade \textbf{Geometria e
+Medidas} contempla geometria plana e espacial, semelhança, trigonometria e transformações geométricas;
+do ponto de vista da verificação simbólica, é a que apresenta maior proporção de habilidades de difícil
+formalização computacional, correspondendo ao limite discutido na Seção~\ref{sub:cas-limites}. A unidade
+\textbf{Probabilidade e Estatística} reúne análise combinatória, probabilidade, medidas de tendência
+central e dispersão e interpretação de dados, sendo a de maior potencial para questões contextualizadas.
+
+Para o recorte desta dissertação, o sistema foi desenvolvido e testado com foco prioritário nas
+unidades de Números e Álgebra e de Probabilidade e Estatística, por duas razões: a maior cobertura da
+verificação simbólica via SymPy para esses conteúdos --- equações, funções, sequências e expressões
+admitem verificação determinística na maioria dos casos --- e a representatividade dessas unidades nas
+avaliações externas brasileiras, em particular no ENEM. As habilidades de Geometria e Medidas que
+admitem verificação simbólica --- equações de retas, circunferências e distâncias na geometria analítica
+--- também foram incluídas, com as ressalvas da Seção~\ref{sub:cas-limites}.
+
+\subsection{Articulação entre BNCC e taxonomias cognitivas}
+\label{sub:bncc-taxonomias}
+
+A BNCC e a TBR operam em níveis de abstração distintos, mas complementares: as habilidades da BNCC
+especificam \emph{o que} o estudante deve aprender; a TBR, \emph{como} ele deve processar
+cognitivamente esse conteúdo. No sistema, o código de habilidade e o nível cognitivo são dois
+parâmetros independentes da especificação de entrada, e sua combinação é o que permite ao professor
+solicitar, com precisão, uma questão sobre um conteúdo específico em um nível de complexidade
+determinado. A articulação não é arbitrária: os verbos das próprias habilidades já carregam uma
+expectativa de nível cognitivo --- \emph{interpretar} aponta para \emph{entender}; \emph{resolver e
+elaborar problemas} combina \emph{aplicar} e \emph{analisar}; \emph{investigar} aponta para os níveis
+superiores. Essa correspondência fornece a ancoragem com que o Agente Crítico Didático avalia a
+coerência entre a habilidade declarada e o nível cognitivo da questão gerada (conforme operacionalizado
+na Seção~\ref{sub:sintese-tax}). Essa dupla ancoragem --- curricular pela BNCC e cognitiva pela TBR --- é
+o que confere ao sistema sua especificidade pedagógica.
+
+\section{Critérios de qualidade para questões matemáticas}
+\label{sec:criterios}
+
+% CASA CANÔNICA dos seis critérios. É o ÚNICO lugar onde eles aparecem
+% enumerados e formatados. As seções anteriores apenas os DERIVAM de
+% cada referencial e remetem para cá.
+
+As seções anteriores apresentaram quatro referenciais --- Polya, a TSD, as taxonomias de Bloom e SOLO,
+e as habilidades da BNCC ---, cada um contribuindo com um ângulo específico para a compreensão do que
+torna uma questão matematicamente e pedagogicamente adequada. Esta seção consolida essas contribuições
+em um conjunto coeso de seis critérios que operam simultaneamente como rubrica do Agente Crítico
+Didático e como instrumento de avaliação pelo painel docente. Os critérios articulam-se em uma estrutura
+que vai da dimensão mais técnica --- a correção matemática --- à mais pedagógica --- a relevância
+formativa.
+
+\begin{enumerate}
+\item \textbf{Correção matemática.} Os dados são consistentes, o gabarito está correto e a resolução
+não contém erros. É o critério mais fundamental e o único que admite avaliação binária; no sistema, é o
+único avaliado de forma determinística, pelo Agente Verificador Simbólico, antes de a questão chegar ao
+Agente Crítico. Questões cujo gabarito depende de dados omitidos, ou que admitem múltiplas
+interpretações incompatíveis, são reprovadas neste critério, pois violam a exigência de Polya de
+solução determinada e verificável.
+
+\item \textbf{Clareza do enunciado e ausência de ambiguidade.} Um enunciado claro permite ao estudante
+identificar sem dúvida o que é dado, o que é pedido e quais são as condições --- a primeira etapa da
+heurística de Polya. À luz da TSD, a ambiguidade empobrece o \emph{milieu}: quando o estudante não
+consegue determinar sobre qual problema deve raciocinar, a resistência produtiva do ambiente se dissolve
+em confusão.
+
+\item \textbf{Adequação ao nível cognitivo e ao público.} O processo cognitivo efetivamente demandado
+deve ser coerente com o nível declarado e compatível com o repertório de um estudante do Ensino Médio.
+Na dimensão cognitiva, o Agente Crítico verifica, com base na SOLO, se a estrutura de resposta exigida é
+compatível com o nível Bloom declarado (Seção~\ref{sub:sintese-tax}); na curricular, verifica se os
+conceitos envolvidos estão previstos para a etapa.
+
+\item \textbf{Alinhamento à habilidade BNCC declarada.} A questão deve abordar o objeto de conhecimento
+correspondente à habilidade declarada (plano do conteúdo) e ter demanda cognitiva compatível com a
+expectativa expressa na habilidade (plano do verbo, conforme a Seção~\ref{sub:bncc-taxonomias}).
+
+\item \textbf{Plausibilidade dos distratores} (em questões de múltipla escolha). Um distrator bem
+elaborado é plausível: corresponde a um erro sistemático real --- confundir o discriminante com a raiz,
+inverter numerador e denominador, esquecer um caso. Um distrator implausível não cumpre função
+diagnóstica e reduz artificialmente a dificuldade.
+
+\item \textbf{Originalidade e relevância pedagógica.} A questão não reproduz mecanicamente enunciados de
+livros didáticos, e seu contexto é significativo para o estudante. À luz da TSD, a relevância está
+ligada à qualidade do \emph{milieu}. É o critério mais subjetivo dos seis, avaliado em escala descritiva
+de três pontos (inadequado, aceitável, rico), e não por veredicto binário.
+\end{enumerate}
+
+A Tabela~\ref{tab:criterios} sintetiza os seis critérios, seus referenciais de origem, o agente
+avaliador e o tipo de resposta produzida.
+
+\begin{table}[htbp]
+\centering
+\caption{Critérios de qualidade, referenciais e mecanismos de avaliação}
+\label{tab:criterios}
+\begin{tabular}{@{}p{3.2cm}p{2.4cm}p{2.8cm}p{3.4cm}@{}}
+\toprule
+\textbf{Critério} & \textbf{Referencial} & \textbf{Agente avaliador} & \textbf{Tipo de resposta} \\
+\midrule
+Correção matemática & Polya; SymPy & Verificador Simbólico & Binário (aprovado / rejeitado) \\
+Clareza do enunciado & Polya; TSD & Crítico Didático & Escala + comentário \\
+Adequação ao nível & Bloom; SOLO & Crítico Didático & Escala + comentário \\
+Alinhamento BNCC & BNCC; Bloom & Crítico Didático & Binário + justificativa \\
+Plausibilidade dos distratores & Dante; TSD & Crítico Didático & Escala por distrator \\
+Originalidade e relevância & TSD; Polya & Crítico Didático & Escala descritiva (3 pontos) \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\footnotesize Elaborado pela autora.}
+\end{table}
+
+Os seis critérios formam a rubrica operacional do sistema e serão retomados no capítulo de avaliação
+como instrumento de avaliação pelo painel docente: os professores participantes receberão uma versão
+desta rubrica adaptada para avaliação humana, permitindo a comparação direta entre o veredicto do
+Agente Crítico Didático e o julgamento dos especialistas. Essa triangulação --- entre verificação
+simbólica determinística, avaliação automatizada por rubrica e avaliação humana qualificada --- é o
+mecanismo de validação da hipótese arquitetural descrita na Seção~\ref{sec:hipotese}.
