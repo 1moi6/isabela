@@ -1,0 +1,207 @@
+\chapter{Inteligência Artificial e Educação Matemática: contexto e desafios}
+\label{cap:contexto}
+
+% =====================================================================
+% PAPEL DESTE CAPÍTULO (registro pedagógico/educacional):
+%   Responde "por que isso importa para o professor".
+%   NÃO explica arquitetura transformer em detalhe, NÃO lista as
+%   estratégias de mitigação, NÃO enuncia a hipótese arquitetural por
+%   inteiro. Esses conteúdos técnicos pertencem ao Capítulo 2.
+% =====================================================================
+
+\section{Inteligência Artificial: definição operacional e classificações relevantes}
+\label{sec:ia-definicao}
+
+O termo \emph{inteligência artificial} foi empregado formalmente pela primeira vez em
+1956, durante a Conferência de Dartmouth, convocada por \citet{mccarthy1955dartmouth} para
+reunir pesquisadores interessados em simular o raciocínio humano por meio de máquinas. Antes
+disso, Alan Turing já havia lançado, em 1950, uma questão fundadora --- \emph{``Can machines
+think?''} --- e proposto um critério comportamental para avaliá-la: se uma máquina produz
+respostas indistinguíveis das humanas em uma interação textual mediada exclusivamente por
+escrita, considera-se que ela demonstra comportamento inteligente \citep{turing1950computing}.
+Não por acaso, a primeira aplicação formal dessa ideia, o \emph{Logic Theorist}
+\citep{newell1956logic}, foi construída para demonstrar teoremas da lógica proposicional ---
+evidenciando, desde a origem, o vínculo estreito entre inteligência artificial e raciocínio
+matemático.
+
+Para os fins desta dissertação, entretanto, adota-se uma definição funcional em lugar de uma
+genealogia histórica. Segundo \citet{russell2021aima}, um sistema é dito inteligente quando
+percebe seu ambiente, processa informações e age de modo a maximizar a realização de objetivos
+previamente definidos. Essa perspectiva ancora a discussão no comportamento observável dos
+sistemas --- e não em questões filosóficas sobre consciência ou cognição ---, o que é suficiente
+e adequado ao contexto educacional aqui investigado.
+
+Do ponto de vista das classificações, distinguem-se duas categorias relevantes para este
+trabalho. A primeira é a chamada \textbf{IA estreita} (\emph{narrow AI}), que designa sistemas
+projetados para executar tarefas específicas com alto desempenho --- reconhecimento de imagens,
+tradução automática, sistemas de recomendação --- sem capacidade de generalização além do
+domínio para o qual foram treinados. A segunda é a \textbf{IA generativa}, categoria mais
+recente, que compreende modelos capazes de produzir conteúdo original --- texto, imagem, código
+--- a partir de padrões aprendidos em grandes volumes de dados. É nessa segunda categoria que se
+inserem os sistemas centrais desta dissertação.
+
+Para os propósitos deste trabalho, entende-se por ``sistema de IA'' qualquer ferramenta
+computacional baseada em modelos de linguagem de grande escala (\emph{Large Language Models} ---
+LLMs) capaz de gerar, avaliar ou organizar conteúdo textual de natureza matemática. Essa
+delimitação exclui, deliberadamente, sistemas voltados à visão computacional, robótica ou jogos,
+cujas arquiteturas e desafios diferem substancialmente do escopo aqui investigado.
+
+\section{IA generativa e modelos de linguagem de grande escala}
+\label{sec:ia-generativa}
+
+% NOTA DE REVISÃO: esta seção foi enxugada. A explicação detalhada da
+% arquitetura transformer, da inferência probabilística e do fato de que
+% "o modelo não computa, prevê" foi REMOVIDA daqui e vive agora na
+% Seção \ref{sec:llm} (Capítulo 2), sua casa canônica. Aqui fica apenas
+% o panorama histórico que situa o leitor.
+
+A trajetória que levou aos atuais modelos de linguagem de grande escala tem início nas primeiras
+tentativas de simular a comunicação humana por meio de máquinas. Na década de 1960,
+\citet{weizenbaum1966eliza} desenvolveu o ELIZA, programa estruturado para estabelecer diálogos
+por meio da identificação de padrões linguísticos e da reorganização das frases apresentadas pelo
+usuário. Ainda que não houvesse compreensão real do conteúdo, o ELIZA demonstrou que máquinas
+poderiam sustentar interações textuais convincentes e abriu caminho para o desenvolvimento de
+tecnologias conversacionais progressivamente mais sofisticadas.
+
+Nas décadas seguintes, o avanço do poder computacional, a ampliação das bases de dados
+disponíveis e o desenvolvimento de métodos conexionistas --- especialmente as redes neurais
+artificiais --- reposicionaram a inteligência artificial como campo estratégico de pesquisa.
+Nesse contexto, \citet{bengio2003neural} propuseram os primeiros modelos neurais de linguagem
+capazes de representar palavras como vetores em espaços semânticos contínuos, estabelecendo as
+bases conceituais para o que viria a seguir. O avanço decisivo ocorreu em 2017, com a introdução
+da arquitetura \emph{transformer} por \citet{vaswani2017attention}, que se tornou a base
+tecnológica da geração contemporânea de LLMs.
+
+Os \textbf{modelos de linguagem de grande escala} são a realização desse percurso em escala
+massiva: modelos como o GPT-3 \citep{brown2020gpt3}, treinados com centenas de bilhões de
+parâmetros, demonstraram que o aumento de escala produz capacidades não observadas em modelos
+menores --- geração de código, tradução entre idiomas e produção de texto de alta qualidade ---,
+o que os tornou a tecnologia dominante para geração de conteúdo textual na presente década. Para
+os fins desta dissertação, importa reter uma propriedade central desses modelos: sua geração é
+\textbf{probabilística e não-determinística}. Essa característica confere grande versatilidade ---
+inclusive para gerar questões matemáticas originais ---, mas também os torna suscetíveis a erros
+em tarefas que exigem rigor lógico e consistência simbólica. O funcionamento técnico que explica
+essa propriedade --- e a distinção fundamental entre \emph{prever} e \emph{computar} --- é
+desenvolvido na Seção~\ref{sec:llm}.
+
+\section{IA na Educação: panorama de aplicações}
+\label{sec:ia-educacao}
+
+A incorporação da inteligência artificial ao campo educacional configura-se como um processo mais
+complexo e gradual do que o observado em outros setores. Diferentemente do ambiente empresarial,
+cuja adoção é fortemente impulsionada por demandas de produtividade e competitividade, a educação
+envolve dimensões pedagógicas, éticas e sociais que exigem reflexão crítica e regulamentação
+cuidadosa. Questões relacionadas à formação docente, à infraestrutura tecnológica, à proteção de
+dados de estudantes e às implicações didáticas do uso dessas ferramentas tornam o avanço
+necessariamente mais cauteloso. Assim, embora a IA apresente potencial significativo para apoiar
+práticas pedagógicas e personalizar a aprendizagem, sua incorporação ao contexto escolar ainda
+ocorre de maneira progressiva e permeada por debates acerca de seus limites e possibilidades.
+
+Dentre as categorias de aplicação mais estudadas na literatura, os \textbf{sistemas tutoriais
+inteligentes} (\emph{Intelligent Tutoring Systems} --- ITS) figuram entre as mais antigas e
+consolidadas. Esses sistemas buscam simular a interação individualizada entre professor e aluno,
+identificando lacunas no conhecimento do estudante e adaptando a sequência de atividades em tempo
+real. A motivação teórica remonta ao estudo seminal de \citet{bloom1984twosigma}, que demonstrou
+que o atendimento individualizado produz ganhos de aprendizagem significativamente superiores aos
+do ensino coletivo convencional --- o chamado \emph{problema das duas sigmas}. Pesquisas
+posteriores indicam que ITS bem projetados conseguem aproximar-se desse referencial, com efeitos
+positivos documentados especialmente em matemática e ciências.
+
+Uma segunda categoria relevante compreende os \textbf{sistemas de recomendação e ambientes
+adaptativos}. Nesses sistemas, algoritmos de aprendizado de máquina analisam o histórico de
+interações do estudante --- desempenho em atividades, tempo de resposta, padrões de erro --- e
+recomendam conteúdos, exercícios ou percursos de aprendizagem personalizados. A lógica subjacente
+é semelhante à dos sistemas de recomendação comerciais, mas orientada a objetivos pedagógicos:
+maximizar a progressão do estudante respeitando seu ritmo e suas dificuldades específicas.
+Plataformas como Khan Academy e Duolingo incorporam variações dessa abordagem em larga escala.
+
+A \textbf{geração automática de conteúdo educacional} constitui a terceira categoria e a mais
+diretamente relacionada ao objeto desta dissertação. Com o advento dos LLMs, tornou-se
+tecnicamente viável produzir questões, enunciados, resumos, \emph{feedback} personalizado e até
+planos de aula de forma automatizada, a partir de especificações fornecidas pelo professor. Essa
+possibilidade tem despertado interesse crescente na pesquisa em Educação Matemática, pois pode
+reduzir o tempo dedicado à elaboração de materiais e ampliar a diversidade de situações-problema
+disponíveis para o trabalho em sala de aula. Entretanto, como discutido na
+Seção~\ref{sec:ia-matematica}, a geração automática em contextos matemáticos apresenta
+fragilidades específicas que demandam estratégias de verificação e validação docente.
+
+Por fim, os \textbf{assistentes conversacionais} representam a categoria de maior penetração no
+cotidiano de professores e estudantes na atualidade. Ferramentas baseadas em LLMs --- como o
+ChatGPT, o Gemini e o próprio Claude --- são amplamente utilizadas para tirar dúvidas, solicitar
+explicações alternativas, gerar exemplos e apoiar a resolução de problemas. Sua acessibilidade,
+disponibilidade contínua e capacidade de adaptar o nível de linguagem ao interlocutor conferem-lhes
+potencial pedagógico relevante. Ao mesmo tempo, sua natureza probabilística --- que pode produzir
+respostas plausíveis, porém incorretas, sem qualquer sinalização de incerteza --- impõe ao
+professor o papel insubstituível de mediador crítico, tema retomado ao final deste capítulo.
+
+\section{IA no ensino de Matemática: potencialidades e fragilidades}
+\label{sec:ia-matematica}
+
+A chegada de modelos de linguagem de grande escala ao cotidiano escolar suscita tanto entusiasmo
+quanto cautela entre educadores e pesquisadores. No campo da Matemática, essa ambivalência é
+especialmente marcada: ao mesmo tempo que os LLMs demonstram capacidade notável de comunicar
+ideias matemáticas em linguagem natural e de produzir resoluções passo a passo, eles exibem
+falhas sistemáticas em tarefas que deveriam ser triviais para qualquer computador convencional.
+
+\subsection*{Potencialidades reconhecidas}
+
+Do ponto de vista pedagógico, os LLMs oferecem três contribuições que merecem destaque. A
+primeira é a \textbf{multiplicidade de abordagens explicativas}: diante de uma mesma questão, o
+modelo pode reformular o enunciado, apresentar exemplos análogos, oferecer representações visuais
+em ASCII ou sugerir estratégias heurísticas alternativas, adaptando a linguagem ao perfil do
+estudante. Essa flexibilidade aproxima-se do ideal de ensino diferenciado preconizado pela
+literatura em educação matemática.
+
+A segunda potencialidade é a \textbf{geração rápida de material didático}. Um professor pode, em
+poucos minutos, obter rascunhos de enunciados, variações de um mesmo problema ou conjuntos de
+exercícios graduados por dificuldade, o que reduz a carga de criação de conteúdo e amplia a
+personalização do ensino.
+
+A terceira contribuição é o \textbf{suporte à articulação verbal do raciocínio}. Ao se pedir que o
+modelo apresente cada etapa de resolução, o processo de solução torna-se legível e discutível, o
+que pode ser aproveitado pelo professor como material para análise e debate em sala. O fundamento
+técnico desse recurso --- a técnica de \emph{chain-of-thought prompting} --- e seus limites são
+tratados na Seção~\ref{sec:mitigacao}.
+
+\subsection*{Fragilidades documentadas}
+
+As limitações dos LLMs em Matemática são igualmente documentadas e, para os fins desta
+dissertação, mais relevantes do que as potencialidades.
+\citet{frieder2023mathematical} conduziram uma avaliação sistemática das capacidades matemáticas
+do ChatGPT/GPT-4, concluindo que o modelo apresenta desempenho aceitável em questões de rotina,
+mas falha de forma expressiva em problemas que exigem demonstração formal, manipulação simbólica
+complexa ou raciocínio em múltiplos passos encadeados. Essa assimetria entre \emph{fluência
+discursiva} e \emph{rigor computacional} é a característica mais decisiva para o uso educacional da
+tecnologia: o modelo escreve sobre Matemática com desenvoltura, mas não garante a correção daquilo
+que escreve.
+
+Do ponto de vista do professor, o que importa reter neste capítulo é a consequência prática dessa
+assimetria --- erros de aritmética, de álgebra simbólica e de encadeamento lógico ocorrem de forma
+recorrente e pouco previsível. A tipologia técnica desses erros, com seus mecanismos e a
+literatura que os documenta, é apresentada na Seção~\ref{sec:limitacoes}.
+
+\subsection*{O fenômeno do erro silencioso}
+\label{sec:erro-silencioso}
+
+% CASA CANÔNICA do conceito de "erro silencioso": é o gancho que motiva
+% todo o trabalho, e por isso é desenvolvido por extenso AQUI. Nos demais
+% capítulos ele deve ser apenas referenciado (\ref{sec:erro-silencioso}).
+
+A principal implicação pedagógica das fragilidades acima não é a possibilidade de erro em si, mas o
+modo como esse erro se apresenta: o LLM tende a produzir respostas \textbf{plausíveis e
+incorretas}, redigidas com o mesmo tom de confiança das respostas corretas. Diferentemente de uma
+calculadora, que simplesmente rejeita uma entrada inválida, ou de um sistema de computação
+algébrica, que emite uma mensagem de erro, o LLM elabora uma explicação coerente para um resultado
+equivocado. Esse fenômeno --- denominado \emph{alucinação} na literatura de processamento de
+linguagem natural e aqui chamado de \textbf{erro silencioso} por sua invisibilidade ao leitor não
+especializado --- representa um risco específico no contexto educacional, em que o professor ou o
+estudante pode aceitar um gabarito incorreto sem perceber o equívoco.
+
+\subsection*{Implicações para esta dissertação}
+
+O diagnóstico apresentado neste capítulo fundamenta a hipótese central deste trabalho: o uso
+isolado de um LLM para geração de questões matemáticas é insuficiente para garantir correção e
+qualidade didática. A resposta a esse diagnóstico --- combinar o poder expressivo do LLM com uma
+verificação determinística e com uma avaliação pedagógica estruturada --- não é um refinamento
+opcional, mas uma necessidade arquitetural. Os fundamentos técnicos dessa combinação, e o
+argumento completo que a sustenta, são desenvolvidos no Capítulo~\ref{cap:tecnica}.
