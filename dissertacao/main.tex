@@ -1,0 +1,56 @@
+% =====================================================================
+% Dissertação PROFMAT/UFMT — fonte reconstruída a partir do PDF
+% Aluna: Isabella Dias Ribeiro dos Santos
+% Orientador: Prof. Dr. Moiseis dos Santos Cecconello
+%
+% NOTA DE PORTABILIDADE:
+%   Este arquivo usa apenas pacotes universais e compila no Overleaf
+%   com o motor pdfLaTeX (selecione "pdfLaTeX" + "BibTeX" no menu).
+%   O estilo de citação pode ser trocado para abntex2cite mais tarde,
+%   sem alterar o conteúdo dos capítulos.
+%
+% COMO COMPILAR (Overleaf ou local):
+%   pdflatex main  ->  bibtex main  ->  pdflatex main  ->  pdflatex main
+% =====================================================================
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+
+% Citação autor-data (troque por abntex2cite quando migrar para o template oficial)
+\usepackage[round,authoryear]{natbib}
+\bibliographystyle{plainnat}
+
+% Espaçamento 1,5 (aproximação do padrão de dissertação)
+\usepackage{setspace}
+\onehalfspacing
+
+\title{Sistema multiagente para geração assistida de questões de Matemática no Ensino Médio}
+\author{Isabella Dias Ribeiro dos Santos}
+\date{}
+
+\begin{document}
+
+% ---------------------------------------------------------------------
+% Os elementos pré-textuais (folha de rosto, resumo, abstract, listas)
+% serão inseridos depois, conforme o template oficial do PROFMAT/UFMT.
+% ---------------------------------------------------------------------
+
+\tableofcontents
+
+\include{capitulos/cap1_contexto}
+\include{capitulos/cap2_tecnica}
+\include{capitulos/cap3_didatica}
+
+% ---------------------------------------------------------------------
+\bibliography{referencias}
+
+\end{document}

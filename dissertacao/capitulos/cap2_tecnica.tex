@@ -1,0 +1,508 @@
+\chapter{Fundamentação técnica: LLMs, agentes e verificação simbólica}
+\label{cap:tecnica}
+
+% =====================================================================
+% PAPEL DESTE CAPÍTULO (registro técnico):
+%   Responde "como isso funciona e por que a combinação é necessária".
+%   É a casa canônica de: transformer (2.1.1), inferência probabilística
+%   (2.1.2), taxonomia técnica de erros (2.1.3), CoT/PAL/tool-use/
+%   self-consistency (2.2), agentes e SMA (2.3), CAS/SymPy (2.4).
+%   A hipótese arquitetural é argumentada por inteiro APENAS em 2.5.
+%
+% NOTA DE REVISÃO: o parágrafo "Descrição: capítulo técnico-central..."
+% que abria este capítulo era resíduo do documento de estrutura e foi
+% removido. A numeração foi corrigida: "Agentes e sistemas multiagentes"
+% passou de 2.2.5/2.2.6 para a Seção 2.3.
+% =====================================================================
+
+Este capítulo apresenta os três pilares conceituais sobre os quais se assenta o sistema proposto:
+os modelos de linguagem de grande escala, os sistemas multiagentes e a verificação simbólica por
+sistemas de computação algébrica. O objetivo não é esgotar cada tema, mas reunir o estritamente
+necessário para justificar, ao final, por que a combinação desses elementos é uma necessidade
+arquitetural e não uma escolha de conveniência.
+
+\section{Modelos de linguagem de grande escala}
+\label{sec:llm}
+
+Os modelos de linguagem de grande escala (\emph{Large Language Models} --- LLMs) são sistemas
+computacionais treinados para processar e gerar texto em linguagem natural a partir de padrões
+aprendidos em volumes massivos de dados textuais. Compreender seu funcionamento em nível conceitual
+é condição necessária para avaliar tanto suas potencialidades quanto suas limitações no contexto
+educacional e, em particular, para justificar por que a arquitetura proposta nesta dissertação
+requer camadas adicionais de verificação simbólica e avaliação pedagógica.
+
+\subsection{Arquitetura \emph{transformer} em nível conceitual}
+\label{sub:transformer}
+
+A quase totalidade dos LLMs contemporâneos é construída sobre a arquitetura \emph{transformer},
+introduzida por \citet{vaswani2017attention} no artigo \emph{Attention Is All You Need}. Antes
+dessa proposta, os modelos de linguagem predominantes utilizavam redes neurais recorrentes (RNNs),
+que processavam sequências de forma estritamente serial --- um elemento de cada vez --- e, por
+isso, apresentavam dificuldades em capturar dependências entre palavras muito distantes no texto. A
+contribuição central dos \emph{transformers} foi substituir essa lógica sequencial por um mecanismo
+de \emph{autoatenção} (\emph{self-attention}), que permite ao modelo avaliar, simultaneamente, a
+relevância de cada elemento de uma sequência em relação a todos os demais. Essa capacidade de
+processamento paralelo tornou o treinamento de modelos muito maiores viável e deu origem à atual
+geração de LLMs.
+
+Para os fins desta dissertação, a arquitetura pode ser compreendida a partir de três conceitos
+encadeados. O primeiro é o de \textbf{token}: a unidade mínima de processamento do modelo, que não
+corresponde necessariamente a uma palavra inteira, mas a fragmentos de texto determinados
+estatisticamente durante o treinamento. A expressão ``função quadrática'', por exemplo, pode ser
+segmentada em dois, três ou mais tokens, dependendo do vocabulário do modelo. Crucialmente, o
+modelo opera inteiramente sobre sequências de identificadores numéricos associados a esses tokens
+--- jamais sobre o texto em si. Isso implica que toda a sofisticação linguística de um LLM é, em
+sua raiz, uma transformação de sequências de números.
+
+O segundo conceito é o de \textbf{janela de contexto}: o número máximo de tokens que o modelo pode
+considerar em uma única operação de inferência. Tudo que precisa ser levado em conta na geração de
+uma resposta --- o enunciado da tarefa, o histórico da conversa, os exemplos fornecidos e a própria
+resposta em construção --- deve caber dentro dessa janela. Modelos com janelas mais amplas
+conseguem manter coerência em textos mais extensos, o que é relevante para a geração de questões com
+contextos elaborados e resoluções detalhadas.
+
+O terceiro conceito é o próprio mecanismo de \textbf{atenção}: o componente pelo qual o modelo
+pondera a influência de cada token sobre os demais ao construir sua representação interna do texto.
+É esse mecanismo que permite ao modelo reconhecer, por exemplo, que o termo ``raiz'' em um
+enunciado matemático pertence ao campo semântico algébrico, e não ao botânico. A atenção opera em
+múltiplas camadas e em múltiplas cabeças simultâneas, o que confere ao modelo capacidade de capturar
+relações de diferentes naturezas em paralelo.
+
+\subsection{Inferência por previsão probabilística}
+\label{sub:inferencia}
+
+Uma vez treinado, o LLM gera texto por meio de um processo denominado \textbf{inferência
+autorregressiva}: a cada passo, calcula-se uma distribuição de probabilidade sobre todos os tokens
+do vocabulário e seleciona-se o próximo token com base nessa distribuição. O token escolhido é
+acrescentado à sequência, que passa a servir de contexto para a previsão seguinte, e o processo se
+repete até que um critério de parada seja atingido.
+
+Essa natureza probabilística tem uma consequência fundamental que distingue os LLMs de qualquer
+ferramenta de cálculo convencional: \textbf{o modelo não computa, ele prevê}. Quando solicitado a
+resolver a equação $2x^2 - 5x + 3 = 0$, o LLM não executa um algoritmo de fatoração; ele gera a
+sequência de tokens que, dado seu treinamento, tem maior probabilidade de aparecer após aquele
+enunciado. Na maior parte dos casos comuns, esse mecanismo produz respostas corretas, pois o
+treinamento expôs o modelo a inúmeros exemplos semelhantes. Porém, ele não oferece nenhuma garantia
+de correção formal, o que o diferencia estruturalmente de um sistema de computação algébrica.
+
+Dois parâmetros controlam o grau de variabilidade da geração. A \textbf{temperatura} escala a
+distribuição de probabilidade antes da amostragem: valores próximos de zero tornam o modelo mais
+determinístico, favorecendo o token mais provável; valores elevados achatam a distribuição,
+aumentando a probabilidade de tokens menos prováveis serem selecionados e, por isso, produzindo
+saídas mais variadas --- e mais suscetíveis a erros em tarefas que exigem precisão. O parâmetro
+\textbf{top-p} (\emph{nucleus sampling}), proposto por \citet{holtzman2020curious}, complementa
+esse controle ao restringir o conjunto de candidatos àqueles cuja probabilidade acumulada não
+ultrapassa um limiar definido, eliminando da amostragem os tokens de baixíssima probabilidade.
+
+Para aplicações matemáticas --- em que a correção é binária --- a variabilidade introduzida por
+esses parâmetros representa um risco concreto. Uma temperatura ligeiramente elevada pode fazer com
+que o modelo produza, em diferentes execuções do mesmo \emph{prompt}, respostas distintas e
+contraditórias para um mesmo problema. Isso tem implicações diretas sobre a \textbf{reprodutibilidade}
+do sistema desenvolvido nesta dissertação, questão retomada no capítulo de implementação.
+
+\subsection{Limitações conhecidas em raciocínio matemático}
+\label{sec:limitacoes}
+
+As limitações dos LLMs em tarefas matemáticas decorrem diretamente de sua arquitetura probabilística
+e foram documentadas de forma sistemática na literatura. Três categorias são especialmente
+relevantes para o presente trabalho.
+
+A primeira é a \textbf{aritmética e a manipulação simbólica}. Como o modelo opera sobre tokens e não
+sobre estruturas algébricas, operações que exigem precisão formal --- fatoração de polinômios,
+simplificação de frações algébricas, resolução de sistemas --- não são computadas, mas aproximadas
+por padrão estatístico. Quando o padrão é frequente no corpus de treinamento, o resultado tende a
+ser correto; quando envolve combinações menos recorrentes de valores ou estruturas, a probabilidade
+de erro cresce de forma não previsível.
+
+A segunda limitação é o \textbf{raciocínio encadeado em múltiplos passos}. Em problemas que exigem
+uma sequência longa de deduções, cada etapa introduz uma nova fonte de variabilidade probabilística.
+Um equívoco em um passo intermediário não apenas invalida aquele passo isolado, mas contamina todos
+os subsequentes --- o chamado \emph{cascading error}. A técnica de \emph{chain-of-thought prompting}
+(Seção~\ref{sub:cot}) atenua esse problema ao forçar a externalização dos passos intermediários, mas
+não o elimina: a cadeia de raciocínio pode ser fluente, coerente na forma e matematicamente
+incorreta no conteúdo.
+
+A terceira limitação é a \textbf{sensibilidade ao fraseado do \emph{prompt}}. Pequenas variações na
+forma como um problema é enunciado podem produzir respostas estruturalmente diferentes, evidenciando
+que o modelo responde ao padrão superficial do texto em vez do conteúdo matemático subjacente. Em um
+sistema de geração de questões, essa sensibilidade impõe que os \emph{prompts} dos agentes sejam
+rigorosamente formulados e testados.
+
+Em conjunto, essas três limitações fundamentam a hipótese central desta dissertação: nenhum LLM,
+utilizado de forma isolada, oferece as garantias necessárias para a geração confiável de questões
+matemáticas destinadas ao contexto escolar. A resposta arquitetural a esse diagnóstico --- a
+combinação com um verificador simbólico determinístico --- é construída ao longo deste capítulo e
+sintetizada na Seção~\ref{sec:hipotese}.
+
+\section{Estratégias de mitigação documentadas na literatura}
+\label{sec:mitigacao}
+
+As limitações descritas na seção anterior motivaram uma linha ativa de pesquisa voltada ao
+desenvolvimento de técnicas que aumentem a confiabilidade desses modelos sem exigir retreinamento.
+As quatro estratégias apresentadas a seguir representam o estado da arte nessa área e constituem o
+referencial técnico que orienta as decisões de projeto do sistema desenvolvido nesta dissertação.
+
+\subsection{Chain-of-thought prompting}
+\label{sub:cot}
+
+A técnica de \emph{chain-of-thought prompting} (CoT), proposta por \citet{wei2022chain}, consiste em
+incluir, nos exemplos fornecidos ao modelo, não apenas o par pergunta-resposta, mas também a cadeia
+completa de passos intermediários que conduz à solução. A hipótese subjacente é que, ao ver exemplos
+de raciocínio explicitado, o modelo passa a produzir suas próprias cadeias de passos antes de
+enunciar a resposta final, o que reduz a probabilidade de saltos inferenciais incorretos.
+
+Os ganhos reportados por \citet{wei2022chain} são expressivos: em \emph{benchmarks} de raciocínio
+aritmético e lógico, o CoT superou abordagens de \emph{few-shot} convencional com margem
+significativa, especialmente em modelos de maior escala. \citet{wang2023selfconsistency} ampliaram
+esse resultado ao demonstrar melhorias adicionais de até 17,9 pontos percentuais no \emph{benchmark}
+GSM8K quando o CoT é combinado com amostragem múltipla. Uma variante mais simples, o \emph{zero-shot
+CoT}, foi proposta por \citet{kojima2022zero}: basta acrescentar a instrução ``vamos pensar passo a
+passo'' ao \emph{prompt} para que o modelo passe a externalizar seu raciocínio, sem necessidade de
+exemplos anotados.
+
+Apesar desses avanços, o CoT apresenta limitação relevante para o presente trabalho: ele melhora a
+coerência narrativa da resolução, mas não garante correção matemática. O modelo pode produzir uma
+cadeia de passos fluente, bem formatada e matematicamente incorreta --- um sinal trocado, uma
+fatoração equivocada, um caso desconsiderado ---, e o erro, por estar embebido em texto
+aparentemente coerente, tende a passar despercebido sem verificação independente. É precisamente essa
+limitação residual que justifica a adição de uma camada de verificação simbólica.
+
+\subsection{Program-aided language models (PAL)}
+\label{sub:pal}
+
+Uma abordagem mais radical ao problema da imprecisão matemática é a proposta por \citet{gao2023pal},
+denominada \emph{Program-Aided Language Models} (PAL). Em vez de solicitar ao modelo que resolva o
+problema diretamente, o PAL instrui o LLM a traduzir o enunciado em linguagem natural para um
+programa em Python, cujos passos de execução correspondem às etapas de raciocínio. A solução efetiva
+do problema é então \textbf{delegada a um interpretador externo} --- determinístico e exato por
+natureza --- que executa o código gerado e retorna o resultado.
+
+Essa divisão de responsabilidades é conceitualmente simples e poderosa: o LLM faz o que faz bem
+(compreender linguagem natural e estruturar um plano de solução), e o interpretador faz o que o LLM
+não consegue garantir (computar com precisão). Nos experimentos de \citet{gao2023pal}, o PAL superou
+modelos muito maiores que utilizavam apenas CoT.
+
+A conexão entre o PAL e a arquitetura desta dissertação é direta e constitui um dos pilares
+conceituais do trabalho. O Agente Verificador Simbólico, descrito no capítulo de arquitetura, opera
+segundo o mesmo princípio fundamental: em vez de confiar na resolução textual produzida pelo Agente
+Gerador, ele delega o cômputo ao SymPy --- um sistema de computação algébrica simbólica --- e compara
+o resultado obtido com o gabarito proposto. A diferença em relação ao PAL reside no escopo: onde o
+PAL utiliza um interpretador Python de propósito geral, o verificador desta dissertação emprega uma
+biblioteca especializada em álgebra simbólica, mais adequada às questões do Ensino Médio e capaz de
+lidar com equivalências formais que a aritmética numérica não captura.
+
+\subsection{Tool use e function calling}
+\label{sub:tooluse}
+
+Uma generalização da ideia do PAL é o paradigma de \emph{tool use}, que equipa o LLM com acesso a um
+conjunto de ferramentas externas --- calculadoras, mecanismos de busca, APIs, interpretadores de
+código --- que podem ser invocadas durante a geração da resposta. O modelo aprende não apenas a
+produzir texto, mas a decidir \emph{quando} e \emph{como} chamar cada ferramenta e a incorporar os
+resultados obtidos ao fluxo de geração. \citet{schick2023toolformer} demonstraram que modelos
+treinados com essa capacidade alcançam desempenho competitivo com modelos muito maiores em tarefas
+que envolvem aritmética e busca factual. A implementação moderna dessa ideia em APIs comerciais é o
+\emph{function calling}: o modelo recebe a descrição de um conjunto de funções disponíveis e pode
+emitir chamadas estruturadas a essas funções no meio da geração.
+
+Para o presente trabalho, a distinção relevante é entre \emph{quando usar} e \emph{quando não usar}
+essa abordagem. O \emph{tool use} não é a abordagem adotada nesta dissertação: o sistema proposto não
+delega ferramentas ao LLM durante a geração, pois isso criaria uma dependência opaca entre o modelo e
+a ferramenta, dificultando a rastreabilidade e o controle pedagógico. Em vez disso, a verificação
+simbólica é realizada por um agente independente, após a geração, o que preserva a separação de
+responsabilidades e permite que o professor visualize tanto a questão gerada quanto o veredicto de
+verificação de forma transparente.
+
+\subsection{Self-consistency e amostragem múltipla}
+\label{sub:selfconsistency}
+
+A estratégia de \emph{self-consistency}, proposta por \citet{wang2023selfconsistency}, parte de uma
+intuição simples: se um problema matemático admite uma resposta correta única, e se o modelo é
+executado múltiplas vezes com o mesmo \emph{prompt} (com temperatura maior que zero, para produzir
+variações), a resposta mais frequente entre as diferentes execuções tem maior probabilidade de ser a
+correta. O processo é análogo a uma votação por maioria entre raciocínios independentes.
+\citet{wang2023selfconsistency} reportaram ganhos de 17,9\% no GSM8K e de 11,0\% no SVAMP ao
+substituir a decodificação gulosa pela amostragem múltipla com votação por maioria.
+
+A limitação principal é o \textbf{custo computacional}: $k$ execuções do mesmo \emph{prompt} implicam
+$k$ vezes o consumo de tokens e, no caso de APIs comerciais, $k$ vezes o custo financeiro. Para
+$k=10$, o custo por questão gerada pode tornar-se proibitivo em um sistema destinado a professores da
+rede pública com acesso limitado a recursos computacionais. Por esse motivo, o sistema proposto não
+adota o \emph{self-consistency} como mecanismo primário de verificação: utiliza-se uma única geração
+seguida de verificação simbólica determinística pelo SymPy. Onde o \emph{self-consistency} reduz a
+probabilidade de erro por convergência estatística, a verificação simbólica detecta erros de forma
+determinística para as classes de questões que o verificador consegue tratar --- mantendo o custo por
+questão em patamar compatível com uso educacional real.
+
+Em conjunto, as quatro estratégias formam um mapa das possibilidades disponíveis para aumentar a
+confiabilidade de LLMs em Matemática. A Tabela~\ref{tab:estrategias} sintetiza as escolhas feitas
+nesta dissertação em relação a cada uma delas.
+
+\begin{table}[htbp]
+\centering
+\caption{Estratégias de mitigação e seu papel no sistema proposto}
+\label{tab:estrategias}
+\begin{tabular}{@{}p{3.2cm}p{2.4cm}p{6.5cm}@{}}
+\toprule
+\textbf{Estratégia} & \textbf{Adoção} & \textbf{Justificativa} \\
+\midrule
+Chain-of-thought & Parcial & Usado nos \emph{prompts} do Agente Gerador para estruturar a resolução; não suficiente sozinho. \\
+PAL / verificação simbólica & Central & Princípio do Agente Verificador Simbólico via SymPy. \\
+Tool use & Não adotado & Preservação da separação de responsabilidades e rastreabilidade pedagógica. \\
+Self-consistency & Não adotado & Custo computacional incompatível com o contexto de uso; substituído por verificação determinística. \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\footnotesize Elaborado pela autora.}
+\end{table}
+
+\section{Agentes e sistemas multiagentes}
+\label{sec:agentes}
+
+% NOTA DE REVISÃO: esta era a Seção 2.2.5/2.2.6 no rascunho (numerada por
+% engano como subseção de "Estratégias de mitigação"). Promovida a 2.3,
+% conforme a estrutura prevista.
+
+As estratégias de mitigação apresentadas na seção anterior --- CoT, PAL, \emph{tool use} e
+\emph{self-consistency} --- podem ser combinadas em sistemas mais sofisticados, nos quais diferentes
+componentes especializados colaboram para resolver tarefas que nenhum deles resolveria adequadamente
+de forma isolada. Essa ideia é formalizada pelo paradigma de \textbf{agentes} e \textbf{sistemas
+multiagentes}, que constitui a base arquitetural do sistema desenvolvido nesta dissertação.
+
+\subsection{Definição de agente}
+\label{sub:agente}
+
+Na formulação clássica de \citet{russell2021aima}, um agente é qualquer entidade que \textbf{percebe}
+seu ambiente por meio de sensores e \textbf{age} sobre ele por meio de atuadores. Um agente é
+considerado racional quando suas ações são orientadas a maximizar uma medida de desempenho, dado o
+conhecimento que possui do ambiente e de suas próprias capacidades. Essa abstração, originalmente
+desenvolvida para agentes físicos e sistemas de planejamento clássico, estende-se naturalmente aos
+sistemas baseados em LLMs. Um \textbf{agente baseado em LLM} percebe seu ambiente por meio de texto
+--- um \emph{prompt} que descreve o contexto, o histórico de ações anteriores e a tarefa corrente ---
+e age produzindo uma resposta textual que pode ter efeitos no mundo: chamar uma ferramenta, gerar um
+documento, enviar uma mensagem a outro agente. O LLM funciona, nesse modelo, como o módulo de decisão
+do agente.
+
+\citet{wang2023agentsurvey} propõem uma taxonomia dos componentes de um agente baseado em LLM
+organizada em três dimensões. A primeira é a \textbf{memória}: a capacidade de reter e recuperar
+informações ao longo do tempo, de curto prazo (o contexto da conversa atual) ou de longo prazo (um
+banco de dados externo consultável). A segunda é o \textbf{acesso a ferramentas}: a possibilidade de
+invocar módulos externos que ampliam as capacidades do LLM além da geração de texto. A terceira é a
+capacidade de \textbf{raciocínio e planejamento}: decompor tarefas complexas em subproblemas,
+executar cada etapa e revisar o plano à luz dos resultados.
+
+Para os fins desta dissertação, cada agente do sistema é definido por uma combinação específica
+dessas três dimensões: o Agente Gerador possui acesso ao histórico de tentativas anteriores
+(memória); o Agente Verificador possui acesso ao SymPy como ferramenta; e o Agente Crítico Didático
+possui uma rubrica pedagógica incorporada ao seu \emph{prompt} como conhecimento estruturado.
+
+\subsection{Propriedades dos sistemas multiagentes}
+\label{sub:sma}
+
+Um \textbf{sistema multiagente} (SMA) é composto por dois ou mais agentes que interagem em um
+ambiente compartilhado, podendo cooperar, competir ou assumir papéis complementares na resolução de
+uma tarefa comum. No contexto dos LLMs, \citet{wu2023autogen} demonstraram que a colaboração entre
+múltiplos agentes especializados permite resolver tarefas de maior complexidade do que qualquer
+agente individual conseguiria, ao mesmo tempo que melhora a factualidade e a robustez das saídas.
+Três propriedades distinguem os SMAs de arquiteturas monolíticas e justificam sua adoção no presente
+trabalho.
+
+A primeira é a \textbf{especialização}: cada agente é configurado para executar uma função bem
+delimitada, com \emph{prompt} de sistema, ferramentas e critérios de avaliação específicos. Um agente
+especializado em verificação simbólica não precisa --- e não deve --- se preocupar com qualidade
+pedagógica; um agente especializado em avaliação didática não precisa reproduzir cálculos algébricos.
+Essa divisão de responsabilidades reduz a ambiguidade de cada tarefa e melhora a qualidade de cada
+componente isoladamente.
+
+A segunda propriedade é a \textbf{verificação independente}: quando um agente produz um resultado que
+é avaliado por outro agente com critérios distintos, erros que passariam despercebidos em uma
+arquitetura monolítica tendem a ser detectados. Esse princípio é análogo à revisão por pares em
+pesquisa científica. No sistema desta dissertação, o Agente Gerador e o Agente Verificador operam com
+base em mecanismos completamente diferentes --- geração probabilística \emph{versus} cômputo simbólico
+determinístico ---, o que torna a verificação genuinamente independente.
+
+A terceira propriedade é a \textbf{iteratividade controlada}: a presença de um orquestrador que
+coordena os ciclos de geração, verificação e revisão permite que o sistema refine progressivamente a
+qualidade da questão sem comprometer a rastreabilidade do processo. Cada iteração deixa um registro
+auditável, especialmente importante no contexto educacional, em que o professor precisa compreender a
+proveniência e o grau de confiança de cada questão produzida.
+
+\subsection{Padrões contemporâneos de orquestração}
+\label{sub:orquestracao}
+
+A organização dos agentes em um SMA segue padrões arquiteturais que determinam como as tarefas são
+distribuídas e como conflitos são resolvidos. A literatura identifica dois padrões fundamentais e um
+ciclo operacional central. O \textbf{padrão supervisor} organiza os agentes em uma hierarquia com um
+coordenador que decide quais agentes acionar, em que ordem e com quais entradas, oferecendo controle
+centralizado e rastreabilidade clara. O \textbf{padrão roteador} direciona cada tarefa ao agente mais
+adequado com base em características da entrada, sendo mais apropriado quando as tarefas são
+heterogêneas, mas oferecendo menor controle sobre ciclos de revisão. Os \textbf{ciclos de revisão}
+(geração--crítica--revisão) combinam os dois anteriores: um agente gera uma proposta, um segundo a
+avalia criticamente, e o resultado é devolvido ao gerador para refinamento, em um ciclo que se repete
+até que um critério de parada seja satisfeito. Esse último padrão é o mecanismo central do sistema
+proposto nesta dissertação.
+
+Três \emph{frameworks} de código aberto dominam atualmente a implementação de SMAs baseados em LLMs.
+O \textbf{AutoGen} \citep{wu2023autogen}, da Microsoft Research, organiza os agentes como entidades
+conversáveis que trocam mensagens, o que facilita a implementação de ciclos de revisão, mas pode
+tornar o fluxo de controle menos previsível. O \textbf{LangGraph} baseia-se em uma representação
+explícita do fluxo de execução como um grafo dirigido, oferecendo controle preciso e facilitando a
+depuração --- adequado a sistemas com lógica de decisão complexa. O \textbf{CrewAI} adota uma metáfora
+de equipe de trabalho, com papéis definidos declarativamente, o que facilita a prototipação rápida,
+embora ofereça menos controle granular. A Tabela~\ref{tab:frameworks} sintetiza essas características.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparativo de \emph{frameworks} para sistemas multiagentes}
+\label{tab:frameworks}
+\begin{tabular}{@{}p{2.2cm}p{3.0cm}p{2.8cm}p{4.0cm}@{}}
+\toprule
+\textbf{Framework} & \textbf{Abstração central} & \textbf{Controle de fluxo} & \textbf{Adequação ao sistema proposto} \\
+\midrule
+AutoGen & Conversa entre agentes & Implícito (mensagens) & Adequado para prototipação; controle limitado. \\
+LangGraph & Grafo de execução & Explícito (grafo) & Alta aderência; controle preciso sobre ciclos. \\
+CrewAI & Equipe com papéis & Declarativo (alto nível) & Rápida configuração; menor controle granular. \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\footnotesize Elaborado pela autora.}
+\end{table}
+
+A decisão final entre LangGraph e CrewAI --- os dois candidatos mais aderentes ao sistema proposto ---
+é apresentada e justificada no capítulo de implementação, após a discussão dos requisitos.
+
+\section{Sistemas de computação algébrica como verificadores}
+\label{sec:cas}
+
+A discussão das seções anteriores convergiu para um diagnóstico claro: LLMs geram texto
+matematicamente plausível, mas não executam cômputos com garantia de correção formal. A estratégia de
+verificação simbólica proposta nesta dissertação responde a esse diagnóstico com uma classe de
+ferramentas que existe precisamente para isso: os \textbf{sistemas de computação algébrica}
+(\emph{Computer Algebra Systems} --- CAS).
+
+\subsection{Computação algébrica simbólica}
+\label{sub:cas-conceito}
+
+Um sistema de computação algébrica é um programa capaz de manipular expressões matemáticas em sua
+forma simbólica --- isto é, de operar sobre símbolos e estruturas algébricas exatas, sem recorrer a
+aproximações numéricas. A distinção em relação ao cálculo numérico é fundamental: enquanto uma
+biblioteca numérica representa $\sqrt{2}$ por sua aproximação decimal ($1{,}41421356\ldots$), um CAS
+mantém $\sqrt{2}$ como objeto simbólico exato, capaz de participar de operações como
+$\sqrt{2}\cdot\sqrt{2}=2$ sem qualquer perda de precisão. Essa distinção tem consequências práticas
+diretas: confirmar que as raízes de $x^2-2=0$ são $x=\pm\sqrt{2}$, ou que $\frac{x^2-1}{x-1}=x+1$ para
+$x\neq 1$, exige manipulação simbólica, não avaliação numérica em pontos isolados.
+
+Do ponto de vista histórico, a computação algébrica simbólica tem suas raízes no projeto MACSYMA,
+desenvolvido no MIT na década de 1960. Nas décadas seguintes, o Maple e o Mathematica tornaram-se
+referência, mas são proprietários e de licenciamento custoso, o que limita sua adoção em contextos
+educacionais de acesso restrito. Esse cenário motivou o desenvolvimento do \textbf{SymPy}: uma
+biblioteca de computação algébrica simbólica escrita inteiramente em Python, de código aberto e
+licença permissiva (BSD), que não depende de nenhum sistema externo e pode ser instalada e utilizada
+gratuitamente em qualquer ambiente computacional \citep{meurer2017sympy}. Por essas características
+--- abertura, integração nativa com Python e custo zero ---, o SymPy foi adotado como verificador
+simbólico no sistema proposto.
+
+\subsection{SymPy: capacidades relevantes para o Ensino Médio}
+\label{sub:sympy}
+
+Interessa detalhar as capacidades do SymPy diretamente relacionadas aos conteúdos matemáticos do
+Ensino Médio que o sistema precisará verificar.
+
+\textbf{Resolução de equações e sistemas.} A função \texttt{solve} recebe uma expressão ou lista de
+expressões e retorna o conjunto-solução exato, incluindo radicais e números complexos quando
+pertinente. Para sistemas, retorna as soluções como dicionários de atribuições, permitindo comparação
+direta com o gabarito proposto pelo Agente Gerador.
+
+\textbf{Manipulação de polinômios e expressões algébricas.} Operações como expansão
+(\texttt{expand}), fatoração (\texttt{factor}), simplificação (\texttt{simplify}) e redução ao mesmo
+denominador (\texttt{together}) são executadas de forma exata, permitindo verificar se a forma
+fatorada de um gabarito é equivalente ao polinômio original.
+
+\textbf{Cálculo de derivadas, integrais e limites.} Para conteúdos de introdução ao Cálculo, o SymPy
+oferece \texttt{diff}, \texttt{integrate} e \texttt{limit}, que operam simbolicamente e retornam
+resultados exatos.
+
+\textbf{Trigonometria simbólica.} As funções trigonométricas simbólicas, com \texttt{trigsimp} e
+\texttt{expand\_trig}, permitem verificar a equivalência entre expressões distintas que representam o
+mesmo valor, como $\sin^2\theta + \cos^2\theta = 1$ ou $\cos(2\theta) = 1 - 2\sin^2\theta$.
+
+\textbf{Equivalência simbólica.} A capacidade mais crítica para a verificação de gabaritos é
+determinar se duas expressões $A$ e $B$ são iguais, o que se realiza aplicando \texttt{simplify} à
+diferença $A-B$: se o resultado for zero, as expressões são equivalentes. Essa abordagem captura
+identidades algébricas gerais, não apenas coincidências em valores particulares.
+
+\subsection{Limites da verificação simbólica}
+\label{sub:cas-limites}
+
+A despeito de suas capacidades, a verificação simbólica via SymPy apresenta limites que o sistema
+precisa reconhecer e tratar explicitamente. O primeiro diz respeito a \textbf{problemas de geometria
+com construção}: questões que envolvem demonstração de propriedades, construção com régua e compasso
+ou argumentação sobre figuras não se prestam à verificação simbólica direta --- não há conjunto-solução
+a comparar, mas uma argumentação lógica. Para esse tipo de questão, o Agente Verificador emite o
+veredicto \emph{não-verificável} e devolve a validação ao professor.
+
+O segundo limite refere-se a \textbf{enunciados em linguagem natural ambíguos}: o SymPy verifica
+expressões formalizadas, não prosa. Quando o Agente Gerador produz um enunciado ambíguo, o
+Verificador pode formalizar uma interpretação diferente da pretendida, produzindo um veredicto
+incorreto --- risco mitigado pelo Agente Crítico Didático, que avalia a clareza do enunciado.
+
+O terceiro limite é a \textbf{incompletude dos algoritmos de simplificação}: para certas classes de
+expressões, \texttt{simplify} pode não reduzir $A-B$ a zero mesmo quando as expressões são
+equivalentes. Para tratar esse caso, o sistema adota uma \textbf{verificação numérica complementar}:
+avalia as expressões em um conjunto de pontos aleatórios e compara os resultados com tolerância
+definida. Essa verificação não oferece prova de equivalência, mas constitui evidência probabilística
+forte --- se duas expressões concordam em $k$ pontos aleatórios independentes, a probabilidade de
+discordância em algum ponto não testado decresce exponencialmente com $k$. O veredicto resultante é
+registrado como \emph{aprovado com ressalva numérica}.
+
+\section{Síntese: a hipótese arquitetural desta dissertação}
+\label{sec:hipotese}
+
+% CASA CANÔNICA da hipótese arquitetural: este é o ÚNICO lugar onde o
+% argumento completo é desenvolvido. Os capítulos anteriores apenas o
+% anunciam (gancho) e referenciam esta seção.
+
+Os pilares conceituais apresentados neste capítulo não são contribuições isoladas. Eles se articulam
+em uma hipótese de trabalho que pode ser enunciada de forma direta: \textbf{a combinação de um LLM
+gerador, um verificador simbólico determinístico, um agente avaliador pedagógico e um orquestrador de
+ciclos de revisão produz questões matemáticas de maior confiabilidade do que qualquer um desses
+componentes poderia produzir de forma isolada.}
+
+A lógica dessa combinação parte de uma constatação sobre limites complementares. O LLM é o único
+componente capaz de compreender uma especificação pedagógica em linguagem natural --- tópico,
+habilidade BNCC, nível cognitivo, contexto temático --- e produzir um enunciado plausível, uma
+resolução passo a passo e, no caso de múltipla escolha, distratores informativos. Nenhum sistema
+determinístico realiza essa tarefa. Mas essa mesma flexibilidade probabilística é a fonte do
+\emph{erro silencioso} identificado na Seção~\ref{sec:erro-silencioso}: o LLM erra com fluência, sem
+sinalizar incerteza.
+
+É nesse ponto que o SymPy intervém. O verificador simbólico não é um segundo LLM revisando o trabalho
+do primeiro: ele opera segundo uma lógica completamente distinta, baseada em transformações algébricas
+determinísticas. Por isso, seus erros --- quando ocorrem --- são de natureza estruturalmente diferente
+dos erros do LLM, o que torna a probabilidade de falha simultânea dos dois componentes na mesma
+direção muito menor do que em qualquer arquitetura homogênea. Como já discutido a propósito do PAL
+(Seção~\ref{sub:pal}) e do \emph{self-consistency} (Seção~\ref{sub:selfconsistency}), a verificação
+independente por mecanismo diferente é mais do que uma redundância: é uma garantia qualitativa que a
+simples repetição do LLM não ofereceria.
+
+A correção matemática, porém, não esgota os critérios de qualidade de uma questão. Uma questão pode
+estar algebricamente impecável e ser pedagogicamente inadequada --- enunciado ambíguo, nível cognitivo
+incompatível com a habilidade declarada, distratores sem função formativa. Essa dimensão é coberta
+pelo \textbf{agente crítico didático}, que avalia a questão com base em uma rubrica derivada dos
+referenciais da literatura de educação matemática. É precisamente por ser externo que esse critério
+tem valor: a rubrica é construída independentemente da questão julgada.
+
+O \textbf{orquestrador} articula esses três componentes em ciclos de revisão controlados. Ele não
+gera, não verifica e não avalia: decide. Com base nos veredictos do verificador e do crítico,
+determina se a questão está aprovada, se deve retornar ao gerador com instruções de melhoria ou se
+deve ser descartada por inviabilidade de correção dentro do número máximo de iterações. Essa política
+de decisão é o que transforma a arquitetura de uma \emph{pipeline} linear em um sistema adaptativo.
+
+O resultado dessa combinação não é a eliminação do erro --- nenhum sistema automatizado pode garantir
+isso em linguagem natural --- mas a sua \textbf{visibilidade e rastreabilidade}. O professor recebe não
+apenas a questão, mas os veredictos estruturados de cada agente, o que posiciona o sistema como
+ferramenta de apoio à autoria docente, e não como substituto do julgamento profissional. Para que essa
+arquitetura funcione, contudo, a rubrica do agente crítico precisa estar ancorada em referenciais
+pedagógicos reconhecidos. O Capítulo~\ref{cap:didatica} cumpre essa função, apresentando os referenciais
+de elaboração de questões matemáticas e consolidando-os em critérios de qualidade operacionalizáveis.
