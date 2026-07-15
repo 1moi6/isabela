@@ -1,0 +1,146 @@
+\chapter{Produto educacional}
+\label{cap:produto}
+
+% =====================================================================
+% PAPEL DESTE CAPÍTULO (exigência do PROFMAT):
+%   Descreve o produto educacional como objeto apropriável por
+%   professores em exercício. NÃO re-explica a arquitetura (Cap. 4)
+%   nem a implementação (Cap. 5) — descreve o que o professor RECEBE.
+%
+%   PENDENTE: a composição final do banco curado (Seção 7.3) e o manual
+%   em PDF (Seção 7.4) dependem do lote de execuções reais; as marcas
+%   estão no texto.
+% =====================================================================
+
+O mestrado profissional exige que a pesquisa resulte em um produto educacional diretamente
+apropriável pela prática docente. Este capítulo descreve esse produto do ponto de vista de quem
+o recebe: o professor de Matemática do Ensino Médio. Os fundamentos que o justificam foram
+estabelecidos nos Capítulos~\ref{cap:contexto} a~\ref{cap:didatica}; seu projeto e construção,
+nos Capítulos~\ref{cap:arquitetura} e~\ref{cap:implementacao}. Aqui, a pergunta é outra: o que,
+concretamente, um professor em exercício pode obter, instalar e usar --- e em que condições.
+
+\section{Visão geral: três entregáveis articulados}
+\label{sec:produto-visao}
+
+O produto educacional é composto por três entregáveis que se complementam, todos versionados em
+repositório público:
+
+\begin{enumerate}
+\item O \textbf{sistema multiagente} --- o \emph{software} que gera, verifica e avalia questões
+  a partir dos parâmetros do professor, com interface web local (Seção~\ref{sec:produto-sistema}).
+\item O \textbf{banco curado de questões} --- um conjunto de questões aprovadas pelo ciclo
+  completo do sistema, categorizadas por tema, habilidade BNCC, nível cognitivo e dificuldade,
+  utilizável mesmo por quem não instalar o sistema (Seção~\ref{sec:produto-banco}).
+\item O \textbf{manual do professor} --- o documento que ensina a instalar, usar e, sobretudo,
+  a compreender os limites da ferramenta (Seção~\ref{sec:produto-manual}).
+\end{enumerate}
+
+A articulação é deliberada: o banco atende ao professor que quer \emph{material pronto}; o
+sistema atende ao que quer \emph{produzir o próprio material}; o manual conecta os dois e
+sustenta o uso crítico que o Capítulo~\ref{cap:contexto} argumentou ser indelegável.
+
+\section{O sistema multiagente}
+\label{sec:produto-sistema}
+
+O professor recebe um pacote Python instalável com uma interface web que roda localmente no
+próprio computador --- nenhum dado da sua prática é enviado a servidores do projeto. A interface
+organiza o trabalho em três áreas: \emph{gerar questão} (o formulário de especificação e o
+acompanhamento do ciclo, com os veredictos de cada agente); \emph{banco} (consulta com filtros
+ao acervo aprovado); e \emph{montar lista} (seleção por filtros e exportação em Markdown ou
+LaTeX, nas versões do aluno e do professor).
+
+\textbf{Requisitos mínimos.} Um computador com Python 3.11 ou superior e acesso a um provedor
+de modelo de linguagem. Este último admite dois caminhos, e a diferença importa para a
+realidade da escola pública:
+
+\begin{itemize}
+\item \textbf{Com API comercial} (Anthropic ou OpenAI): exige uma chave de API paga pelo uso;
+  o custo por questão é pequeno, mas existe, e a chave é informada diretamente no painel de
+  configuração da interface --- não fica gravada em arquivo algum.
+\item \textbf{Sem API paga} (Ollama): o professor instala um modelo aberto que roda no próprio
+  computador, sem chave e sem custo por uso. O requisito desloca-se do financeiro para o de
+  \emph{hardware} (memória suficiente para o modelo escolhido), e a qualidade da geração é
+  inferior à dos modelos comerciais --- limitação documentada no manual.
+\end{itemize}
+
+\textbf{Caminhos de instalação.} Para o professor com alguma familiaridade com linha de
+comando, a instalação são três comandos, reproduzidos no manual e no repositório. Para o
+professor sem essa familiaridade, o manual oferece um roteiro passo a passo com capturas de
+tela --- e, de forma realista, reconhece que o caminho de menor atrito para esse perfil é
+começar pelo banco curado, que não exige instalação alguma.
+
+\section{O banco curado de questões}
+\label{sec:produto-banco}
+
+O banco reúne as questões que atravessaram o ciclo completo --- verificação simbólica e
+avaliação didática --- e foram aprovadas. Cada questão carrega seus metadados (tema, habilidade
+BNCC, nível cognitivo, dificuldade, natureza e formato) e o histórico do ciclo que a produziu,
+incluindo o veredicto do verificador. É essa categorização que permite ao professor localizar
+rapidamente, por exemplo, questões \emph{aplicadas} de função exponencial no nível
+\emph{analisar} associadas à habilidade \texttt{EM13MAT304}.
+
+O banco é distribuído em dois formatos: \textbf{JSON} (o formato nativo do sistema, que
+preserva todos os metadados e permite reimportação e filtragem programática) e \textbf{PDF}
+(listas organizadas por tema, com gabarito e resolução comentada, para uso direto sem qualquer
+ferramenta).
+
+% PENDENTE: composição final do banco (meta do projeto: 60-100 questões
+% aprovadas, equilibradas por tema e nível) — depende do lote de
+% execuções reais com API. Atualizar os números abaixo após a curadoria.
+\emph{[A composição quantitativa final do banco --- meta de 60 a 100 questões aprovadas,
+equilibradas por tema e nível cognitivo --- será consolidada após o lote de geração com
+provedor real e a curadoria final, e reportada nesta seção.]}
+
+\textbf{Licenciamento.} O banco é distribuído sob licença Creative Commons
+Atribuição-CompartilhaIgual (CC BY-SA), que autoriza o professor a usar, adaptar e redistribuir
+as questões --- inclusive modificando enunciados para sua turma --- desde que mantenha a
+atribuição e a mesma licença. O código do sistema mantém licença de \emph{software} livre
+própria, indicada no repositório.
+
+\section{O manual do professor}
+\label{sec:produto-manual}
+
+O manual é o entregável que transforma o \emph{software} em produto educacional: sem ele, o
+sistema é acessível apenas a quem já domina o vocabulário técnico. Sua estrutura tem quatro
+partes:
+
+\begin{enumerate}
+\item \textbf{Instalação} --- os dois caminhos (com e sem API paga), em roteiro passo a passo.
+\item \textbf{Uso típico} --- como preencher cada parâmetro da especificação, com exemplos
+  comentados de boas especificações e do efeito de cada parâmetro sobre a questão gerada.
+\item \textbf{Fluxos de trabalho recomendados} --- três roteiros práticos: gerar questões
+  avulsas para uma avaliação; construir um acervo pessoal ao longo do bimestre; e montar listas
+  diferenciadas por nível a partir do banco.
+\item \textbf{Limitações conhecidas e como contorná-las} --- a parte mais importante do
+  documento. Explica, em linguagem não técnica, o que significa o veredicto \emph{não-verificável}
+  (e por que essas questões pedem conferência manual prioritária), por que a qualidade varia
+  com o provedor escolhido, e por que a validação final de \emph{toda} questão permanece sendo
+  atribuição do professor --- retomando, agora em registro prático, o argumento da
+  Seção~\ref{sec:erro-silencioso}.
+\end{enumerate}
+
+% PENDENTE: o manual em PDF será derivado da documentação do repositório
+% (README do sistema) após a estabilização da interface e do banco.
+\emph{[O manual em PDF encontra-se em elaboração a partir da documentação do repositório; a
+versão final acompanha o produto no repositório público e no Apêndice desta dissertação.]}
+
+\section{Estratégia de disseminação}
+\label{sec:produto-disseminacao}
+
+A disseminação apoia-se em três frentes. A primeira é o \textbf{repositório público}: código,
+banco e manual versionados juntos, com histórico aberto --- qualquer professor, ou pesquisador,
+pode obter a versão mais recente, relatar problemas e propor melhorias. A segunda é a
+\textbf{rede do PROFMAT}: apresentação do produto em encontros do programa e disponibilização
+às turmas de egressos, cujo perfil --- professores em exercício com formação continuada em
+Matemática --- coincide exatamente com o usuário-alvo. A terceira são as \textbf{parcerias com
+escolas}: o desenho da avaliação por painel docente (Capítulo~\ref{cap:avaliacao}) já estabelece
+contato com professores da rede, e esses mesmos professores são os multiplicadores naturais do
+produto em suas escolas.
+
+Cabe, por fim, registrar o que o produto \emph{não} pretende ser. Ele não substitui o livro
+didático, não substitui bancos institucionais consolidados como os do ENEM e da OBMEP e ---
+sobretudo --- não substitui o julgamento profissional docente. Ele ataca um ponto específico e
+bem delimitado da prática: o custo, em tempo e em risco de erro, de produzir questões novas,
+alinhadas à BNCC e calibradas por nível cognitivo. O que o sistema automatiza é a produção e a
+primeira camada de verificação; a autoria pedagógica --- decidir o que avaliar, quando e para
+quem --- permanece onde sempre esteve.
