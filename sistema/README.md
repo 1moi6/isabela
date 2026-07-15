@@ -26,14 +26,21 @@ pip install -e ".[dev,app,anthropic]"   # troque 'anthropic' por 'openai' ou 'ol
 
 ## Configuração do LLM
 
+**Pela interface (recomendado):** a barra lateral do app tem o painel *Configuração do LLM* —
+escolha o provedor, informe a chave de API (campo mascarado; fica só na sessão do navegador,
+não é gravada em disco) e, opcionalmente, o modelo.
+
+**Por variáveis de ambiente** (padrão quando o campo da UI fica vazio; única via para uso
+programático):
+
 | Variável | Valores | Padrão |
 |---|---|---|
 | `QUESTOES_PROVEDOR` | `anthropic` \| `openai` \| `ollama` | `anthropic` |
 | `QUESTOES_MODELO` | nome do modelo | padrão do provedor |
 | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | chave da API | — |
 
-Com **Ollama** (modelos abertos, sem chave): instale o Ollama, `ollama pull qwen2.5:14b` e use
-`QUESTOES_PROVEDOR=ollama`.
+Com **Ollama** (modelos abertos, sem chave): instale o Ollama, `ollama pull qwen2.5:14b` e
+selecione `ollama` no painel (ou `QUESTOES_PROVEDOR=ollama`).
 
 ## Uso
 

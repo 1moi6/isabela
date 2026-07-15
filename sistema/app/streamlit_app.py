@@ -47,11 +47,46 @@ def _banco() -> BancoQuestoes:
     return BancoQuestoes(BANCO_PATH)
 
 
-def _orquestrador() -> Orquestrador:
-    provedor = criar_provedor(
-        os.environ.get("QUESTOES_PROVEDOR", "anthropic"),
-        modelo=os.environ.get("QUESTOES_MODELO"),
-    )
+def _config_llm() -> dict:
+    """Painel de configuração do LLM na barra lateral.
+
+    A chave digitada vive apenas na sessão do navegador (st.session_state);
+    não é gravada em disco. Variáveis de ambiente funcionam como padrão.
+    """
+    with st.sidebar:
+        st.header("⚙️ Configuração do LLM")
+        provedores = ["anthropic", "openai", "ollama"]
+        padrao = os.environ.get("QUESTOES_PROVEDOR", "anthropic")
+        provedor = st.selectbox(
+            "Provedor",
+            provedores,
+            index=provedores.index(padrao) if padrao in provedores else 0,
+            help="Anthropic/OpenAI exigem chave de API. Ollama roda modelos abertos localmente, sem chave.",
+        )
+        modelo = st.text_input(
+            "Modelo (opcional)",
+            value=os.environ.get("QUESTOES_MODELO", ""),
+            placeholder={"anthropic": "claude-sonnet-5", "openai": "gpt-4o-mini", "ollama": "qwen2.5:14b"}[provedor],
+            help="Vazio = modelo padrão do provedor.",
+        )
+        api_key, url = None, None
+        if provedor in ("anthropic", "openai"):
+            var = "ANTHROPIC_API_KEY" if provedor == "anthropic" else "OPENAI_API_KEY"
+            api_key = st.text_input(
+                "Chave de API",
+                type="password",
+                value="",
+                help=f"Fica apenas nesta sessão do navegador. Se vazia, usa a variável de ambiente {var}.",
+            ) or None
+            if api_key is None and not os.environ.get(var):
+                st.warning(f"Informe a chave acima ou defina {var} no ambiente.")
+        else:
+            url = st.text_input("URL do Ollama", value="http://localhost:11434")
+        return {"nome": provedor, "modelo": modelo or None, "api_key": api_key, "url": url}
+
+
+def _orquestrador(cfg: dict) -> Orquestrador:
+    provedor = criar_provedor(cfg["nome"], modelo=cfg["modelo"], api_key=cfg["api_key"], url=cfg["url"])
     return Orquestrador(
         Gerador(provedor), VerificadorSimbolico(), CriticoDidatico(provedor), log_dir=LOG_DIR
     )
@@ -79,6 +114,8 @@ st.caption(
     "Sistema multiagente (LLM gerador + verificador simbólico SymPy + crítico didático). "
     "Produto educacional — PROFMAT/UFMT."
 )
+
+cfg_llm = _config_llm()
 
 aba_gerar, aba_banco, aba_lista = st.tabs(["✏️ Gerar questão", "🗂️ Banco", "📄 Montar lista"])
 
@@ -114,7 +151,7 @@ with aba_gerar:
         )
         with st.spinner("Ciclo de geração-verificação-crítica em andamento…"):
             try:
-                resultado = _orquestrador().produzir(spec)
+                resultado = _orquestrador(cfg_llm).produzir(spec)
             except Exception as exc:
                 st.error(f"Falha no ciclo: {exc}")
                 st.stop()

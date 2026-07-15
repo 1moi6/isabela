@@ -8,10 +8,11 @@ MODELO_PADRAO = "gpt-4o-mini"  # sugestão do projeto para desenvolvimento (cust
 
 
 class ProvedorOpenAI(ProvedorLLM):
-    def __init__(self, modelo: str | None = None):
+    def __init__(self, modelo: str | None = None, api_key: str | None = None):
         import openai  # dependência opcional: pip install questoes-em[openai]
 
-        self._cliente = openai.OpenAI()
+        # api_key=None deixa o SDK buscar OPENAI_API_KEY no ambiente
+        self._cliente = openai.OpenAI(api_key=api_key) if api_key else openai.OpenAI()
         self._modelo = modelo or MODELO_PADRAO
 
     def completar(self, system: str, user: str, temperature: float = TEMPERATURA_PADRAO) -> str:
