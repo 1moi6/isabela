@@ -98,7 +98,7 @@ Para aplicações matemáticas --- em que a correção é binária --- a variabi
 esses parâmetros representa um risco concreto. Uma temperatura ligeiramente elevada pode fazer com
 que o modelo produza, em diferentes execuções do mesmo \emph{prompt}, respostas distintas e
 contraditórias para um mesmo problema. Isso tem implicações diretas sobre a \textbf{reprodutibilidade}
-do sistema desenvolvido nesta dissertação, questão retomada no capítulo de implementação.
+do sistema desenvolvido nesta dissertação, questão retomada no Capítulo~\ref{cap:implementacao}.
 
 \subsection{Limitações conhecidas em raciocínio matemático}
 \label{sec:limitacoes}
@@ -183,7 +183,7 @@ não consegue garantir (computar com precisão). Nos experimentos de \citet{gao2
 modelos muito maiores que utilizavam apenas CoT.
 
 A conexão entre o PAL e a arquitetura desta dissertação é direta e constitui um dos pilares
-conceituais do trabalho. O Agente Verificador Simbólico, descrito no capítulo de arquitetura, opera
+conceituais do trabalho. O Agente Verificador Simbólico, descrito no Capítulo~\ref{cap:arquitetura}, opera
 segundo o mesmo princípio fundamental: em vez de confiar na resolução textual produzida pelo Agente
 Gerador, ele delega o cômputo ao SymPy --- um sistema de computação algébrica simbólica --- e compara
 o resultado obtido com o gabarito proposto. A diferença em relação ao PAL reside no escopo: onde o
@@ -369,8 +369,8 @@ CrewAI & Equipe com papéis & Declarativo (alto nível) & Rápida configuração
 {\footnotesize Elaborado pela autora.}
 \end{table}
 
-A decisão final entre LangGraph e CrewAI --- os dois candidatos mais aderentes ao sistema proposto ---
-é apresentada e justificada no capítulo de implementação, após a discussão dos requisitos.
+A decisão sobre adotar ou não um desses \emph{frameworks} --- e qual --- é uma escolha de projeto,
+apresentada e justificada na Seção~\ref{sec:decisoes}, à luz dos requisitos do sistema.
 
 \section{Sistemas de computação algébrica como verificadores}
 \label{sec:cas}

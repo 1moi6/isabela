@@ -1,0 +1,198 @@
+\chapter{Implementação}
+\label{cap:implementacao}
+
+% =====================================================================
+% PAPEL DESTE CAPÍTULO (registro de engenharia):
+%   Materializa a arquitetura do Cap. 4 em código. Trechos comentados,
+%   nível acessível ao leitor professor de Matemática; detalhes extensos
+%   vão aos apêndices. NÃO re-explica papéis dos agentes (Cap. 4) nem
+%   fundamentos (Caps. 2-3).
+%
+%   PENDENTE: as Seções 5.6 (custo/desempenho) e 5.7 (exemplos com API
+%   real) dependem de execuções com provedor de LLM real e estão
+%   marcadas no texto.
+% =====================================================================
+
+Este capítulo descreve a implementação concreta da arquitetura apresentada no
+Capítulo~\ref{cap:arquitetura}. Antes das escolhas técnicas, cabe explicitar o método que
+organizou o desenvolvimento. A pesquisa adota a abordagem de \emph{design science research}
+(DSR), apropriada ao mestrado profissional por unir a construção de um artefato à produção de
+conhecimento sobre ele, articulada em ciclos: o \textbf{Ciclo 1} construiu o protótipo mínimo
+--- um tópico (função quadrática), apenas Gerador e Verificador Simbólico --- para validar a
+viabilidade técnica da verificação simbólica em malha fechada com um LLM; o \textbf{Ciclo 2}
+completou o sistema com o Crítico Didático, o Orquestrador, o banco curado, a montagem de
+listas e a interface do professor, expandindo o recorte para os cinco temas; o \textbf{Ciclo 3},
+de avaliação por painel docente, é objeto do Capítulo~\ref{cap:avaliacao}; e o \textbf{Ciclo 4}
+corresponde à consolidação do produto educacional e desta dissertação.
+
+\section{Stack técnica}
+\label{sec:stack}
+
+O sistema é implementado em \textbf{Python 3.11+}, com quatro dependências centrais:
+\textbf{SymPy} para a verificação simbólica (Seção~\ref{sub:sympy}); \textbf{Pydantic} para os
+contratos de dados validados por esquema; \textbf{Streamlit} para a interface web do professor;
+e o SDK do provedor de LLM escolhido. As dependências de provedor são \emph{opcionais}: o
+professor instala apenas a do provedor que usará --- Anthropic, OpenAI ou nenhuma, no caso do
+Ollama, que expõe modelos abertos locais por HTTP. Os testes usam \texttt{pytest} e não exigem
+chave de API alguma, ponto retomado na Seção~\ref{sec:reprodutibilidade}.
+
+Conforme antecipado na Seção~\ref{sec:decisoes}, não se adota \emph{framework} de agentes: a
+orquestração é código Python direto, decisão que privilegia a legibilidade da política de
+decisão sobre a conveniência de abstrações prontas.
+
+\section{Estrutura do repositório}
+\label{sec:repositorio}
+
+O código vive no diretório \texttt{sistema/} do repositório público da dissertação, organizado
+para que cada conceito do Capítulo~\ref{cap:arquitetura} tenha endereço único:
+
+\begin{verbatim}
+sistema/
+|- dados/bncc_em_matematica.json    # catalogo de habilidades do recorte
+|- prompts/gerador.md, critico.md   # prompts versionados (Apendice A)
+|- src/questoes/
+|  |- especificacao.py              # entrada do professor (Secao 4.2)
+|  |- modelos.py                    # contratos entre agentes (Pydantic)
+|  |- llm/                          # provedores plugaveis
+|  |- agentes/                      # gerador, verificador, critico,
+|  |                                #   orquestrador (Secoes 4.3-4.6)
+|  |- verificacao/                  # estrategias SymPy por tipo
+|  |- banco.py, listas.py           # persistencia e listas (Secao 5.4)
+|- app/streamlit_app.py             # interface do professor
+|- tests/                           # 36 testes automatizados
+\end{verbatim}
+
+Dois princípios de organização merecem nota. Primeiro, os \emph{prompts} não são cadeias de
+caracteres embutidas no código, mas arquivos Markdown próprios: são artefatos da pesquisa,
+citáveis e versionáveis independentemente da lógica. Segundo, o pacote \texttt{verificacao/} é
+isolado dos agentes: o núcleo simbólico pode ser testado --- e estendido a novos temas --- sem
+tocar em nenhum componente que envolva LLM.
+
+\section{Implementação dos agentes}
+\label{sec:impl-agentes}
+
+\subsection{Contratos de dados}
+
+Toda a comunicação entre agentes usa modelos Pydantic, que validam estrutura e tipos no momento
+da criação. O contrato central é a formalização verificável (Seção~\ref{sec:ag-gerador}):
+
+\begin{verbatim}
+class ExpressaoVerificavel(BaseModel):
+    tipo: str            # roteia a estrategia: 'equacao',
+                         #   'funcao', 'progressao'
+    expressao: str       # ex.: "Eq(2*x**2 - 5*x + 3, 0)"
+    incognitas: list[str]
+    resposta_esperada: str   # gabarito em sintaxe SymPy
+    parametros: dict[str, str]
+\end{verbatim}
+
+\subsection{Gerador}
+
+O Gerador monta o pedido ao LLM a partir da especificação --- cada parâmetro vira uma linha de
+instrução, com descritores operacionais para dificuldade e natureza --- e valida a resposta
+contra o modelo \texttt{Questao}. A extração do JSON é tolerante a desvios comuns de formato
+(cercas de código, texto circundante), e qualquer resposta inválida gera erro detectável, nunca
+dado corrompido. Nas iterações de revisão, o \emph{feedback} do Orquestrador é anexado ao
+pedido com a instrução de corrigir exatamente o que foi apontado, preservando o restante.
+
+\subsection{Verificador Simbólico}
+
+O coração do Verificador é a comparação simbólica exata. Para equações, o conjunto-solução
+calculado pelo SymPy é confrontado com o gabarito elemento a elemento:
+
+\begin{verbatim}
+def _pertence(valor, colecao) -> bool:
+    """Igualdade simbolica exata: simplify(a - b) == 0."""
+    return any(sp.simplify(valor - outro) == 0
+               for outro in colecao)
+\end{verbatim}
+
+\noindent A verificação falha tanto se o gabarito contém solução espúria quanto se omite alguma
+--- os dois sentidos da divergência são reportados na justificativa. Um cuidado transversal de
+segurança e robustez: as expressões vindas do LLM são interpretadas por \texttt{sympify} com
+espaço de nomes \emph{restrito} (apenas símbolos e funções matemáticas autorizados), e qualquer
+falha de interpretação degrada para o veredicto \emph{não-verificável} em vez de interromper o
+ciclo (Seção~\ref{sec:ag-verificador}).
+
+\subsection{Crítico Didático}
+
+O Crítico envia ao LLM a questão (sem a formalização, irrelevante para o julgamento didático) e
+a especificação declarada, sob a rubrica da Seção~\ref{sec:criterios} traduzida em instruções.
+A resposta é validada contra o modelo \texttt{ParecerDidatico}, que impõe notas inteiras de 1 a
+5 por construção.
+
+\subsection{Orquestrador}
+
+A política de decisão inteira (Seção~\ref{sec:ag-orquestrador}) cabe em um laço legível:
+
+\begin{verbatim}
+for numero in range(1, self._max + 1):        # max = 3
+    questao = self._gerador.gerar(spec, feedback=feedback)
+    verificacao = self._verificador.verificar(questao)
+
+    if verificacao.veredicto == Veredicto.REJEITADO:
+        feedback = ...   # veredicto + valor calculado
+        continue         # NAO consulta o Critico
+
+    parecer = self._critico.avaliar(questao)
+    if not parecer.aprovado:
+        feedback = ...   # sugestoes de revisao do Critico
+        continue
+
+    return ResultadoCiclo(aprovada=True, ...)
+return ResultadoCiclo(aprovada=False, ...)     # descarte
+\end{verbatim}
+
+\section{Persistência e banco de questões}
+\label{sec:persistencia}
+
+Questões aprovadas são persistidas em \textbf{SQLite} --- formato de arquivo único, sem
+servidor, adequado ao uso individual pelo professor. Cada registro guarda a questão completa,
+os metadados da especificação como colunas indexáveis (tema, habilidade, nível, dificuldade,
+natureza, formato) e o \textbf{histórico integral de iterações} do ciclo que a produziu. Os
+metadados alimentam a montagem de listas: o professor filtra o banco por tema e dificuldade,
+escolhe a quantidade, e o sistema exporta a lista em Markdown ou LaTeX, em duas versões ---
+aluno (sem gabarito) e professor (com gabarito e resoluções).
+
+\section{Reprodutibilidade, logging e testes}
+\label{sec:reprodutibilidade}
+
+Três mecanismos respondem ao requisito de reprodutibilidade do projeto. Primeiro, a
+\textbf{temperatura} padrão dos provedores é 0,3 --- baixa, conforme a discussão da
+Seção~\ref{sub:inferencia}. Segundo, todo ciclo é registrado em \emph{log} JSONL com os objetos
+completos de cada iteração, permitindo reconstruir qualquer execução. Terceiro, os
+\emph{prompts} são versionados junto ao código: qualquer mudança neles é uma mudança rastreável
+do sistema.
+
+A estratégia de testes explora a separação de responsabilidades da arquitetura. O núcleo
+simbólico é testado diretamente, com casos que incluem os erros típicos de LLM (gabarito
+incompleto, troca de sinal) e casos degenerados (PG de razão unitária, extremo de função afim).
+A política do Orquestrador é testada com um \textbf{LLM falso} --- um provedor que devolve
+respostas pré-programadas em sequência --- que permite exercitar deterministicamente os quatro
+caminhos do ciclo: aprovação direta, revisão por rejeição matemática, revisão por reprovação
+didática e descarte. O conjunto, de 36 testes, executa em menos de um segundo e não requer
+chave de API --- qualquer pessoa que clone o repositório pode validar o sistema integralmente
+sem custo.
+
+\section{Custo e desempenho}
+\label{sec:custo}
+
+% PENDENTE: esta seção requer execuções com provedores reais.
+% Medir: custo médio por questão aprovada (por provedor), tempo médio por
+% ciclo, distribuição do número de iterações, taxa de descarte.
+\emph{[Seção a completar com dados de execução real: custo médio por questão aprovada em cada
+provedor (API comercial \emph{versus} modelo aberto local), tempo médio por ciclo, distribuição
+do número de iterações até a aprovação e taxa de descarte por tema. As medições serão feitas
+sobre o lote de questões gerado para o banco curado.]}
+
+\section{Exemplos completos de execução}
+\label{sec:exemplos}
+
+% PENDENTE: substituir pelos registros JSONL de execuções reais com API,
+% reproduzindo os objetos completos (questão, veredictos, pareceres).
+\emph{[Seção a completar com três execuções reais registradas pelo sistema: (i) questão de
+função quadrática aprovada na primeira iteração; (ii) questão de progressão geométrica rejeitada
+pelo Verificador --- gabarito omitindo o primeiro termo --- revisada e aprovada; (iii) questão
+não-verificável simbolicamente, aprovada com ressalva e marcada para revisão prioritária do
+professor. Os roteiros desses três casos, já validados com o LLM de teste, estão descritos na
+Seção~\ref{sec:fluxo}.]}

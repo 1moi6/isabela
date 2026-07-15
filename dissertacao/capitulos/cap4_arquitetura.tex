@@ -1,0 +1,254 @@
+\chapter{Arquitetura do sistema multiagente}
+\label{cap:arquitetura}
+
+% =====================================================================
+% PAPEL DESTE CAPÍTULO (registro de projeto):
+%   Apresenta a arquitetura em nível conceitual: papéis, contratos de
+%   interface e fluxo de execução. NÃO repete a justificativa da
+%   combinação (casa canônica: 2.5) nem a fundamentação da rubrica
+%   (casa canônica: 3.4). NÃO desce a detalhes de código (Cap. 5).
+% =====================================================================
+
+Os capítulos anteriores estabeleceram o problema (Capítulo~\ref{cap:contexto}), a hipótese
+arquitetural que responde a ele (Seção~\ref{sec:hipotese}) e os referenciais didáticos que
+fundamentam os critérios de qualidade (Seção~\ref{sec:criterios}). Este capítulo apresenta o
+projeto do sistema que materializa essa hipótese: a especificação de entrada fornecida pelo
+professor, os quatro agentes com seus contratos de interface, o fluxo de execução completo e as
+decisões de projeto --- incluindo as alternativas consideradas e descartadas. A implementação
+concreta, com as escolhas de tecnologia e trechos de código, é objeto do
+Capítulo~\ref{cap:implementacao}.
+
+\section{Visão geral}
+\label{sec:visao-geral}
+
+O sistema é composto por quatro agentes especializados coordenados em um fluxo cíclico de
+geração e revisão, conforme a Figura~\ref{fig:componentes}. O professor fornece uma
+\textbf{especificação} --- os parâmetros didáticos da questão desejada --- e recebe, ao final,
+ou uma questão aprovada acompanhada dos veredictos de todos os avaliadores, ou a informação de
+que a especificação foi descartada após esgotar as tentativas de revisão.
+
+\begin{figure}[htbp]
+\centering
+\begin{tabular}{c}
+\begin{minipage}{0.92\textwidth}
+\centering\ttfamily\small
+[Especificação do professor]\\[2pt]
+$\downarrow$\\[2pt]
+\fbox{Orquestrador} $\rightarrow$ \fbox{Gerador (LLM)} $\rightarrow$ questão estruturada\\[2pt]
+$\downarrow$\\[2pt]
+\fbox{Verificador Simbólico (SymPy)} \quad e \quad \fbox{Crítico Didático (LLM + rubrica)}\\[2pt]
+$\downarrow$\\[2pt]
+aprovada $\rightarrow$ banco curado \qquad
+rejeitada $\rightarrow$ Gerador (com \emph{feedback}) ou descarte
+\end{minipage}
+\end{tabular}
+\caption{Diagrama de componentes do sistema. Elaborado pela autora.}
+\label{fig:componentes}
+\end{figure}
+
+Três princípios de projeto, derivados diretamente da fundamentação técnica, governam a
+arquitetura. O primeiro é a \textbf{separação de responsabilidades}: cada agente executa uma
+função única e bem delimitada, e nenhum agente acumula os papéis de gerar e avaliar
+(Seção~\ref{sub:sma}). O segundo é a \textbf{verificação independente por mecanismo distinto}: a
+correção matemática é julgada por um sistema de computação algébrica, não por um segundo LLM,
+de modo que os erros dos dois componentes tenham naturezas estruturalmente diferentes
+(Seção~\ref{sec:hipotese}). O terceiro é a \textbf{rastreabilidade}: toda iteração do ciclo ---
+incluindo as tentativas rejeitadas --- é registrada e apresentada ao professor, que recebe não
+apenas o produto final, mas a história da sua produção.
+
+\section{Especificação de entrada}
+\label{sec:especificacao}
+
+A especificação é o contrato entre o professor e o sistema. Ela é composta por seis parâmetros
+obrigatórios e dois opcionais, todos validados antes do início do ciclo:
+
+\begin{itemize}
+\item \textbf{Tema} --- o tópico matemático, dentro do recorte da dissertação: função afim,
+  função quadrática, função exponencial, progressão aritmética ou progressão geométrica.
+\item \textbf{Habilidade BNCC} --- o código da habilidade (por exemplo, \texttt{EM13MAT302}),
+  validado contra um catálogo local derivado da BNCC; códigos desconhecidos são rejeitados na
+  entrada, antes de qualquer chamada ao LLM.
+\item \textbf{Nível cognitivo} --- um dos seis processos da Taxonomia de Bloom Revisada
+  (Seção~\ref{sub:bloom}).
+\item \textbf{Dificuldade} --- fácil, média ou difícil, com descritores operacionais que
+  acompanham o \emph{prompt} (fácil: aplicação direta; média: articulação de dois ou mais
+  passos; difícil: estratégia não evidente ou análise de casos).
+\item \textbf{Natureza} --- teórica (manipulação e propriedades, sem contexto externo) ou
+  aplicada (situação-problema com contexto realista).
+\item \textbf{Formato} --- discursiva ou múltipla escolha com quatro alternativas.
+\item \textbf{Contexto temático} (opcional) --- um domínio para ambientar a questão aplicada
+  (esportes, finanças pessoais etc.).
+\item \textbf{Restrições} (opcionais) --- condições adicionais em linguagem natural (por
+  exemplo, ``apenas coeficientes inteiros'').
+\end{itemize}
+
+A validação antecipada do código BNCC merece destaque: ela impede, por construção, que o
+sistema produza questões associadas a habilidades inexistentes --- um erro que um LLM cometeria
+com naturalidade e que seria invisível ao professor que não tem o documento da BNCC de memória.
+
+\section{Agente Gerador}
+\label{sec:ag-gerador}
+
+O Gerador é o único agente criativo do sistema. Recebe a especificação (e, nas iterações de
+revisão, o \emph{feedback} estruturado do Orquestrador) e produz a questão completa como objeto
+estruturado, nunca como texto livre. Sua saída contém: o enunciado; a resolução passo a passo;
+o gabarito em linguagem natural; as alternativas, quando múltipla escolha, cada distrator
+anotado com o erro sistemático de estudante que ele representa; e o campo mais importante do
+ponto de vista arquitetural, a \textbf{formalização verificável}.
+
+A formalização verificável é a ponte entre a prosa da questão e o verificador simbólico. Trata-se
+de um objeto com quatro campos --- o \emph{tipo} de verificação (equação, propriedade de função
+ou progressão), a \emph{expressão} em sintaxe SymPy, a \emph{resposta esperada} (o gabarito, na
+mesma sintaxe) e \emph{parâmetros} auxiliares --- que o Gerador preenche no momento da criação da
+questão. Essa decisão resolve o segundo limite da verificação simbólica apontado na
+Seção~\ref{sub:cas-limites}: o Verificador nunca precisa interpretar o enunciado em linguagem
+natural, pois quem traduz a prosa para a forma simbólica é o próprio agente que a escreveu ---
+e a tradução é, ela mesma, parte do objeto auditável que o professor pode inspecionar. Quando a
+questão não admite formalização nos tipos suportados, o campo é nulo e a questão segue o caminho
+do veredicto \emph{não-verificável} (Seção~\ref{sec:ag-verificador}).
+
+O \emph{prompt} do Gerador é um artefato versionado da pesquisa (reproduzido no Apêndice A) e
+possui três blocos: a instrução de papel (elaborador experiente de questões para o EM), as
+regras obrigatórias --- incluindo a exigência de saída exclusivamente em JSON e a proibição de
+sinalizar o procedimento de resolução no enunciado, em atenção ao efeito Topaze
+(Seção~\ref{sub:tsd}) --- e o esquema do objeto de saída.
+
+\section{Agente Verificador Simbólico}
+\label{sec:ag-verificador}
+
+O Verificador resolve a questão de forma independente e compara o resultado com o gabarito
+proposto. É o único agente sem LLM: opera exclusivamente sobre a formalização verificável, por
+meio do SymPy, e por isso seu julgamento é determinístico e reprodutível
+(Seção~\ref{sec:cas}).
+
+A verificação é organizada por \textbf{estratégias por tipo de questão}:
+
+\begin{itemize}
+\item \textbf{Equações} --- o conjunto-solução é calculado simbolicamente e comparado com o
+  gabarito por igualdade exata (a diferença entre cada par de soluções deve simplificar a zero).
+  A comparação detecta tanto soluções incorretas quanto \emph{gabaritos incompletos} --- uma
+  raiz esquecida, erro frequente de LLMs.
+\item \textbf{Propriedades de funções} --- zeros, vértice, valor em um ponto e extremos, cada um
+  calculado pela via simbólica adequada (resolução, derivada, substituição).
+\item \textbf{Progressões} --- termo geral e soma de PA e PG, calculados pelas fórmulas fechadas,
+  incluindo o caso degenerado da PG de razão unitária.
+\item \textbf{Verificação numérica complementar} --- quando a simplificação simbólica não é
+  conclusiva, as expressões são avaliadas em pontos aleatórios com semente fixa; a concordância
+  gera o veredicto \emph{aprovado com ressalva numérica} (Seção~\ref{sub:cas-limites}).
+\end{itemize}
+
+A saída é um veredicto de quatro valores --- \emph{aprovado}, \emph{rejeitado},
+\emph{não-verificável} ou \emph{aprovado com ressalva numérica} --- acompanhado de justificativa
+e, quando houver, do resultado calculado independentemente. Esse resultado calculado integra o
+\emph{feedback} devolvido ao Gerador em caso de rejeição: o agente que errou recebe não apenas a
+informação de que errou, mas o valor correto contra o qual revisar seu trabalho.
+
+Um princípio de robustez completa o projeto deste agente: formalizações malformadas (sintaxe
+inválida produzida pelo LLM, tipo desconhecido) nunca interrompem o ciclo com erro --- degradam
+para o veredicto \emph{não-verificável}, e a decisão sobre o que fazer com a questão permanece
+onde deve estar, no Orquestrador.
+
+\section{Agente Crítico Didático}
+\label{sec:ag-critico}
+
+O Crítico avalia a qualidade pedagógica da questão com base na rubrica consolidada na
+Seção~\ref{sec:criterios}. Como a correção matemática já foi julgada pelo Verificador, o
+Crítico avalia os cinco critérios restantes --- clareza do enunciado, adequação ao nível
+cognitivo, alinhamento à habilidade BNCC, plausibilidade dos distratores e originalidade ---
+atribuindo a cada um nota de 1 a 5 e comentário objetivo.
+
+A rubrica é traduzida em \emph{prompt} (Apêndice A) com uma instrução de decisão explícita: a
+questão é aprovada somente se nenhum critério receber nota inferior a 3. Em caso de reprovação,
+o Crítico é obrigado a preencher um campo de \textbf{sugestões de revisão} com instruções
+acionáveis --- o que mudar, e não apenas o que está errado --- que o Orquestrador repassa ao
+Gerador. O parecer completo (notas, comentários, decisão e sugestões) é um objeto estruturado
+que acompanha a questão até o professor.
+
+\section{Agente Orquestrador}
+\label{sec:ag-orquestrador}
+
+O Orquestrador coordena o ciclo e concentra toda a política de decisão do sistema. Ele não
+gera, não verifica e não avalia: decide. Sua política, deliberadamente simples e auditável, é:
+
+\begin{enumerate}
+\item \textbf{Rejeição do Verificador} --- a questão volta ao Gerador com o veredicto, a
+  justificativa e o resultado calculado; \emph{não passa pelo Crítico}, pois não há sentido em
+  avaliar didaticamente uma questão matematicamente incorreta.
+\item \textbf{Veredicto não-verificável} --- a questão \emph{segue} ao Crítico. A
+  impossibilidade de verificação automática não é defeito da questão; a aprovação final carrega
+  a marca de revisão prioritária pelo professor.
+\item \textbf{Reprovação do Crítico} --- a questão volta ao Gerador com as sugestões de revisão.
+\item \textbf{Aprovação dos dois avaliadores} --- a questão é aprovada e entra no banco curado.
+\item \textbf{Critério de parada} --- três iterações sem aprovação implicam descarte. O limite
+  evita ciclos improdutivos (e o custo correspondente) quando a especificação é inviável ou o
+  Gerador não converge.
+\end{enumerate}
+
+A \textbf{memória de execução} completa o papel do agente: cada iteração --- questão gerada,
+veredicto do Verificador, parecer do Crítico e \emph{feedback} enviado --- é registrada em um
+objeto de resultado que acompanha o ciclo inteiro. Esse registro cumpre dupla função:
+rastreabilidade para o professor (que pode inspecionar por que uma questão precisou de duas
+tentativas) e material de análise para a avaliação empírica do sistema.
+
+\section{Fluxo de execução completo}
+\label{sec:fluxo}
+
+O percurso típico de uma especificação pelo sistema pode ser descrito em cinco tempos:
+
+\begin{enumerate}
+\item O professor submete a especificação; a validação de entrada rejeita imediatamente códigos
+  BNCC desconhecidos.
+\item O Orquestrador aciona o Gerador, que produz a questão estruturada com sua formalização
+  verificável.
+\item O Verificador resolve a formalização e emite seu veredicto; se rejeitar, o ciclo retorna
+  ao passo 2 com \emph{feedback}, sem consultar o Crítico.
+\item O Crítico avalia a questão pela rubrica; se reprovar, o ciclo retorna ao passo 2 com as
+  sugestões de revisão.
+\item Aprovada por ambos --- ou esgotadas as três iterações --- o Orquestrador registra o
+  resultado completo, e a questão aprovada é persistida no banco curado com seus metadados e
+  histórico.
+\end{enumerate}
+
+Dois exemplos ilustram o valor do ciclo. No primeiro, o Gerador produz uma questão de progressão
+geométrica cujo gabarito omite o primeiro termo ($3^5 = 243$ em vez de $2 \cdot 3^5 = 486$) ---
+um erro silencioso clássico, embutido em uma resolução fluente. O Verificador calcula o termo de
+forma independente, rejeita o gabarito e devolve o valor correto; a segunda iteração é aprovada.
+No segundo exemplo, uma questão matematicamente impecável é reprovada pelo Crítico por
+inconsistência de nível: especificada como \emph{analisar}, exigia apenas a aplicação de um
+algoritmo anunciado no próprio enunciado; a revisão eleva a demanda cognitiva. Os dois casos ---
+detalhados, com os objetos completos, no Capítulo~\ref{cap:implementacao} --- correspondem
+exatamente às duas dimensões de qualidade que a hipótese arquitetural (Seção~\ref{sec:hipotese})
+se propõe a garantir.
+
+\section{Decisões de projeto e alternativas descartadas}
+\label{sec:decisoes}
+
+Quatro decisões estruturais merecem justificativa explícita.
+
+\textbf{Por que quatro agentes, e não três ou cinco.} A divisão reflete as quatro funções
+irredutíveis do problema: criar, verificar matemática, avaliar didática e decidir. Fundir
+verificador e crítico em um único avaliador destruiria a propriedade central da arquitetura ---
+a independência de mecanismos (Seção~\ref{sec:hipotese}); adicionar um quinto agente (por
+exemplo, um revisor de linguagem) aumentaria custo e latência sem função que os existentes não
+cubram.
+
+\textbf{Por que verificação independente, e não auto-verificação.} Solicitar ao próprio LLM que
+confira seu trabalho é sujeito aos mesmos vieses da geração: um modelo que erra um cálculo tende
+a errar também a conferência, e a literatura de \emph{self-consistency}
+(Seção~\ref{sub:selfconsistency}) mostra que a repetição reduz, mas não elimina, erros
+correlacionados. O SymPy oferece garantia de natureza diferente: para as classes tratáveis, o
+erro do gabarito é \emph{detectado}, não apenas tornado menos provável.
+
+\textbf{Por que orquestração em código puro, e não um \emph{framework} de agentes.} A
+Seção~\ref{sub:orquestracao} apresentou LangGraph e CrewAI como candidatos. A implementação
+optou por não adotar \emph{framework} algum: o fluxo tem quatro nós e uma política de decisão de
+cinco regras, e expressá-lo diretamente em código torna a política legível por inteiro em uma
+única função --- qualidade valiosa em um trabalho acadêmico cujo leitor é professor de
+Matemática, não engenheiro de software. Um \emph{framework} se justificaria com fluxos maiores
+ou paralelismo real entre avaliadores; a decisão é revisitada na discussão de trabalhos futuros.
+
+\textbf{Por que JSON estruturado, e não texto livre.} Toda comunicação entre agentes usa objetos
+validados por esquema. Texto livre exigiria que cada agente interpretasse a prosa do anterior
+--- reintroduzindo, dentro do sistema, exatamente a ambiguidade que a arquitetura existe para
+controlar. A validação por esquema também converte falhas de formato do LLM em erros detectáveis
+e tratáveis, em vez de corrupção silenciosa de dados.
