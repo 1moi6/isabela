@@ -1,0 +1,137 @@
+"""Testes da política de decisão do Orquestrador usando um provedor LLM fake.
+
+O fake devolve respostas pré-programadas em sequência, permitindo testar os
+caminhos do ciclo (aprovação direta, revisão por verificador, revisão por
+crítico, descarte) de forma determinística e sem chave de API.
+"""
+
+import json
+
+from questoes.agentes import CriticoDidatico, Gerador, Orquestrador, VerificadorSimbolico
+from questoes.especificacao import (
+    Dificuldade, Especificacao, Formato, Natureza, NivelBloom, Tema,
+)
+from questoes.llm.base import ProvedorLLM
+from questoes.modelos import Veredicto
+
+
+class LLMFake(ProvedorLLM):
+    """Devolve respostas da fila na ordem; registra os pedidos recebidos."""
+
+    def __init__(self, respostas: list[str]):
+        self.respostas = list(respostas)
+        self.pedidos: list[str] = []
+
+    def completar(self, system, user, temperature=0.3):
+        self.pedidos.append(user)
+        return self.respostas.pop(0)
+
+
+SPEC = Especificacao(
+    tema=Tema.FUNCAO_QUADRATICA,
+    habilidade_bncc="EM13MAT302",
+    nivel_bloom=NivelBloom.APLICAR,
+    dificuldade=Dificuldade.MEDIA,
+    natureza=Natureza.TEORICA,
+    formato=Formato.DISCURSIVA,
+)
+
+
+def _questao_json(resposta_esperada="[1, Rational(3,2)]"):
+    return json.dumps({
+        "enunciado": "Resolva a equação 2x² - 5x + 3 = 0.",
+        "resolucao": "Por Bhaskara: $\\Delta = 25 - 24 = 1$; $x = (5 \\pm 1)/4$.",
+        "gabarito": "x = 1 ou x = 3/2",
+        "alternativas": None,
+        "verificavel": {
+            "tipo": "equacao",
+            "expressao": "Eq(2*x**2 - 5*x + 3, 0)",
+            "incognitas": ["x"],
+            "resposta_esperada": resposta_esperada,
+            "parametros": {},
+        },
+    })
+
+
+def _parecer_json(aprovado=True, nota=4, sugestoes=None):
+    criterios = ["clareza", "adequacao_nivel", "alinhamento_bncc", "distratores", "originalidade"]
+    return json.dumps({
+        "notas": [{"criterio": c, "nota": nota, "comentario": "ok"} for c in criterios],
+        "aprovado": aprovado,
+        "sugestoes_revisao": sugestoes,
+    })
+
+
+def _orquestrador(llm):
+    return Orquestrador(Gerador(llm), VerificadorSimbolico(), CriticoDidatico(llm))
+
+
+def test_aprovacao_na_primeira_iteracao():
+    llm = LLMFake([_questao_json(), _parecer_json(aprovado=True)])
+    resultado = _orquestrador(llm).produzir(SPEC)
+    assert resultado.aprovada
+    assert len(resultado.iteracoes) == 1
+    assert resultado.iteracoes[0].verificacao.veredicto == Veredicto.APROVADO
+
+
+def test_gabarito_errado_gera_revisao_e_aprova_na_segunda():
+    llm = LLMFake([
+        _questao_json(resposta_esperada="[1, 2]"),   # it.1: gabarito errado -> verificador rejeita
+        _questao_json(),                              # it.2: corrigido
+        _parecer_json(aprovado=True),                 # crítico aprova
+    ])
+    resultado = _orquestrador(llm).produzir(SPEC)
+    assert resultado.aprovada
+    assert len(resultado.iteracoes) == 2
+    assert resultado.iteracoes[0].verificacao.veredicto == Veredicto.REJEITADO
+    assert resultado.iteracoes[0].parecer is None      # reprovado antes do crítico
+    # o feedback da 2ª geração menciona o veredito do verificador
+    assert "REPROVOU o gabarito" in llm.pedidos[1]
+
+
+def test_reprovacao_didatica_gera_revisao_com_sugestoes():
+    llm = LLMFake([
+        _questao_json(),
+        _parecer_json(aprovado=False, nota=2, sugestoes="Remova a ambiguidade do enunciado."),
+        _questao_json(),
+        _parecer_json(aprovado=True),
+    ])
+    resultado = _orquestrador(llm).produzir(SPEC)
+    assert resultado.aprovada
+    assert len(resultado.iteracoes) == 2
+    assert "Remova a ambiguidade" in llm.pedidos[2]  # sugestão chegou ao gerador
+
+
+def test_descarte_apos_tres_iteracoes():
+    ruim = _questao_json(resposta_esperada="[7]")
+    llm = LLMFake([ruim, ruim, ruim])
+    resultado = _orquestrador(llm).produzir(SPEC)
+    assert not resultado.aprovada
+    assert resultado.questao_final is None
+    assert len(resultado.iteracoes) == 3
+
+
+def test_nao_verificavel_segue_ao_critico():
+    questao_sem_formalizacao = json.dumps({
+        "enunciado": "Justifique por que o discriminante determina o número de raízes reais.",
+        "resolucao": "Argumentação sobre o sinal de Delta...",
+        "gabarito": "Argumentação",
+        "alternativas": None,
+        "verificavel": None,
+    })
+    llm = LLMFake([questao_sem_formalizacao, _parecer_json(aprovado=True)])
+    resultado = _orquestrador(llm).produzir(SPEC)
+    assert resultado.aprovada
+    assert resultado.iteracoes[0].verificacao.veredicto == Veredicto.NAO_VERIFICAVEL
+    assert resultado.iteracoes[0].parecer is not None  # crítico foi consultado
+
+
+def test_log_jsonl_gravado(tmp_path):
+    llm = LLMFake([_questao_json(), _parecer_json(aprovado=True)])
+    orq = Orquestrador(
+        Gerador(llm), VerificadorSimbolico(), CriticoDidatico(llm), log_dir=tmp_path
+    )
+    orq.produzir(SPEC)
+    linhas = (tmp_path / "ciclos.jsonl").read_text().strip().splitlines()
+    assert len(linhas) == 1
+    assert json.loads(linhas[0])["aprovada"] is True

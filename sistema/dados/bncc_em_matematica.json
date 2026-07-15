@@ -1,0 +1,54 @@
+{
+  "nota": "Catálogo das habilidades BNCC do recorte da dissertação (funções afim/quadrática/exponencial e progressões). Descrições parafraseadas a partir da BNCC do Ensino Médio — CONFERIR o texto oficial em bncc_ensino_medio.pdf antes da versão final. 'bloom_sugerido' lê os verbos da habilidade à luz da TBR (Seção 3.3.3 da dissertação).",
+  "habilidades": [
+    {
+      "codigo": "EM13MAT302",
+      "descricao": "Construir modelos empregando as funções polinomiais de 1º ou 2º graus, para resolver problemas em contextos diversos, com ou sem apoio de tecnologias digitais.",
+      "unidade_tematica": "Números e Álgebra",
+      "temas": ["funcao_afim", "funcao_quadratica"],
+      "bloom_sugerido": ["aplicar", "criar"]
+    },
+    {
+      "codigo": "EM13MAT303",
+      "descricao": "Interpretar e comparar situações que envolvam juros simples com as que envolvem juros compostos, por meio de representações gráficas ou análise de planilhas, destacando o crescimento linear ou exponencial de cada caso.",
+      "unidade_tematica": "Números e Álgebra",
+      "temas": ["funcao_afim", "funcao_exponencial"],
+      "bloom_sugerido": ["entender", "analisar"]
+    },
+    {
+      "codigo": "EM13MAT304",
+      "descricao": "Resolver e elaborar problemas com funções exponenciais nos quais seja necessário compreender e interpretar a variação das grandezas envolvidas, em contextos como o da Matemática Financeira, entre outros.",
+      "unidade_tematica": "Números e Álgebra",
+      "temas": ["funcao_exponencial"],
+      "bloom_sugerido": ["aplicar", "analisar"]
+    },
+    {
+      "codigo": "EM13MAT401",
+      "descricao": "Converter representações algébricas de funções polinomiais de 1º grau em representações geométricas no plano cartesiano, distinguindo os casos nos quais o comportamento é proporcional, recorrendo ou não a softwares ou aplicativos de álgebra e geometria dinâmica.",
+      "unidade_tematica": "Números e Álgebra",
+      "temas": ["funcao_afim"],
+      "bloom_sugerido": ["entender", "aplicar"]
+    },
+    {
+      "codigo": "EM13MAT402",
+      "descricao": "Converter representações algébricas de funções polinomiais de 2º grau em representações geométricas no plano cartesiano, distinguindo os casos nos quais uma variável for diretamente proporcional ao quadrado da outra, recorrendo ou não a softwares ou aplicativos de álgebra e geometria dinâmica.",
+      "unidade_tematica": "Números e Álgebra",
+      "temas": ["funcao_quadratica"],
+      "bloom_sugerido": ["entender", "aplicar"]
+    },
+    {
+      "codigo": "EM13MAT507",
+      "descricao": "Identificar e associar progressões aritméticas (PA) a funções afins de domínios discretos, para análise de propriedades, dedução de algumas fórmulas e resolução de problemas.",
+      "unidade_tematica": "Números e Álgebra",
+      "temas": ["progressao_aritmetica", "funcao_afim"],
+      "bloom_sugerido": ["analisar", "aplicar"]
+    },
+    {
+      "codigo": "EM13MAT508",
+      "descricao": "Identificar e associar progressões geométricas (PG) a funções exponenciais de domínios discretos, para análise de propriedades, dedução de algumas fórmulas e resolução de problemas.",
+      "unidade_tematica": "Números e Álgebra",
+      "temas": ["progressao_geometrica", "funcao_exponencial"],
+      "bloom_sugerido": ["analisar", "aplicar"]
+    }
+  ]
+}
