@@ -1,15 +1,15 @@
-% =====================================================================
-% Bibliografia reconstruída a partir do texto da dissertação.
-%
-% ATENÇÃO: as entradas abaixo foram INFERIDAS do corpo do texto (autor e
-% ano que o próprio texto menciona). Os campos de detalhe (páginas,
-% editora, volume, DOI, edição) são um RASCUNHO e precisam ser
-% conferidos contra as fontes originais. Cada entrada a validar está
-% marcada com "% CONFERIR".
-% =====================================================================
+Bibliografia reconstruída a partir do texto da dissertação.
 
-% ----- Inteligência Artificial: fundamentos e história -----
-@book{russell2021aima,                                      % CONFERIR
+ATENCAO: as entradas foram INFERIDAS do corpo do texto (autor e ano que o
+proprio texto menciona). Os campos de detalhe (paginas, editora, volume,
+DOI, edicao) sao um RASCUNHO e precisam ser conferidos contra as fontes
+originais. Cada entrada a validar esta precedida pela marca "CONFERIR"
+(fora da entrada, pois BibTeX nao aceita comentarios com % dentro delas).
+
+----- Inteligencia Artificial: fundamentos e historia -----
+
+CONFERIR
+@book{russell2021aima,
   author    = {Russell, Stuart and Norvig, Peter},
   title     = {Artificial Intelligence: A Modern Approach},
   edition   = {4},
@@ -17,7 +17,8 @@
   year      = {2021}
 }
 
-@article{turing1950computing,                               % CONFERIR
+CONFERIR
+@article{turing1950computing,
   author  = {Turing, Alan M.},
   title   = {Computing Machinery and Intelligence},
   journal = {Mind},
@@ -27,27 +28,36 @@
   year    = {1950}
 }
 
-@misc{mccarthy1955dartmouth,                                % CONFERIR (proposta de Dartmouth / McCarthy et al.)
+CONFERIR (proposta de Dartmouth)
+@misc{mccarthy1955dartmouth,
   author = {McCarthy, John and Minsky, Marvin and Rochester, Nathaniel and Shannon, Claude},
   title  = {A Proposal for the Dartmouth Summer Research Project on Artificial Intelligence},
   year   = {1955}
 }
 
-@inproceedings{newell1956logic,                             % CONFERIR (Logic Theorist)
-  author = {Newell, Allen and Simon, Herbert A.},
-  title  = {The Logic Theory Machine: A Complex Information Processing System},
-  year   = {1956}
+CONFERIR (Logic Theorist)
+@inproceedings{newell1956logic,
+  author    = {Newell, Allen and Simon, Herbert A.},
+  title     = {The Logic Theory Machine: A Complex Information Processing System},
+  booktitle = {IRE Transactions on Information Theory},
+  year      = {1956}
 }
 
-% ----- LLMs, transformers e geração probabilística -----
-@inproceedings{weizenbaum1966eliza,                         % CONFERIR
-  author = {Weizenbaum, Joseph},
-  title  = {ELIZA — A Computer Program for the Study of Natural Language Communication between Man and Machine},
+----- LLMs, transformers e geracao probabilistica -----
+
+CONFERIR
+@article{weizenbaum1966eliza,
+  author  = {Weizenbaum, Joseph},
+  title   = {{ELIZA} --- A Computer Program for the Study of Natural Language Communication between Man and Machine},
   journal = {Communications of the ACM},
-  year   = {1966}
+  volume  = {9},
+  number  = {1},
+  pages   = {36--45},
+  year    = {1966}
 }
 
-@article{bengio2003neural,                                  % CONFERIR
+CONFERIR
+@article{bengio2003neural,
   author  = {Bengio, Yoshua and Ducharme, R{\'e}jean and Vincent, Pascal and Jauvin, Christian},
   title   = {A Neural Probabilistic Language Model},
   journal = {Journal of Machine Learning Research},
@@ -56,164 +66,202 @@
   year    = {2003}
 }
 
-@inproceedings{vaswani2017attention,                        % CONFERIR
-  author = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia},
-  title  = {Attention Is All You Need},
+CONFERIR
+@inproceedings{vaswani2017attention,
+  author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia},
+  title     = {Attention Is All You Need},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year   = {2017}
+  year      = {2017}
 }
 
-@inproceedings{brown2020gpt3,                               % CONFERIR (era a citação [1] no texto)
-  author = {Brown, Tom B. and others},
-  title  = {Language Models are Few-Shot Learners},
+CONFERIR (era a citacao [1] no rascunho original)
+@inproceedings{brown2020gpt3,
+  author    = {Brown, Tom B. and others},
+  title     = {Language Models are Few-Shot Learners},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year   = {2020}
+  year      = {2020}
 }
 
-@article{holtzman2020curious,                               % CONFERIR (nucleus sampling / top-p)
-  author = {Holtzman, Ari and Buys, Jan and Du, Li and Forbes, Maxwell and Choi, Yejin},
-  title  = {The Curious Case of Neural Text Degeneration},
+CONFERIR (nucleus sampling / top-p)
+@inproceedings{holtzman2020curious,
+  author    = {Holtzman, Ari and Buys, Jan and Du, Li and Forbes, Maxwell and Choi, Yejin},
+  title     = {The Curious Case of Neural Text Degeneration},
   booktitle = {International Conference on Learning Representations (ICLR)},
-  year   = {2020}
+  year      = {2020}
 }
 
-% ----- Limitações e mitigação em raciocínio matemático -----
-@article{frieder2023mathematical,                           % CONFERIR
-  author = {Frieder, Simon and others},
-  title  = {Mathematical Capabilities of ChatGPT},
-  year   = {2023}
+----- Limitacoes e mitigacao em raciocinio matematico -----
+
+CONFERIR
+@article{frieder2023mathematical,
+  author  = {Frieder, Simon and others},
+  title   = {Mathematical Capabilities of {ChatGPT}},
+  journal = {Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track},
+  year    = {2023}
 }
 
-@inproceedings{wei2022chain,                                % CONFERIR
-  author = {Wei, Jason and Wang, Xuezhi and Schuurmans, Dale and Bosma, Maarten and Ichter, Brian and Xia, Fei and Chi, Ed and Le, Quoc and Zhou, Denny},
-  title  = {Chain-of-Thought Prompting Elicits Reasoning in Large Language Models},
+CONFERIR
+@inproceedings{wei2022chain,
+  author    = {Wei, Jason and Wang, Xuezhi and Schuurmans, Dale and Bosma, Maarten and Ichter, Brian and Xia, Fei and Chi, Ed and Le, Quoc and Zhou, Denny},
+  title     = {Chain-of-Thought Prompting Elicits Reasoning in Large Language Models},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year   = {2022}
+  year      = {2022}
 }
 
-@inproceedings{kojima2022zero,                              % CONFERIR
-  author = {Kojima, Takeshi and Gu, Shixiang Shane and Reid, Machel and Matsuo, Yutaka and Iwasawa, Yusuke},
-  title  = {Large Language Models are Zero-Shot Reasoners},
+CONFERIR
+@inproceedings{kojima2022zero,
+  author    = {Kojima, Takeshi and Gu, Shixiang Shane and Reid, Machel and Matsuo, Yutaka and Iwasawa, Yusuke},
+  title     = {Large Language Models are Zero-Shot Reasoners},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year   = {2022}
+  year      = {2022}
 }
 
-@inproceedings{wang2023selfconsistency,                     % CONFERIR
-  author = {Wang, Xuezhi and Wei, Jason and Schuurmans, Dale and Le, Quoc and Chi, Ed and Narang, Sharan and Chowdhery, Aakanksha and Zhou, Denny},
-  title  = {Self-Consistency Improves Chain of Thought Reasoning in Language Models},
+CONFERIR
+@inproceedings{wang2023selfconsistency,
+  author    = {Wang, Xuezhi and Wei, Jason and Schuurmans, Dale and Le, Quoc and Chi, Ed and Narang, Sharan and Chowdhery, Aakanksha and Zhou, Denny},
+  title     = {Self-Consistency Improves Chain of Thought Reasoning in Language Models},
   booktitle = {International Conference on Learning Representations (ICLR)},
-  year   = {2023}
+  year      = {2023}
 }
 
-@inproceedings{gao2023pal,                                  % CONFERIR
-  author = {Gao, Luyu and Madaan, Aman and Zhou, Shuyan and Alon, Uri and Liu, Pengfei and Yang, Yiming and Callan, Jamie and Neubig, Graham},
-  title  = {PAL: Program-aided Language Models},
+CONFERIR
+@inproceedings{gao2023pal,
+  author    = {Gao, Luyu and Madaan, Aman and Zhou, Shuyan and Alon, Uri and Liu, Pengfei and Yang, Yiming and Callan, Jamie and Neubig, Graham},
+  title     = {{PAL}: Program-aided Language Models},
   booktitle = {International Conference on Machine Learning (ICML)},
-  year   = {2023}
+  year      = {2023}
 }
 
-@article{schick2023toolformer,                              % CONFERIR
-  author = {Schick, Timo and Dwivedi-Yu, Jane and Dess{\`i}, Roberto and Raileanu, Roberta and Lomeli, Maria and Zettlemoyer, Luke and Cancedda, Nicola and Scialom, Thomas},
-  title  = {Toolformer: Language Models Can Teach Themselves to Use Tools},
-  year   = {2023}
+CONFERIR
+@inproceedings{schick2023toolformer,
+  author    = {Schick, Timo and Dwivedi-Yu, Jane and Dess{\`i}, Roberto and Raileanu, Roberta and Lomeli, Maria and Zettlemoyer, Luke and Cancedda, Nicola and Scialom, Thomas},
+  title     = {Toolformer: Language Models Can Teach Themselves to Use Tools},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023}
 }
 
-% ----- Agentes e sistemas multiagentes -----
-@article{wu2023autogen,                                     % CONFERIR
-  author = {Wu, Qingyun and others},
-  title  = {AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation},
-  year   = {2023}
+----- Agentes e sistemas multiagentes -----
+
+CONFERIR
+@misc{wu2023autogen,
+  author       = {Wu, Qingyun and others},
+  title        = {AutoGen: Enabling Next-Gen {LLM} Applications via Multi-Agent Conversation},
+  howpublished = {arXiv:2308.08155},
+  year         = {2023}
 }
 
-@article{wang2023agentsurvey,                               % CONFERIR
-  author = {Wang, Lei and others},
-  title  = {A Survey on Large Language Model based Autonomous Agents},
-  year   = {2023}
+CONFERIR
+@misc{wang2023agentsurvey,
+  author       = {Wang, Lei and others},
+  title        = {A Survey on Large Language Model based Autonomous Agents},
+  howpublished = {arXiv:2308.11432},
+  year         = {2023}
 }
 
-% ----- Computação algébrica simbólica -----
-@article{meurer2017sympy,                                   % CONFERIR
+----- Computacao algebrica simbolica -----
+
+CONFERIR
+@article{meurer2017sympy,
   author  = {Meurer, Aaron and others},
-  title   = {SymPy: Symbolic Computing in Python},
+  title   = {{SymPy}: Symbolic Computing in {Python}},
   journal = {PeerJ Computer Science},
   volume  = {3},
   pages   = {e103},
   year    = {2017}
 }
 
-% ----- Educação matemática e taxonomias -----
-@book{polya1945howtosolveit,                                % CONFERIR
+----- Educacao matematica e taxonomias -----
+
+CONFERIR
+@book{polya1945howtosolveit,
   author    = {P{\'o}lya, George},
   title     = {How to Solve It},
   publisher = {Princeton University Press},
   year      = {1945}
 }
 
-@book{polya1995arte,                                        % CONFERIR (tradução brasileira)
+CONFERIR (traducao brasileira)
+@book{polya1995arte,
   author    = {P{\'o}lya, George},
   title     = {A Arte de Resolver Problemas},
   publisher = {Interci{\^e}ncia},
+  address   = {Rio de Janeiro},
   year      = {1995}
 }
 
-@book{brousseau1997tsd,                                     % CONFERIR
+CONFERIR
+@book{brousseau1997tsd,
   author    = {Brousseau, Guy},
   title     = {Theory of Didactical Situations in Mathematics},
   publisher = {Kluwer},
   year      = {1997}
 }
 
-@book{dante2003didatica,                                    % CONFERIR
+CONFERIR
+@book{dante2003didatica,
   author    = {Dante, Luiz Roberto},
   title     = {Did{\'a}tica da Resolu{\c{c}}{\~a}o de Problemas de Matem{\'a}tica},
   publisher = {{\'A}tica},
+  address   = {S{\~a}o Paulo},
   year      = {2003}
 }
 
-@book{anderson2001taxonomy,                                 % CONFERIR (Bloom revisada)
+CONFERIR (Bloom revisada)
+@book{anderson2001taxonomy,
   author    = {Anderson, Lorin W. and Krathwohl, David R.},
   title     = {A Taxonomy for Learning, Teaching, and Assessing},
   publisher = {Longman},
   year      = {2001}
 }
 
-@book{biggs1982solo,                                        % CONFERIR
+CONFERIR
+@book{biggs1982solo,
   author    = {Biggs, John B. and Collis, Kevin F.},
-  title     = {Evaluating the Quality of Learning: The SOLO Taxonomy},
+  title     = {Evaluating the Quality of Learning: The {SOLO} Taxonomy},
   publisher = {Academic Press},
   year      = {1982}
 }
 
-@article{miranda2015taxonomia,                              % CONFERIR
-  author  = {Miranda, [autor]},
-  title   = {[T{\'i}tulo do estudo sobre taxonomia de Bloom com professores de Matem{\'a}tica]},
+CONFERIR (autoria e titulo completos a preencher pela aluna)
+@article{miranda2015taxonomia,
+  author  = {Miranda, [completar autoria]},
+  title   = {[Completar: estudo sobre taxonomia de Bloom com professores de Matem{\'a}tica da Educa{\c{c}}{\~a}o B{\'a}sica]},
+  journal = {[completar]},
   year    = {2015}
 }
 
-@misc{brasil2018bncc,                                       % CONFERIR
-  author       = {{Brasil, Minist{\'e}rio da Educa{\c{c}}{\~a}o}},
-  title        = {Base Nacional Comum Curricular},
-  year         = {2018},
-  howpublished = {Bras{\'i}lia: MEC}
+CONFERIR
+@misc{brasil2018bncc,
+  author       = {{Brasil}},
+  title        = {Base Nacional Comum Curricular: Ensino M{\'e}dio},
+  howpublished = {Bras{\'i}lia: Minist{\'e}rio da Educa{\c{c}}{\~a}o},
+  year         = {2018}
 }
 
-@misc{brasil1998pcn,                                        % CONFERIR
-  author       = {{Brasil, Minist{\'e}rio da Educa{\c{c}}{\~a}o}},
+CONFERIR
+@misc{brasil1998pcn,
+  author       = {{Brasil}},
   title        = {Par{\^a}metros Curriculares Nacionais},
-  year         = {1998},
-  howpublished = {Bras{\'i}lia: MEC}
+  howpublished = {Bras{\'i}lia: Minist{\'e}rio da Educa{\c{c}}{\~a}o},
+  year         = {1998}
 }
 
-@article{bloom1984twosigma,                                 % CONFERIR
+CONFERIR (problema das duas sigmas)
+@article{bloom1984twosigma,
   author  = {Bloom, Benjamin S.},
   title   = {The 2 Sigma Problem: The Search for Methods of Group Instruction as Effective as One-to-One Tutoring},
   journal = {Educational Researcher},
+  volume  = {13},
+  number  = {6},
+  pages   = {4--16},
   year    = {1984}
 }
 
-@book{valente1999computador,                                % CONFERIR
+CONFERIR
+@book{valente1999computador,
   author    = {Valente, Jos{\'e} Armando},
   title     = {O Computador na Sociedade do Conhecimento},
   publisher = {UNICAMP/NIED},
+  address   = {Campinas},
   year      = {1999}
 }
