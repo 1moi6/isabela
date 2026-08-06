@@ -1,0 +1,149 @@
+========================================================================
+  GERADOR DE QUESTÕES DE MATEMÁTICA — ENSINO MÉDIO
+  Produto educacional da dissertação de mestrado (PROFMAT/UFMT)
+========================================================================
+
+Este programa gera questões de Matemática do Ensino Médio, confere se a
+resposta está correta usando cálculo simbólico e avalia a qualidade
+didática da questão. Depois, monta listas de exercícios prontas para
+imprimir (versão do aluno e versão do professor).
+
+
+------------------------------------------------------------------------
+PASSO 1 — Colocar a pasta no lugar certo
+------------------------------------------------------------------------
+
+Copie a pasta "sistema" inteira para a Área de Trabalho (ou para a pasta
+Documentos). Não deixe a pasta dentro do arquivo .zip: clique com o botão
+direito no .zip e escolha "Extrair tudo" antes de continuar.
+
+Evite colocá-la em "Arquivos de Programas" ou em pastas do OneDrive —
+nesses lugares o Windows costuma bloquear a instalação.
+
+
+------------------------------------------------------------------------
+PASSO 2 — Instalar (uma única vez)
+------------------------------------------------------------------------
+
+Dê um duplo clique no arquivo:
+
+        instalar.bat
+
+Vai abrir uma janela preta com letras brancas. Isso é normal. Ela vai
+baixar da internet o que o programa precisa — leva de 2 a 10 minutos.
+Espere até aparecer "INSTALAÇÃO CONCLUÍDA COM SUCESSO".
+
+  • Se o Windows mostrar um aviso azul ("O Windows protegeu o computador"),
+    clique em "Mais informações" e depois em "Executar assim mesmo".
+
+  • Se a janela disser que FALTA INSTALAR O PYTHON, siga as instruções que
+    aparecem nela: baixe o Python no site python.org e, na primeira tela do
+    instalador, MARQUE a caixinha "Add python.exe to PATH". Depois volte e
+    dê duplo clique em instalar.bat de novo.
+
+Esse passo só é feito uma vez, na primeira utilização.
+
+
+------------------------------------------------------------------------
+PASSO 3 — Usar o programa
+------------------------------------------------------------------------
+
+Dê um duplo clique no arquivo:
+
+        iniciar.bat
+
+Uma janela preta vai abrir e, alguns segundos depois, o programa aparece
+sozinho no navegador (Chrome, Edge, etc.).
+
+  ATENÇÃO: deixe a janela preta aberta enquanto estiver usando o programa.
+  Fechar a janela preta encerra o programa. Para terminar, é só fechá-la.
+
+Dica: clique com o botão direito em iniciar.bat e escolha
+"Fixar na barra de tarefas" ou "Enviar para > Área de trabalho (criar
+atalho)" para abrir mais rápido nas próximas vezes.
+
+
+------------------------------------------------------------------------
+PASSO 4 — Informar a chave de acesso da inteligência artificial
+------------------------------------------------------------------------
+
+Na primeira vez que o programa abrir, clique em "Configurações", no canto
+superior direito:
+
+  1. Escolha o provedor (anthropic ou openai).
+  2. Cole a chave de API no campo indicado.
+
+A chave é pessoal e paga por uso. Ela fica apenas na memória enquanto o
+programa estiver aberto — não é gravada no computador. Isso significa que
+ela precisa ser colada de novo toda vez que o programa for aberto.
+
+Sem chave, o programa não consegue gerar questões novas — mas a aba
+"Banco curado" continua funcionando com as questões já salvas.
+
+
+------------------------------------------------------------------------
+PASSO 5 — Guardar as questões no Google Drive (opcional)
+------------------------------------------------------------------------
+
+Ainda em "Configurações", há o campo "Pasta sincronizada". Se você usa o
+Google Drive para Desktop, cole ali o caminho de uma pasta do Drive —
+por exemplo:
+
+        C:\Users\SeuNome\Google Drive\Questões
+
+A cada questão que você salvar, o programa grava nessa pasta um arquivo
+de texto com a questão, um arquivo com o histórico completo e uma
+planilha "_indice.csv" com uma linha por questão. O Google Drive
+sincroniza sozinho; o programa não pede senha nem autorização.
+
+A planilha abre direto no Google Planilhas ou no Excel e serve para
+analisar o conjunto depois.
+
+
+------------------------------------------------------------------------
+COMO USAR — as duas abas
+------------------------------------------------------------------------
+
+  GERAR
+    Escolha o tema, a habilidade da BNCC, o nível cognitivo, a
+    dificuldade e o formato, e diga quantas questões quer (até 10 de uma
+    vez). Cada questão aparece com a trilha do que aconteceu: o que o
+    gerador escreveu, o que o verificador matemático recalculou e como o
+    avaliador didático pontuou. Se gostar, clique em "Salvar no banco".
+
+  BANCO CURADO
+    Consulta as questões salvas, com filtros por tema e dificuldade.
+    Aqui você também registra a SUA avaliação de cada questão — aceita,
+    aceita com ajuste ou recusada, com um comentário explicando. Esse
+    registro é o que alimenta a análise do capítulo de avaliação.
+
+    Marque "usar na lista" nas questões que quiser e uma barra aparece
+    embaixo para exportar a lista em Markdown, LaTeX ou Word, na versão
+    do aluno ou na do professor (com gabarito e resolução).
+
+As questões salvas ficam no arquivo "banco_questoes.db", dentro da pasta.
+Para fazer backup ou levar para outro computador, basta copiar esse
+arquivo.
+
+
+------------------------------------------------------------------------
+SE ALGO DER ERRADO
+------------------------------------------------------------------------
+
+  "Nada acontece quando dou duplo clique"
+      A janela pode ter aberto e fechado rápido demais por causa de um
+      erro. Abra a pasta, clique na barra de endereço, digite  cmd  e
+      tecle Enter; na janela que abrir, digite  instalar.bat  e Enter.
+      A mensagem de erro vai ficar visível.
+
+  "O navegador não abriu sozinho"
+      Na janela preta aparece um endereço parecido com
+      http://127.0.0.1:8000 — copie e cole na barra do navegador.
+
+  "Erro ao baixar os componentes"
+      Verifique a internet. Em redes de escola ou universidade, o
+      firewall pode bloquear o download; tente de outra rede.
+
+  "Quero começar do zero"
+      Apague a pasta oculta ".venv" de dentro da pasta do programa e rode
+      instalar.bat novamente.

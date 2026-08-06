@@ -44,10 +44,32 @@ sustenta o uso crítico que o Capítulo~\ref{cap:contexto} argumentou ser indele
 
 O professor recebe um pacote Python instalável com uma interface web que roda localmente no
 próprio computador --- nenhum dado da sua prática é enviado a servidores do projeto. A interface
-organiza o trabalho em três áreas: \emph{gerar questão} (o formulário de especificação e o
-acompanhamento do ciclo, com os veredictos de cada agente); \emph{banco} (consulta com filtros
-ao acervo aprovado); e \emph{montar lista} (seleção por filtros e exportação em Markdown ou
-LaTeX, nas versões do aluno e do professor).
+organiza o trabalho em duas áreas. Em \emph{gerar}, o professor preenche o formulário de
+especificação, indica quantas questões deseja e acompanha cada uma chegando com a
+\textbf{trilha do ciclo}: o que o Gerador redigiu, o que o Verificador Simbólico recalculou de
+forma independente e como o Crítico Didático pontuou. Em \emph{banco curado}, consulta o acervo
+com filtros, registra sua própria avaliação de cada questão e seleciona itens para exportar a
+lista em Markdown, \LaTeX{} ou Word, nas versões do aluno e do professor.
+
+A decisão de exibir o resultado recalculado pelo verificador --- e não apenas um selo de
+``aprovado'' --- é deliberada. O erro silencioso descrito na Seção~\ref{sec:erro-silencioso} é
+justamente aquele que se apresenta com aparência de correção; mostrar ao professor \emph{o que}
+a máquina calculou por conta própria devolve a ele a possibilidade de discordar, em vez de
+substituir a confiança cega no LLM por confiança cega no sistema.
+
+\textbf{Registro da avaliação do professor.} Cada questão do banco admite um julgamento humano
+--- aceita, aceita com ajuste ou recusada --- acompanhado de um comentário livre. O registro
+serve a dois propósitos: organiza a curadoria do próprio professor e constitui a matéria-prima
+da avaliação empírica relatada no Capítulo~\ref{cap:avaliacao}, ao permitir contrastar a
+aprovação pelos agentes com o juízo de quem conhece a turma.
+
+\textbf{Depósito em pasta sincronizada.} O professor pode indicar uma pasta que um serviço de
+nuvem (Google Drive, OneDrive) já sincronize. A cada questão salva, o sistema grava ali um
+arquivo legível com a questão e sua verificação, um arquivo com o ciclo completo e uma planilha
+com uma linha por questão --- veredicto do verificador, nota mínima do crítico, número de
+iterações e avaliação do professor. Não há autenticação nem chamada de rede: quem sincroniza é
+o cliente da nuvem já instalado, escolha que evita depender de credenciais que expiram e mantém
+o princípio de que nenhum dado transita por servidores do projeto.
 
 \textbf{Requisitos mínimos.} Um computador com Python 3.11 ou superior e acesso a um provedor
 de modelo de linguagem. Este último admite dois caminhos, e a diferença importa para a

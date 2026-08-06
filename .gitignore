@@ -1,0 +1,14 @@
+# Lixo do Finder (macOS)
+.DS_Store
+**/.DS_Store
+
+# Saidas de compilacao do LaTeX (o PDF e gerado no Overleaf)
+dissertacao/*.aux
+dissertacao/*.bbl
+dissertacao/*.blg
+dissertacao/*.log
+dissertacao/*.out
+dissertacao/*.toc
+dissertacao/*.synctex.gz
+dissertacao/*.fls
+dissertacao/*.fdb_latexmk

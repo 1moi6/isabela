@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gerador de questões · Matemática do Ensino Médio</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2317337a'/><text x='16' y='23' font-size='20' font-family='Georgia,serif' fill='white' text-anchor='middle'>ƒ</text></svg>">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="cabecalho">
+  <div class="marca">
+    <h1 class="marca__nome">Gerador de questões</h1>
+    <p class="marca__escopo">Matemática · Ensino Médio</p>
+    <p class="marca__responsavel" id="marca-responsavel"></p>
+  </div>
+
+  <nav class="abas" role="tablist">
+    <button class="abas__item abas__item--ativo" role="tab" data-aba="gerar">Gerar</button>
+    <button class="abas__item" role="tab" data-aba="banco">Banco curado</button>
+  </nav>
+
+  <div class="estado">
+    <span class="estado__item" id="estado-banco" title="Questões no banco curado">—</span>
+    <span class="estado__separador" aria-hidden="true"></span>
+    <span class="estado__item" id="estado-provedor">—</span>
+    <button class="botao botao--discreto" id="abrir-config">Configurações</button>
+  </div>
+</header>
+
+<main>
+  <!-- ------------------------------------------------------------- Gerar -->
+  <section class="painel painel--duplo" id="aba-gerar">
+    <form class="especificacao" id="form-gerar">
+      <h2 class="especificacao__titulo">Especificação</h2>
+      <p class="especificacao__nota">
+        Cada campo vira instrução explícita para o gerador. Quanto mais preciso,
+        menos iterações até a questão passar.
+      </p>
+
+      <label class="campo">
+        <span class="campo__rotulo">Tema</span>
+        <select class="campo__controle" name="tema" id="campo-tema"></select>
+      </label>
+
+      <label class="campo">
+        <span class="campo__rotulo">Habilidade da BNCC</span>
+        <select class="campo__controle" name="habilidade_bncc" id="campo-habilidade"></select>
+        <span class="campo__ajuda" id="descricao-habilidade"></span>
+      </label>
+
+      <label class="campo">
+        <span class="campo__rotulo">Nível cognitivo <span class="campo__fonte">Bloom</span></span>
+        <select class="campo__controle" name="nivel_bloom" id="campo-bloom"></select>
+      </label>
+
+      <fieldset class="campo">
+        <legend class="campo__rotulo">Dificuldade</legend>
+        <div class="opcoes" id="campo-dificuldade"></div>
+      </fieldset>
+
+      <fieldset class="campo">
+        <legend class="campo__rotulo">Natureza</legend>
+        <div class="opcoes" id="campo-natureza"></div>
+      </fieldset>
+
+      <fieldset class="campo">
+        <legend class="campo__rotulo">Formato</legend>
+        <div class="opcoes" id="campo-formato"></div>
+      </fieldset>
+
+      <label class="campo">
+        <span class="campo__rotulo">Contexto <span class="campo__fonte">opcional</span></span>
+        <input class="campo__controle" name="contexto" placeholder="esportes, finanças pessoais…">
+      </label>
+
+      <label class="campo">
+        <span class="campo__rotulo">Restrições <span class="campo__fonte">opcional</span></span>
+        <input class="campo__controle" name="restricoes" placeholder="apenas coeficientes inteiros…">
+      </label>
+
+      <label class="campo campo--linha">
+        <span class="campo__rotulo">Quantas questões</span>
+        <input class="campo__controle campo__controle--curto" type="number"
+               name="quantidade" value="1" min="1" max="10">
+      </label>
+
+      <button class="botao botao--principal" type="submit" id="botao-gerar">Gerar</button>
+      <p class="especificacao__aviso" id="aviso-chave" hidden></p>
+    </form>
+
+    <div class="resultados" id="resultados">
+      <div class="vazio">
+        <p class="vazio__titulo">Nenhuma questão gerada ainda</p>
+        <p class="vazio__texto">
+          Descreva a questão à esquerda e clique em <strong>Gerar</strong>. Cada questão
+          passa por três agentes antes de chegar aqui — e o veredicto de cada um fica
+          registrado junto com ela.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------- Banco -->
+  <section class="painel" id="aba-banco" hidden>
+    <div class="filtros">
+      <label class="campo campo--linha">
+        <span class="campo__rotulo">Tema</span>
+        <select class="campo__controle" id="filtro-tema"><option value="">Todos</option></select>
+      </label>
+      <label class="campo campo--linha">
+        <span class="campo__rotulo">Dificuldade</span>
+        <select class="campo__controle" id="filtro-dificuldade"><option value="">Todas</option></select>
+      </label>
+      <p class="filtros__contagem" id="contagem-banco"></p>
+    </div>
+
+    <div class="lista-banco" id="lista-banco"></div>
+  </section>
+</main>
+
+<!-- Barra de montagem de lista: aparece quando há questões selecionadas -->
+<div class="barra-lista" id="barra-lista" hidden>
+  <div class="barra-lista__contagem"><strong id="qtd-selecionadas">0</strong> selecionadas</div>
+  <label class="campo campo--linha barra-lista__titulo">
+    <span class="campo__rotulo">Título</span>
+    <input class="campo__controle" id="titulo-lista" value="Lista de exercícios">
+  </label>
+  <label class="alternar">
+    <input type="checkbox" id="com-gabarito">
+    <span>Incluir gabarito e resoluções</span>
+  </label>
+  <div class="barra-lista__acoes">
+    <button class="botao" data-formato="markdown">Markdown</button>
+    <button class="botao" data-formato="latex">LaTeX</button>
+    <button class="botao botao--principal" data-formato="docx">Word</button>
+  </div>
+</div>
+
+<!-- --------------------------------------------------------- Configurações -->
+<dialog class="dialogo" id="dialogo-config">
+  <form method="dialog" class="dialogo__conteudo">
+    <h2 class="dialogo__titulo">Configurações</h2>
+
+    <label class="campo">
+      <span class="campo__rotulo">Provedor de LLM</span>
+      <select class="campo__controle" id="config-provedor">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai">OpenAI</option>
+        <option value="ollama">Ollama (local, sem chave)</option>
+      </select>
+    </label>
+
+    <label class="campo">
+      <span class="campo__rotulo">Sua chave de API</span>
+      <input class="campo__controle" id="config-chave" type="password"
+             placeholder="cole aqui a sua chave">
+      <span class="campo__ajuda">
+        A chave fica guardada <strong>neste navegador</strong> e acompanha cada pedido de
+        geração. O servidor usa e descarta — não guarda a chave de ninguém. Ela passa pelo
+        servidor para chegar ao provedor, então use este sistema apenas se confia em quem
+        o administra.
+      </span>
+      <button class="botao botao--discreto" type="button" id="esquecer-chave"
+              style="align-self: flex-start">Esquecer a chave deste navegador</button>
+      <div id="chave-responsavel"></div>
+    </label>
+
+    <div class="campo" id="config-servidor">
+      <span class="campo__rotulo">Preferências desta máquina</span>
+      <span class="campo__ajuda">
+        Valem para o servidor, não para quem se conecta a ele.
+      </span>
+
+      <label class="campo" style="margin-top: 10px">
+        <span class="campo__rotulo">Responsável por este servidor</span>
+        <input class="campo__controle" id="config-responsavel" placeholder="Prof. Fulano de Tal">
+        <span class="campo__ajuda">
+          Aparece na tela de acesso e ao lado do campo de chave. Quem recebe um convite
+          precisa saber de quem é o endereço antes de digitar a própria chave de API.
+        </span>
+      </label>
+
+      <label class="campo" style="margin-top: 10px">
+        <span class="campo__rotulo">Instituição</span>
+        <input class="campo__controle" id="config-instituicao" placeholder="UFMT — Departamento de Matemática">
+      </label>
+
+      <label class="campo" style="margin-top: 10px">
+        <span class="campo__rotulo">Contato</span>
+        <input class="campo__controle" id="config-contato" placeholder="email para dúvidas">
+      </label>
+
+      <label class="campo" style="margin-top: 10px">
+        <span class="campo__rotulo">Pasta sincronizada</span>
+        <input class="campo__controle" id="config-pasta"
+               placeholder="/Users/você/Google Drive/Questões">
+        <span class="campo__ajuda">
+          Cada questão salva vira um <code>.md</code>, um <code>.json</code> e uma linha no
+          <code>_indice.csv</code> dentro desta pasta. Aponte para uma pasta que o Google Drive
+          já sincronize — o app não precisa de senha nem autorização.
+        </span>
+      </label>
+
+      <label class="campo" style="margin-top: 10px">
+        <span class="campo__rotulo">Modelo <span class="campo__fonte">opcional</span></span>
+        <input class="campo__controle" id="config-modelo" placeholder="padrão do provedor">
+      </label>
+    </div>
+
+    <div class="dialogo__acoes">
+      <button class="botao" value="cancelar">Cancelar</button>
+      <button class="botao botao--principal" id="salvar-config" value="salvar">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="avisos" id="avisos" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

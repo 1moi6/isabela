@@ -18,6 +18,7 @@ JSONL para rastreabilidade.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 from ..especificacao import Especificacao
@@ -37,19 +38,26 @@ class Orquestrador:
         critico: CriticoDidatico,
         max_iteracoes: int = MAX_ITERACOES,
         log_dir: Path | None = None,
+        ao_progredir: Callable[[dict], None] | None = None,
     ):
         self._gerador = gerador
         self._verificador = verificador
         self._critico = critico
         self._max = max_iteracoes
         self._log_dir = log_dir
+        # Aviso de progresso para quem estiver acompanhando de fora (a interface).
+        # É observação, não decisão: a política do ciclo continua inteira aqui.
+        self._ao_progredir = ao_progredir or (lambda _: None)
 
     def produzir(self, spec: Especificacao) -> ResultadoCiclo:
         iteracoes: list[RegistroIteracao] = []
         feedback: str | None = None
 
         for numero in range(1, self._max + 1):
+            self._ao_progredir({"iteracao": numero, "etapa": "gerando"})
             questao = self._gerador.gerar(spec, feedback=feedback)
+
+            self._ao_progredir({"iteracao": numero, "etapa": "verificando"})
             verificacao = self._verificador.verificar(questao)
 
             if verificacao.veredicto == Veredicto.REJEITADO:
@@ -67,6 +75,10 @@ class Orquestrador:
                 )
                 continue
 
+            self._ao_progredir({
+                "iteracao": numero, "etapa": "criticando",
+                "veredicto": verificacao.veredicto.value,
+            })
             parecer = self._critico.avaliar(questao)
             if not parecer.aprovado:
                 feedback = (

@@ -1,3 +1,5 @@
+import threading
+
 import pytest
 
 from questoes.banco import BancoQuestoes
@@ -43,6 +45,29 @@ def test_salvar_e_buscar(tmp_path):
     assert banco.total() == 2
     achadas = banco.buscar(dificuldade="facil")
     assert len(achadas) == 1
+
+
+def test_banco_atravessa_threads(tmp_path):
+    """A interface Streamlit reaproveita o banco entre threads diferentes."""
+    banco = BancoQuestoes(tmp_path / "t.db")
+    banco.salvar(_resultado())
+
+    erros = []
+
+    def em_outra_thread():
+        try:
+            banco.salvar(_resultado(dificuldade=Dificuldade.FACIL))
+            banco.buscar()
+            banco.total()
+        except Exception as exc:  # pragma: no cover - só falha se a conexão prender
+            erros.append(exc)
+
+    t = threading.Thread(target=em_outra_thread)
+    t.start()
+    t.join()
+
+    assert not erros, erros
+    assert banco.total() == 2
 
 
 def test_ciclo_reprovado_nao_entra_no_banco(tmp_path):

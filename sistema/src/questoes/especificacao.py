@@ -10,7 +10,7 @@ import json
 from enum import Enum
 from pathlib import Path
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 _DADOS = Path(__file__).resolve().parents[2] / "dados" / "bncc_em_matematica.json"
 
@@ -84,6 +84,28 @@ class Especificacao(BaseModel):
             conhecidos = ", ".join(sorted(catalogo))
             raise ValueError(f"Habilidade BNCC desconhecida: {v}. Disponíveis: {conhecidos}")
         return v
+
+    @model_validator(mode="after")
+    def _validar_tema_compativel(self):
+        """O tema pedido precisa ser um dos temas da habilidade escolhida.
+
+        Sem esta checagem, um pedido incoerente (PG com uma habilidade de PA)
+        só é descoberto pelo Crítico Didático --- depois de três iterações,
+        cerca de cinco minutos e o custo de seis chamadas ao LLM. A interface
+        já filtra as habilidades pelo tema; isto protege quem chama a API
+        diretamente.
+        """
+        habilidade = carregar_habilidades()[self.habilidade_bncc]
+        if self.tema.value not in habilidade["temas"]:
+            compativeis = ", ".join(
+                c for c, h in carregar_habilidades().items() if self.tema.value in h["temas"]
+            )
+            raise ValueError(
+                f"A habilidade {self.habilidade_bncc} não cobre o tema '{self.tema.value}' "
+                f"(ela trata de: {', '.join(habilidade['temas'])}). "
+                f"Para este tema, use: {compativeis}."
+            )
+        return self
 
     def descricao_habilidade(self) -> str:
         return carregar_habilidades()[self.habilidade_bncc]["descricao"]

@@ -1,0 +1,782 @@
+/* =============================================================================
+   Gerador de questões — lógica da interface.
+
+   Sem framework e sem passo de compilação: o arquivo roda como está. Todo texto
+   vindo do modelo entra na página por textContent, nunca por innerHTML — o
+   enunciado é conteúdo gerado, e conteúdo gerado não vira marcação.
+   ========================================================================== */
+
+/* Endereço fixo do backend, quando houver túnel nomeado. Deixe vazio para o
+   modo local (a página é servida pelo próprio servidor) ou para o túnel
+   rápido (o endereço chega pelo link de convite, em ?api=).
+
+   Com um endereço aqui, os links de convite passam a ser permanentes: não
+   precisam mais carregar o endereço da vez. */
+const API_PADRAO = "";
+
+const estadoApp = {
+  opcoes: null,
+  gerados: [],      // ciclos desta sessão, ainda não necessariamente salvos
+  banco: [],
+  selecionadas: new Set(),
+  compartilhado: false,
+};
+
+/* ------------------------------------------------------------- credenciais
+   A chave de API fica no navegador de quem usa e viaja em cada requisição.
+   O servidor usa e descarta: ninguém guarda credencial de terceiro. */
+const guardado = {
+  get convite() { return localStorage.getItem("questoes.convite") || ""; },
+  set convite(v) { localStorage.setItem("questoes.convite", v); },
+  /* Endereço do backend. Vazio significa "a mesma origem que serviu esta
+     página" — o caso do uso local, em que o próprio servidor entrega o HTML.
+     Quando a interface vem do GitHub Pages, o backend está noutro endereço e
+     ele chega pelo link de convite (?api=...). */
+  get api() { return localStorage.getItem("questoes.api") || API_PADRAO; },
+  set api(v) { v ? localStorage.setItem("questoes.api", v) : localStorage.removeItem("questoes.api"); },
+  get chave() { return localStorage.getItem("questoes.chave") || ""; },
+  set chave(v) { v ? localStorage.setItem("questoes.chave", v) : localStorage.removeItem("questoes.chave"); },
+  get provedor() { return localStorage.getItem("questoes.provedor") || ""; },
+  set provedor(v) { v ? localStorage.setItem("questoes.provedor", v) : localStorage.removeItem("questoes.provedor"); },
+};
+
+/** Descobre onde está a API, na ordem: link → constante → mesma origem → backend.json.
+ *
+ *  A última etapa é o que torna os convites permanentes: com o túnel rápido o
+ *  endereço muda a cada reinício, e o servidor publica o endereço da vez num
+ *  `backend.json` ao lado desta página. Assim o link nunca precisa carregá-lo. */
+async function descobrirApi() {
+  if (localStorage.getItem("questoes.api")) return;   // veio pelo link, manda
+  if (API_PADRAO) { guardado.api = API_PADRAO; return; }
+
+  // Servida pelo próprio servidor? Então a API é a mesma origem.
+  try {
+    const r = await fetch("/api/identificacao", { method: "GET" });
+    if (r.ok) { guardado.api = ""; return; }
+  } catch (_) { /* origem não atende a API: seguimos para o backend.json */ }
+
+  try {
+    // Sem cache: o endereço muda e um valor velho leva a um túnel morto.
+    const cfg = await (await fetch(`backend.json?t=${Date.now()}`)).json();
+    if (cfg.endereco) guardado.api = cfg.endereco;
+  } catch (_) {
+    avisar("Não encontrei o endereço do servidor. Peça um link novo a quem administra.", "erro");
+  }
+}
+
+/** Aceita convite e endereço do backend pela URL, e limpa a barra de endereço. */
+function capturarConvite() {
+  const url = new URL(window.location.href);
+  const codigo = url.searchParams.get("convite");
+  const api = url.searchParams.get("api");
+  if (!codigo && !api) return;
+  if (codigo) guardado.convite = codigo;
+  if (api) guardado.api = api.replace(/\/+$/, "");
+  url.searchParams.delete("convite");
+  url.searchParams.delete("api");
+  window.history.replaceState({}, "", url.pathname + url.search);
+}
+
+/* ------------------------------------------------------------- utilitários */
+function el(tag, classe, texto) {
+  const node = document.createElement(tag);
+  if (classe) node.className = classe;
+  if (texto !== undefined && texto !== null) node.textContent = texto;
+  return node;
+}
+
+function avisar(mensagem, tipo = "") {
+  const caixa = el("div", `aviso ${tipo ? "aviso--" + tipo : ""}`, mensagem);
+  document.getElementById("avisos").append(caixa);
+  setTimeout(() => caixa.remove(), 6000);
+}
+
+async function api(caminho, opcoes = {}) {
+  const cabecalhos = { "Content-Type": "application/json" };
+  if (guardado.convite) cabecalhos["X-Convite"] = guardado.convite;
+  if (guardado.chave) cabecalhos["X-Chave-API"] = guardado.chave;
+  if (guardado.provedor) cabecalhos["X-Provedor"] = guardado.provedor;
+
+  const resposta = await fetch(guardado.api + caminho, { headers: cabecalhos, ...opcoes });
+  if (resposta.status === 401) {
+    mostrarBloqueio();
+    throw new Error("Acesso não autorizado.");
+  }
+  if (!resposta.ok) {
+    let detalhe = `${resposta.status} ${resposta.statusText}`;
+    try {
+      const corpo = await resposta.json();
+      if (corpo.detail) detalhe = typeof corpo.detail === "string" ? corpo.detail : JSON.stringify(corpo.detail);
+    } catch (_) { /* resposta sem corpo JSON */ }
+    throw new Error(detalhe);
+  }
+  return resposta;
+}
+
+const rotulo = (lista, valor) => (lista.find((o) => o.valor === valor) || {}).rotulo || valor;
+
+/** Assinatura de quem mantém o servidor, para quem chega por um link. */
+function blocoResponsavel(ident) {
+  if (!ident || !ident.responsavel) return null;
+  const bloco = el("div", "responsavel");
+  bloco.append(el("span", "responsavel__rotulo", "Servidor mantido por"));
+  bloco.append(el("span", "responsavel__nome", ident.responsavel));
+  if (ident.instituicao) bloco.append(el("span", "responsavel__linha", ident.instituicao));
+  if (ident.contato) bloco.append(el("span", "responsavel__linha", ident.contato));
+  return bloco;
+}
+
+/** Tela de acesso: aparece quando o convite falta ou não vale mais. */
+async function mostrarBloqueio() {
+  if (document.getElementById("bloqueio")) return;
+  const capa = el("div", "bloqueio");
+  capa.id = "bloqueio";
+  const caixa = el("div", "bloqueio__caixa");
+  caixa.append(el("h2", "bloqueio__titulo", "Acesso por convite"));
+  caixa.append(el("p", "bloqueio__texto",
+    guardado.convite
+      ? "Este convite não vale mais. Peça um link novo a quem administra o sistema."
+      : "Abra o link de convite que você recebeu. Ele identifica você e dá acesso ao seu banco de questões."));
+  capa.append(caixa);
+  document.body.append(capa);
+
+  // A identificação é pública justamente para aparecer aqui, antes do acesso.
+  try {
+    const ident = await (await fetch(guardado.api + "/api/identificacao")).json();
+    const bloco = blocoResponsavel(ident);
+    if (bloco) caixa.append(bloco);
+    estadoApp.identificacao = ident;
+  } catch (_) { /* sem identificação configurada, a tela segue útil */ }
+}
+
+/* ------------------------------------------------------------------ estado */
+async function carregarEstado() {
+  const dados = await (await api("/api/estado")).json();
+  estadoApp.compartilhado = dados.compartilhado;
+
+  document.getElementById("estado-banco").textContent =
+    `${dados.total_no_banco} no banco`;
+  document.getElementById("estado-provedor").textContent =
+    dados.nome || (dados.modelo ? `${dados.provedor} · ${dados.modelo}` : dados.provedor);
+
+  const aviso = document.getElementById("aviso-chave");
+  if (!dados.chave_presente && dados.provedor !== "ollama") {
+    aviso.textContent = dados.compartilhado
+      ? "Informe a sua chave de API em Configurações para gerar questões."
+      : `Sem chave de API. Informe em Configurações ou defina ${dados.variavel_chave} no ambiente.`;
+    aviso.hidden = false;
+  } else {
+    aviso.hidden = true;
+  }
+
+  // Preferências do servidor só são editáveis na máquina onde ele roda.
+  document.getElementById("config-servidor").hidden = dados.compartilhado;
+  document.getElementById("config-pasta").value = dados.pasta_sincronizada || "";
+  document.getElementById("config-modelo").value = dados.modelo || "";
+  document.getElementById("config-provedor").value = guardado.provedor || dados.provedor;
+
+  await mostrarIdentificacao();
+
+  if (!dados.compartilhado && dados.pasta_sincronizada && !dados.pasta_acessivel) {
+    avisar(`A pasta sincronizada '${dados.pasta_sincronizada}' não foi encontrada.`, "erro");
+  }
+  return dados;
+}
+
+/** Mostra quem mantém o servidor: no rodapé do cabeçalho e junto do campo de chave. */
+async function mostrarIdentificacao() {
+  let ident = estadoApp.identificacao;
+  if (!ident) {
+    try {
+      ident = await (await fetch(guardado.api + "/api/identificacao")).json();
+      estadoApp.identificacao = ident;
+    } catch (_) { return; }
+  }
+
+  document.getElementById("config-responsavel").value = ident.responsavel || "";
+  document.getElementById("config-instituicao").value = ident.instituicao || "";
+  document.getElementById("config-contato").value = ident.contato || "";
+
+  const assinatura = [ident.responsavel, ident.instituicao].filter(Boolean).join(" · ");
+  document.getElementById("marca-responsavel").textContent = assinatura;
+
+  const junto = document.getElementById("chave-responsavel");
+  junto.replaceChildren();
+  const bloco = blocoResponsavel(ident);
+  if (bloco) junto.append(bloco);
+}
+
+/* ---------------------------------------------------------------- formulário */
+function preencherSelect(elemento, itens, valorDe = (i) => i.valor, textoDe = (i) => i.rotulo) {
+  elemento.replaceChildren();
+  for (const item of itens) {
+    const opcao = el("option", null, textoDe(item));
+    opcao.value = valorDe(item);
+    elemento.append(opcao);
+  }
+}
+
+function grupoOpcoes(container, itens, valorInicial) {
+  container.replaceChildren();
+  container.dataset.valor = valorInicial;
+  for (const item of itens) {
+    const botao = el("button", "opcoes__item", item.rotulo);
+    botao.type = "button";
+    botao.dataset.valor = item.valor;
+    if (item.valor === valorInicial) botao.classList.add("opcoes__item--ativo");
+    botao.addEventListener("click", () => {
+      container.dataset.valor = item.valor;
+      for (const irmao of container.children) {
+        irmao.classList.toggle("opcoes__item--ativo", irmao === botao);
+      }
+    });
+    container.append(botao);
+  }
+}
+
+function habilidadesDoTema(tema) {
+  const compativeis = estadoApp.opcoes.habilidades.filter((h) => h.temas.includes(tema));
+  return compativeis.length ? compativeis : estadoApp.opcoes.habilidades;
+}
+
+function atualizarHabilidades() {
+  const tema = document.getElementById("campo-tema").value;
+  const campo = document.getElementById("campo-habilidade");
+  preencherSelect(campo, habilidadesDoTema(tema), (h) => h.codigo, (h) => h.codigo);
+  mostrarDescricaoHabilidade();
+}
+
+function mostrarDescricaoHabilidade() {
+  const codigo = document.getElementById("campo-habilidade").value;
+  const habilidade = estadoApp.opcoes.habilidades.find((h) => h.codigo === codigo);
+  document.getElementById("descricao-habilidade").textContent = habilidade ? habilidade.descricao : "";
+}
+
+async function montarFormulario() {
+  const o = estadoApp.opcoes;
+  preencherSelect(document.getElementById("campo-tema"), o.temas);
+  preencherSelect(document.getElementById("campo-bloom"), o.bloom);
+  document.getElementById("campo-bloom").value = "aplicar";
+  grupoOpcoes(document.getElementById("campo-dificuldade"), o.dificuldades, "media");
+  grupoOpcoes(document.getElementById("campo-natureza"), o.naturezas, "aplicada");
+  grupoOpcoes(document.getElementById("campo-formato"), o.formatos, "discursiva");
+  atualizarHabilidades();
+
+  preencherSelect(document.getElementById("filtro-tema"), [{ valor: "", rotulo: "Todos" }, ...o.temas]);
+  preencherSelect(
+    document.getElementById("filtro-dificuldade"),
+    [{ valor: "", rotulo: "Todas" }, ...o.dificuldades]
+  );
+}
+
+function lerEspecificacao() {
+  const form = document.getElementById("form-gerar");
+  return {
+    tema: document.getElementById("campo-tema").value,
+    habilidade_bncc: document.getElementById("campo-habilidade").value,
+    nivel_bloom: document.getElementById("campo-bloom").value,
+    dificuldade: document.getElementById("campo-dificuldade").dataset.valor,
+    natureza: document.getElementById("campo-natureza").dataset.valor,
+    formato: document.getElementById("campo-formato").dataset.valor,
+    contexto: form.contexto.value.trim() || null,
+    restricoes: form.restricoes.value.trim() || null,
+  };
+}
+
+/* ------------------------------------------------- trilha do ciclo (assinatura) */
+function etapa(agente, veredicto, detalhe, estilo) {
+  const item = el("li", `trilha__etapa trilha__etapa--${estilo}`);
+  item.append(el("span", "trilha__agente", agente));
+  item.append(el("span", "trilha__veredicto", veredicto));
+  if (detalhe) item.append(el("span", "trilha__detalhe", detalhe));
+  return item;
+}
+
+const VEREDICTO = {
+  aprovado: ["conferiu o gabarito", "ok"],
+  rejeitado: ["reprovou o gabarito", "erro"],
+  nao_verificavel: ["não formalizável", "neutro"],
+  aprovado_ressalva_numerica: ["conferiu por amostragem", "ok"],
+};
+
+function montarTrilha(iteracao) {
+  const trilha = el("ol", "trilha");
+  trilha.append(etapa("Gerador", "questão redigida", null, "neutro"));
+
+  const v = iteracao.verificacao;
+  const [texto, estilo] = VEREDICTO[v.veredicto] || [v.veredicto, "neutro"];
+  const detalhe = v.resultado_calculado
+    ? `recalculou: ${v.resultado_calculado}`
+    : v.justificativa;
+  trilha.append(etapa("Verificador simbólico", texto, detalhe, estilo));
+
+  const p = iteracao.parecer;
+  if (!p) {
+    trilha.append(etapa("Crítico didático", "não chegou a avaliar", null, "neutro"));
+  } else {
+    const notas = p.notas.map((n) => n.nota);
+    const minima = notas.length ? Math.min(...notas) : 0;
+    trilha.append(etapa(
+      "Crítico didático",
+      p.aprovado ? "aprovou" : "pediu revisão",
+      `nota mínima ${minima}/5 em ${p.notas.length} critérios`,
+      p.aprovado ? "ok" : "erro"
+    ));
+  }
+  return trilha;
+}
+
+/** Trilha durante a execução, refletindo o que o servidor informa de progresso. */
+function trilhaEmAndamento(progresso) {
+  const p = progresso || { iteracao: 1, etapa: "gerando" };
+  const trilha = el("ol", "trilha");
+
+  const estados = {
+    gerando:     ["trabalhando", "neutro", "neutro"],
+    verificando: ["ok", "trabalhando", "neutro"],
+    criticando:  ["ok", "ok", "trabalhando"],
+  }[p.etapa] || ["trabalhando", "neutro", "neutro"];
+
+  const textos = {
+    gerando:     ["redigindo…", "aguardando", "aguardando"],
+    verificando: ["questão redigida", "conferindo a conta…", "aguardando"],
+    criticando:  ["questão redigida",
+                  (VEREDICTO[p.veredicto] || ["conferiu"])[0],
+                  "avaliando…"],
+  }[p.etapa] || ["redigindo…", "aguardando", "aguardando"];
+
+  ["Gerador", "Verificador simbólico", "Crítico didático"].forEach((agente, i) => {
+    trilha.append(etapa(agente, textos[i], null, estados[i]));
+  });
+
+  if (p.iteracao > 1) {
+    const nota = el("li", "trilha__etapa trilha__etapa--neutro");
+    nota.append(el("span", "trilha__agente", "Iteração"));
+    nota.append(el("span", "trilha__veredicto", `${p.iteracao} de 3`));
+    trilha.append(nota);
+  }
+  return trilha;
+}
+
+/* --------------------------------------------------------- cartão da questão */
+function detalhe(resumo, preencher) {
+  const bloco = el("details", "detalhe");
+  bloco.append(el("summary", "detalhe__resumo", resumo));
+  const corpo = el("div", "detalhe__corpo");
+  preencher(corpo);
+  bloco.append(corpo);
+  return bloco;
+}
+
+function corpoDaQuestao(questao) {
+  const corpo = el("div", "questao__corpo");
+  corpo.append(el("p", "questao__enunciado", questao.enunciado));
+  if (questao.alternativas && questao.alternativas.length) {
+    const lista = el("ul", "questao__alternativas");
+    "abcd".split("").forEach((letra, i) => {
+      const alt = questao.alternativas[i];
+      if (!alt) return;
+      const item = el("li", "questao__alternativa" + (alt.correta ? " questao__alternativa--correta" : ""));
+      item.append(el("span", "questao__letra", `(${letra})`));
+      item.append(el("span", null, alt.texto));
+      lista.append(item);
+    });
+    corpo.append(lista);
+  }
+  return corpo;
+}
+
+function cabecaDaQuestao(questao, identificacao) {
+  const cabeca = el("div", "questao__cabeca");
+  cabeca.append(el("span", "questao__id", identificacao));
+  const spec = questao.especificacao;
+  const meta = [
+    rotulo(estadoApp.opcoes.temas, spec.tema),
+    spec.habilidade_bncc,
+    rotulo(estadoApp.opcoes.bloom, spec.nivel_bloom),
+    rotulo(estadoApp.opcoes.dificuldades, spec.dificuldade),
+    rotulo(estadoApp.opcoes.formatos, spec.formato),
+  ].join(" · ");
+  cabeca.append(el("span", "questao__meta", meta));
+  return cabeca;
+}
+
+function blocosDeApoio(cartao, questao, iteracao) {
+  cartao.append(detalhe("Resolução e gabarito", (corpo) => {
+    corpo.append(el("p", null, questao.resolucao));
+    const gab = el("p", null, "");
+    gab.append(el("strong", null, "Gabarito: "));
+    gab.append(document.createTextNode(questao.gabarito));
+    gab.style.marginTop = "12px";
+    corpo.append(gab);
+  }));
+
+  if (iteracao && iteracao.parecer) {
+    cartao.append(detalhe("Parecer didático por critério", (corpo) => {
+      const lista = el("ul", "criterios");
+      for (const nota of iteracao.parecer.notas) {
+        const item = el("li", "criterios__item");
+        item.append(el("span", "criterios__nota", `${nota.nota}/5`));
+        item.append(el("span", null, `${nota.criterio} — ${nota.comentario}`));
+        lista.append(item);
+      }
+      corpo.append(lista);
+    }));
+  }
+}
+
+/* ----------------------------------------------------- cartão: recém-gerada */
+function cartaoGerado(entrada, indice) {
+  const cartao = el("article", "questao");
+  const r = entrada.resultado;
+
+  if (!r) {  // ainda em andamento
+    const cabeca = el("div", "questao__cabeca");
+    cabeca.append(el("span", "questao__id", "Gerando…"));
+    cartao.append(cabeca);
+    cartao.append(trilhaEmAndamento(entrada.progresso));
+    return cartao;
+  }
+
+  const ultima = r.iteracoes[r.iteracoes.length - 1];
+
+  if (!r.aprovada) {
+    cartao.append(cabecaDaQuestao(ultima.questao, "Descartada"));
+    cartao.append(corpoDaQuestao(ultima.questao));
+    cartao.append(montarTrilha(ultima));
+    cartao.append(el("p", "iteracao",
+      `Descartada após ${r.iteracoes.length} iterações sem aprovação. Ajuste a especificação e gere de novo.`));
+    historicoAnterior(cartao, r);
+    return cartao;
+  }
+
+  cartao.append(cabecaDaQuestao(r.questao_final, entrada.id ? `Questão #${entrada.id}` : "Aprovada"));
+  cartao.append(corpoDaQuestao(r.questao_final));
+  cartao.append(montarTrilha(ultima));
+  historicoAnterior(cartao, r);
+  blocosDeApoio(cartao, r.questao_final, ultima);
+
+  const rodape = el("div", "questao__rodape");
+  if (entrada.id) {
+    rodape.append(el("span", "etiqueta etiqueta--ok", "no banco"));
+    rodape.append(el("span", "campo__ajuda", "Avalie esta questão na aba Banco curado."));
+  } else {
+    const salvar = el("button", "botao botao--principal", "Salvar no banco");
+    salvar.addEventListener("click", async () => {
+      salvar.disabled = true;
+      try {
+        const dados = await (await api("/api/banco", { method: "POST", body: JSON.stringify(r) })).json();
+        entrada.id = dados.id;
+        if (dados.aviso_sincronizacao) avisar(dados.aviso_sincronizacao, "erro");
+        else avisar(`Salva como questão #${dados.id}.`, "ok");
+        renderizarGerados();
+        carregarEstado();
+      } catch (erro) {
+        avisar(`Não foi possível salvar: ${erro.message}`, "erro");
+        salvar.disabled = false;
+      }
+    });
+    rodape.append(salvar);
+    rodape.append(el("span", "campo__ajuda", "Só o que você salvar entra no banco e vai para a pasta sincronizada."));
+  }
+  cartao.append(rodape);
+  return cartao;
+}
+
+function historicoAnterior(cartao, resultado) {
+  for (const it of resultado.iteracoes.slice(0, -1)) {
+    const linha = el("p", "iteracao");
+    linha.append(el("span", "iteracao__rotulo", `Iteração ${it.numero} `));
+    linha.append(document.createTextNode(it.feedback_para_gerador || "revisada"));
+    cartao.append(linha);
+  }
+}
+
+function renderizarGerados() {
+  const area = document.getElementById("resultados");
+  area.replaceChildren();
+  if (!estadoApp.gerados.length) {
+    const vazio = el("div", "vazio");
+    vazio.append(el("p", "vazio__titulo", "Nenhuma questão gerada ainda"));
+    vazio.append(el("p", "vazio__texto",
+      "Descreva a questão à esquerda e clique em Gerar. Cada questão passa por três agentes antes de chegar aqui — e o veredicto de cada um fica registrado junto com ela."));
+    area.append(vazio);
+    return;
+  }
+  estadoApp.gerados.forEach((entrada, i) => area.append(cartaoGerado(entrada, i)));
+}
+
+/* ------------------------------------------------------------------ geração */
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** Dispara o ciclo e acompanha até o fim, atualizando a trilha no caminho.
+ *
+ *  Um ciclo leva de 80 a 250 segundos — mais do que qualquer proxy reverso
+ *  aceita numa requisição só. Por isso o servidor devolve um identificador na
+ *  hora e nós perguntamos o andamento. */
+async function executarCiclo(spec, entrada) {
+  const inicio = await (await api("/api/gerar", {
+    method: "POST", body: JSON.stringify(spec),
+  })).json();
+
+  while (true) {
+    await espera(2000);
+    const situacao = await (await api(`/api/gerar/${inicio.tarefa}`)).json();
+
+    if (situacao.estado === "executando") {
+      entrada.progresso = situacao.progresso;
+      renderizarGerados();
+      continue;
+    }
+    if (situacao.estado === "erro") throw new Error(situacao.detalhe);
+    return situacao.resultado;
+  }
+}
+
+async function gerar(evento) {
+  evento.preventDefault();
+  const botao = document.getElementById("botao-gerar");
+  const form = document.getElementById("form-gerar");
+  const quantidade = Math.max(1, Math.min(10, Number(form.quantidade.value) || 1));
+  const spec = lerEspecificacao();
+
+  botao.disabled = true;
+  for (let i = 0; i < quantidade; i++) {
+    botao.textContent = quantidade > 1 ? `Gerando ${i + 1} de ${quantidade}…` : "Gerando…";
+    const entrada = { resultado: null, id: null, progresso: null };
+    estadoApp.gerados.unshift(entrada);
+    renderizarGerados();
+    try {
+      entrada.resultado = await executarCiclo(spec, entrada);
+    } catch (erro) {
+      estadoApp.gerados.shift();
+      renderizarGerados();
+      avisar(`Falha na geração: ${erro.message}`, "erro");
+      break;
+    }
+    renderizarGerados();
+  }
+  botao.disabled = false;
+  botao.textContent = "Gerar";
+}
+
+/* -------------------------------------------------------------------- banco */
+function controlesDeAvaliacao(registro) {
+  const area = el("div", "avaliacao");
+  area.append(el("span", "avaliacao__rotulo", "Sua avaliação:"));
+
+  const comentario = el("input", "avaliacao__comentario");
+  comentario.placeholder = "por que aceitou, ajustou ou recusou (opcional)";
+  comentario.value = registro.comentario_professor || "";
+
+  const registrada = el("span", "avaliacao__registrada");
+  const mostrarRegistrada = () => {
+    registrada.textContent = registro.decisao_professor
+      ? `registrada: ${rotulo(estadoApp.opcoes.decisoes, registro.decisao_professor)}`
+      : "";
+  };
+  mostrarRegistrada();
+
+  for (const decisao of estadoApp.opcoes.decisoes) {
+    const botao = el("button", "opcoes__item", decisao.rotulo);
+    botao.type = "button";
+    botao.style.flex = "0 0 auto";
+    if (registro.decisao_professor === decisao.valor) botao.classList.add("opcoes__item--ativo");
+    botao.addEventListener("click", async () => {
+      try {
+        const resposta = await (await api(`/api/banco/${registro.id}/avaliacao`, {
+          method: "POST",
+          body: JSON.stringify({ decisao: decisao.valor, comentario: comentario.value.trim() || null }),
+        })).json();
+        registro.decisao_professor = decisao.valor;
+        registro.comentario_professor = comentario.value.trim();
+        for (const irmao of area.querySelectorAll(".opcoes__item")) {
+          irmao.classList.toggle("opcoes__item--ativo", irmao === botao);
+        }
+        mostrarRegistrada();
+        if (resposta.aviso_sincronizacao) avisar(resposta.aviso_sincronizacao, "erro");
+        else avisar("Avaliação registrada.", "ok");
+      } catch (erro) {
+        avisar(`Não foi possível registrar: ${erro.message}`, "erro");
+      }
+    });
+    area.append(botao);
+  }
+
+  area.append(comentario);
+  area.append(registrada);
+  return area;
+}
+
+function cartaoDoBanco(registro) {
+  const cartao = el("article", "questao");
+  const questao = registro.questao;
+
+  const cabeca = cabecaDaQuestao(questao, `Questão #${String(registro.id).padStart(4, "0")}`);
+  const selecao = el("label", "selecao");
+  const caixa = el("input");
+  caixa.type = "checkbox";
+  caixa.checked = estadoApp.selecionadas.has(registro.id);
+  caixa.addEventListener("change", () => {
+    if (caixa.checked) estadoApp.selecionadas.add(registro.id);
+    else estadoApp.selecionadas.delete(registro.id);
+    atualizarBarraLista();
+  });
+  selecao.append(caixa, el("span", null, "usar na lista"));
+  cabeca.append(selecao);
+  selecao.style.marginLeft = "auto";
+  cartao.append(cabeca);
+
+  cartao.append(corpoDaQuestao(questao));
+
+  const rodape = el("div", "questao__rodape");
+  const [texto, estilo] = VEREDICTO[registro.veredicto_verificacao]
+    || [registro.veredicto_verificacao, "neutro"];
+  const classeEtiqueta = { ok: "ok", erro: "erro" }[estilo] || "neutra";
+  rodape.append(el("span", `etiqueta etiqueta--${classeEtiqueta}`, `verificador: ${texto}`));
+  if (registro.nota_minima_critico != null) {
+    rodape.append(el("span", "etiqueta etiqueta--neutra", `nota mínima ${registro.nota_minima_critico}/5`));
+  }
+  rodape.append(el("span", "etiqueta etiqueta--neutra", `${registro.iteracoes || 1} iteração(ões)`));
+  cartao.append(rodape);
+
+  blocosDeApoio(cartao, questao, null);
+  cartao.append(controlesDeAvaliacao(registro));
+  return cartao;
+}
+
+async function carregarBanco() {
+  const tema = document.getElementById("filtro-tema").value;
+  const dificuldade = document.getElementById("filtro-dificuldade").value;
+  const busca = new URLSearchParams();
+  if (tema) busca.set("tema", tema);
+  if (dificuldade) busca.set("dificuldade", dificuldade);
+
+  estadoApp.banco = await (await api(`/api/banco?${busca}`)).json();
+  const area = document.getElementById("lista-banco");
+  area.replaceChildren();
+
+  document.getElementById("contagem-banco").textContent =
+    `${estadoApp.banco.length} questão(ões)`;
+
+  if (!estadoApp.banco.length) {
+    const vazio = el("div", "vazio");
+    vazio.append(el("p", "vazio__titulo", "Banco vazio"));
+    vazio.append(el("p", "vazio__texto",
+      "As questões que você salvar na aba Gerar aparecem aqui, prontas para avaliar e montar listas."));
+    area.append(vazio);
+    return;
+  }
+  for (const registro of estadoApp.banco) area.append(cartaoDoBanco(registro));
+}
+
+/* ---------------------------------------------------------- montagem da lista */
+function atualizarBarraLista() {
+  const barra = document.getElementById("barra-lista");
+  barra.hidden = estadoApp.selecionadas.size === 0;
+  document.getElementById("qtd-selecionadas").textContent = estadoApp.selecionadas.size;
+}
+
+async function baixarLista(formato) {
+  const corpo = {
+    titulo: document.getElementById("titulo-lista").value || "Lista de exercícios",
+    ids: [...estadoApp.selecionadas].sort((a, b) => a - b),
+    com_gabarito: document.getElementById("com-gabarito").checked,
+    formato_arquivo: formato,
+  };
+  try {
+    const resposta = await api("/api/lista", { method: "POST", body: JSON.stringify(corpo) });
+    const blob = await resposta.blob();
+    const nome = (resposta.headers.get("Content-Disposition") || "").match(/filename="(.+?)"/);
+    const link = el("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = nome ? nome[1] : `lista.${formato}`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  } catch (erro) {
+    avisar(`Não foi possível montar a lista: ${erro.message}`, "erro");
+  }
+}
+
+/* ------------------------------------------------------------------- abas */
+function trocarAba(nome) {
+  for (const botao of document.querySelectorAll(".abas__item")) {
+    botao.classList.toggle("abas__item--ativo", botao.dataset.aba === nome);
+  }
+  document.getElementById("aba-gerar").hidden = nome !== "gerar";
+  document.getElementById("aba-banco").hidden = nome !== "banco";
+  document.getElementById("barra-lista").hidden = nome !== "banco" || estadoApp.selecionadas.size === 0;
+  if (nome === "banco") carregarBanco();
+}
+
+/* ------------------------------------------------------------------ início */
+async function iniciar() {
+  capturarConvite();
+  await descobrirApi();
+  try {
+    estadoApp.opcoes = await (await api("/api/opcoes")).json();
+  } catch (erro) {
+    avisar(`Não foi possível carregar as opções: ${erro.message}`, "erro");
+    return;
+  }
+  await montarFormulario();
+  try {
+    await carregarEstado();
+  } catch (erro) {
+    return;  // 401 já mostrou a tela de acesso
+  }
+
+  document.getElementById("campo-tema").addEventListener("change", atualizarHabilidades);
+  document.getElementById("campo-habilidade").addEventListener("change", mostrarDescricaoHabilidade);
+  document.getElementById("form-gerar").addEventListener("submit", gerar);
+  document.getElementById("filtro-tema").addEventListener("change", carregarBanco);
+  document.getElementById("filtro-dificuldade").addEventListener("change", carregarBanco);
+
+  for (const botao of document.querySelectorAll(".abas__item")) {
+    botao.addEventListener("click", () => trocarAba(botao.dataset.aba));
+  }
+  for (const botao of document.querySelectorAll(".barra-lista__acoes .botao")) {
+    botao.addEventListener("click", () => baixarLista(botao.dataset.formato));
+  }
+
+  const dialogo = document.getElementById("dialogo-config");
+  document.getElementById("abrir-config").addEventListener("click", () => dialogo.showModal());
+  document.getElementById("salvar-config").addEventListener("click", async () => {
+    // Chave e provedor são de quem usa: ficam no navegador, nunca no servidor.
+    const campoChave = document.getElementById("config-chave");
+    if (campoChave.value) guardado.chave = campoChave.value;
+    guardado.provedor = document.getElementById("config-provedor").value;
+    campoChave.value = "";
+    estadoApp.identificacao = null;  // relê do servidor após salvar
+
+    try {
+      if (!estadoApp.compartilhado) {
+        await api("/api/config", {
+          method: "POST",
+          body: JSON.stringify({
+            pasta_sincronizada: document.getElementById("config-pasta").value.trim(),
+            provedor: guardado.provedor,
+            modelo: document.getElementById("config-modelo").value.trim(),
+            responsavel: document.getElementById("config-responsavel").value.trim(),
+            instituicao: document.getElementById("config-instituicao").value.trim(),
+            contato: document.getElementById("config-contato").value.trim(),
+          }),
+        });
+      }
+      await carregarEstado();
+      avisar("Configurações salvas.", "ok");
+    } catch (erro) {
+      avisar(`Não foi possível salvar: ${erro.message}`, "erro");
+    }
+  });
+
+  document.getElementById("esquecer-chave").addEventListener("click", () => {
+    guardado.chave = "";
+    carregarEstado();
+    avisar("Chave removida deste navegador.", "ok");
+  });
+
+  renderizarGerados();
+}
+
+iniciar();

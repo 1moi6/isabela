@@ -10,7 +10,12 @@ import json
 import sqlite3
 from pathlib import Path
 
-from .modelos import Questao, ResultadoCiclo
+from .convites import DONO_LOCAL
+from .modelos import AvaliacaoProfessor, Questao, ResultadoCiclo
+
+# Questões gravadas antes do modo compartilhado têm dono NULL e pertencem ao
+# uso local. Todo acesso passa por este filtro: ninguém enxerga o banco de outro.
+_FILTRO_DONO = "COALESCE(dono, 'local') = ?"
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS questoes (
@@ -28,15 +33,37 @@ CREATE TABLE IF NOT EXISTS questoes (
 );
 """
 
+# Colunas acrescentadas depois da primeira versão do banco. Bancos já existentes
+# na máquina do professor são migrados na abertura, sem perder o conteúdo.
+_COLUNAS_NOVAS = {
+    "avaliacao_json": "TEXT",
+    "nota_minima_critico": "INTEGER",
+    "iteracoes": "INTEGER",
+    # Quem é dono da questão, quando o sistema roda em modo compartilhado.
+    # Linhas antigas ficam com NULL e pertencem ao dono local (ver DONO_LOCAL).
+    "dono": "TEXT",
+}
+
 
 class BancoQuestoes:
     def __init__(self, caminho: Path | str = "banco_questoes.db"):
-        self._conn = sqlite3.connect(str(caminho))
+        # check_same_thread=False: o servidor atende cada requisição numa thread do
+        # pool, e o banco é aberto uma vez só — sem isto, a segunda requisição
+        # encontra a conexão presa à thread da primeira. É seguro porque o SQLite
+        # aqui é serializado (sqlite3.threadsafety == 3).
+        self._conn = sqlite3.connect(str(caminho), check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._conn.execute(_SCHEMA)
+        self._migrar()
         self._conn.commit()
 
-    def salvar(self, resultado: ResultadoCiclo) -> int:
+    def _migrar(self) -> None:
+        existentes = {c["name"] for c in self._conn.execute("PRAGMA table_info(questoes)")}
+        for coluna, tipo in _COLUNAS_NOVAS.items():
+            if coluna not in existentes:
+                self._conn.execute(f"ALTER TABLE questoes ADD COLUMN {coluna} {tipo}")
+
+    def salvar(self, resultado: ResultadoCiclo, dono: str = DONO_LOCAL) -> int:
         """Persiste um ciclo aprovado; retorna o id da questão."""
         if not resultado.aprovada or resultado.questao_final is None:
             raise ValueError("Apenas ciclos aprovados entram no banco curado.")
@@ -45,8 +72,9 @@ class BancoQuestoes:
         ultima = resultado.iteracoes[-1]
         cur = self._conn.execute(
             "INSERT INTO questoes (criada_em, tema, habilidade_bncc, nivel_bloom, dificuldade,"
-            " natureza, formato, veredicto_verificacao, questao_json, historico_json)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " natureza, formato, veredicto_verificacao, questao_json, historico_json,"
+            " nota_minima_critico, iteracoes, dono)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 resultado.criada_em,
                 spec.tema.value,
@@ -58,10 +86,67 @@ class BancoQuestoes:
                 ultima.verificacao.veredicto.value,
                 q.model_dump_json(),
                 json.dumps([i.model_dump(mode="json") for i in resultado.iteracoes], ensure_ascii=False),
+                ultima.parecer.nota_minima() if ultima.parecer else None,
+                len(resultado.iteracoes),
+                dono,
             ),
         )
         self._conn.commit()
         return cur.lastrowid
+
+    def avaliar(
+        self, questao_id: int, avaliacao: AvaliacaoProfessor, dono: str = DONO_LOCAL
+    ) -> None:
+        """Registra o julgamento do professor sobre uma questão do banco dele."""
+        cur = self._conn.execute(
+            f"UPDATE questoes SET avaliacao_json = ? WHERE id = ? AND {_FILTRO_DONO}",
+            (avaliacao.model_dump_json(), questao_id, dono),
+        )
+        if cur.rowcount == 0:
+            raise KeyError(f"Questão #{questao_id} não está no banco.")
+        self._conn.commit()
+
+    def obter(
+        self, questao_id: int, dono: str = DONO_LOCAL
+    ) -> tuple[ResultadoCiclo, AvaliacaoProfessor | None]:
+        """Reconstrói o ciclo completo de uma questão e sua avaliação, se houver.
+
+        Usado para reexportar o arquivo na pasta sincronizada quando o professor
+        registra uma avaliação depois de a questão já estar salva.
+        """
+        r = self._conn.execute(
+            "SELECT criada_em, questao_json, historico_json, avaliacao_json"
+            f" FROM questoes WHERE id = ? AND {_FILTRO_DONO}",
+            (questao_id, dono),
+        ).fetchone()
+        if r is None:
+            raise KeyError(f"Questão #{questao_id} não está no banco.")
+        resultado = ResultadoCiclo(
+            aprovada=True,
+            questao_final=Questao.model_validate_json(r["questao_json"]),
+            iteracoes=json.loads(r["historico_json"]),
+            criada_em=r["criada_em"],
+        )
+        bruta = json.loads(r["avaliacao_json"] or "null")
+        return resultado, (AvaliacaoProfessor.model_validate(bruta) if bruta else None)
+
+    def registros(self, dono: str = DONO_LOCAL) -> list[dict]:
+        """Uma linha por questão, com metadados e avaliação — base do índice exportado."""
+        linhas = self._conn.execute(
+            "SELECT id, criada_em, tema, habilidade_bncc, nivel_bloom, dificuldade, natureza,"
+            " formato, veredicto_verificacao, nota_minima_critico, iteracoes, avaliacao_json,"
+            f" questao_json FROM questoes WHERE {_FILTRO_DONO} ORDER BY id",
+            (dono,),
+        ).fetchall()
+        registros = []
+        for r in linhas:
+            reg = dict(r)
+            avaliacao = json.loads(reg.pop("avaliacao_json") or "null")
+            reg["decisao_professor"] = (avaliacao or {}).get("decisao", "")
+            reg["comentario_professor"] = (avaliacao or {}).get("comentario", "") or ""
+            reg["questao"] = Questao.model_validate_json(reg.pop("questao_json"))
+            registros.append(reg)
+        return registros
 
     def buscar(
         self,
@@ -70,9 +155,10 @@ class BancoQuestoes:
         habilidade_bncc: str | None = None,
         formato: str | None = None,
         limite: int | None = None,
+        dono: str = DONO_LOCAL,
     ) -> list[tuple[int, Questao]]:
         """Filtra o banco pelos metadados; retorna pares (id, Questao)."""
-        clausulas, valores = [], []
+        clausulas, valores = [_FILTRO_DONO], [dono]
         for coluna, valor in (
             ("tema", tema),
             ("dificuldade", dificuldade),
@@ -82,17 +168,17 @@ class BancoQuestoes:
             if valor is not None:
                 clausulas.append(f"{coluna} = ?")
                 valores.append(valor)
-        sql = "SELECT id, questao_json FROM questoes"
-        if clausulas:
-            sql += " WHERE " + " AND ".join(clausulas)
+        sql = "SELECT id, questao_json FROM questoes WHERE " + " AND ".join(clausulas)
         sql += " ORDER BY id"
         if limite:
             sql += f" LIMIT {int(limite)}"
         linhas = self._conn.execute(sql, valores).fetchall()
         return [(r["id"], Questao.model_validate_json(r["questao_json"])) for r in linhas]
 
-    def total(self) -> int:
-        return self._conn.execute("SELECT COUNT(*) FROM questoes").fetchone()[0]
+    def total(self, dono: str = DONO_LOCAL) -> int:
+        return self._conn.execute(
+            f"SELECT COUNT(*) FROM questoes WHERE {_FILTRO_DONO}", (dono,)
+        ).fetchone()[0]
 
     def fechar(self) -> None:
         self._conn.close()

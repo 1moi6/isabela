@@ -1,5 +1,11 @@
 __pycache__/
 *.egg-info/
 .pytest_cache/
+.venv/
+.DS_Store
 banco_questoes.db
 logs/
+# Preferencias da maquina do professor (pasta sincronizada, provedor).
+config_local.json
+# Codigos de acesso: quem tem o codigo entra como a pessoa. Nunca versionar.
+convites.json

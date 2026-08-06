@@ -30,7 +30,7 @@ corresponde à consolidação do produto educacional e desta dissertação.
 
 O sistema é implementado em \textbf{Python 3.11+}, com quatro dependências centrais:
 \textbf{SymPy} para a verificação simbólica (Seção~\ref{sub:sympy}); \textbf{Pydantic} para os
-contratos de dados validados por esquema; \textbf{Streamlit} para a interface web do professor;
+contratos de dados validados por esquema; \textbf{FastAPI} para a interface web do professor;
 e o SDK do provedor de LLM escolhido. As dependências de provedor são \emph{opcionais}: o
 professor instala apenas a do provedor que usará --- Anthropic, OpenAI ou nenhuma, no caso do
 Ollama, que expõe modelos abertos locais por HTTP. Os testes usam \texttt{pytest} e não exigem
@@ -58,8 +58,10 @@ sistema/
 |  |                                #   orquestrador (Secoes 4.3-4.6)
 |  |- verificacao/                  # estrategias SymPy por tipo
 |  |- banco.py, listas.py           # persistencia e listas (Secao 5.4)
-|- app/streamlit_app.py             # interface do professor
-|- tests/                           # 36 testes automatizados
+|  |- sincronizacao.py              # espelho na pasta da nuvem (Cap. 7)
+|- api/main.py                      # API HTTP da interface (Cap. 7)
+|- web/                             # pagina do professor (HTML, CSS, JS)
+|- tests/                           # 56 testes automatizados
 \end{verbatim}
 
 Dois princípios de organização merecem nota. Primeiro, os \emph{prompts} não são cadeias de
@@ -158,9 +160,20 @@ aluno (sem gabarito) e professor (com gabarito e resoluções).
 \label{sec:reprodutibilidade}
 
 Três mecanismos respondem ao requisito de reprodutibilidade do projeto. Primeiro, a
-\textbf{temperatura} padrão dos provedores é 0,3 --- baixa, conforme a discussão da
-Seção~\ref{sub:inferencia}. Segundo, todo ciclo é registrado em \emph{log} JSONL com os objetos
-completos de cada iteração, permitindo reconstruir qualquer execução. Terceiro, os
+\textbf{temperatura} é fixada em 0,3 --- baixa, conforme a discussão da
+Seção~\ref{sub:inferencia} --- nos provedores que ainda expõem esse parâmetro. A ressalva não é
+detalhe de implementação: as gerações mais recentes de modelos comerciais
+\textbf{removeram os parâmetros de amostragem} da interface pública, substituindo o controle
+explícito de variabilidade por regulagens internas do próprio modelo. Enviá-los passou a ser
+erro de requisição, e o sistema deixa de enviá-los nesses casos. O episódio expõe uma
+fragilidade estrutural da dependência de APIs proprietárias: uma decisão metodológica
+documentada pode ser invalidada por uma mudança unilateral do fornecedor, sem aviso e sem
+recurso --- argumento adicional em favor do caminho com modelos abertos locais, discutido no
+Capítulo~\ref{cap:produto}.
+
+Os outros dois mecanismos são independentes do fornecedor e absorvem essa perda. Todo ciclo é
+registrado em \emph{log} JSONL com os objetos completos de cada iteração, permitindo
+reconstruir qualquer execução --- inclusive quais parâmetros foram efetivamente enviados. E os
 \emph{prompts} são versionados junto ao código: qualquer mudança neles é uma mudança rastreável
 do sistema.
 

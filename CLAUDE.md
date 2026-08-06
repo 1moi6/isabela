@@ -17,10 +17,10 @@ Dois artefatos:
 
 ```
 cd sistema
-pip install -e ".[dev]"     # sympy, pydantic, pytest — suficiente para os testes
-python -m pytest            # 36 testes; NÃO exigem chave de API (usam LLM fake)
+pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi — suficiente para os testes
+python -m pytest            # 56 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
-streamlit run app/streamlit_app.py    # UI (requer .[app] e um provedor configurado)
+python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
 
 Pontos estruturais que não são óbvios pelos nomes de arquivo:
@@ -32,6 +32,22 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   3 iterações sem aprovação = descarte. Testes de política usam `LLMFake` (test_orquestrador.py).
 - **Provedores de LLM são plugáveis** via `llm/criar_provedor` (`anthropic`/`openai`/`ollama`);
   dependências de provedor são opcionais no `pyproject.toml` — não as torne obrigatórias.
+  Os modelos atuais da Anthropic **rejeitam `temperature`**: `anthropic_llm.py` só envia o
+  parâmetro para as famílias legadas listadas ali (padrão = não enviar).
+- **A interface é FastAPI + HTML/CSS/JS sem passo de build** (`api/main.py` + `web/`). Um
+  `POST /api/gerar` produz **uma** questão; o lote é o cliente repetindo a chamada, para o
+  professor ver cada questão chegar. Nada de Node: `instalar.bat` continua sendo só `pip install`.
+- **Texto vindo do LLM entra na página por `textContent`, nunca por `innerHTML`** (`web/app.js`).
+- **Modo local vs. compartilhado** (`convites.py`): sem `convites.json` não há autenticação
+  (uso individual); criar o primeiro convite liga a exigência. O modo depende da **existência**
+  do arquivo, não do conteúdo — senão revogar o último convite reabriria o acesso a todos.
+- **A chave de API viaja por requisição** (cabeçalho `X-Chave-API`, guardada no `localStorage`
+  de quem usa) e nunca é gravada. Não volte a guardá-la em variável de módulo: com duas pessoas,
+  a segunda sobrescrevia a primeira e o uso de uma era cobrado da outra, sem erro visível.
+- **Todo acesso ao banco filtra por dono** (`_FILTRO_DONO` em `banco.py`). Método novo que
+  consulte `questoes` sem esse filtro vaza o banco de uma pessoa para outra.
+- A **pasta sincronizada** (`sincronizacao.py`) espelha as questões num diretório que o Google
+  Drive replica — sem OAuth, sem chamada de rede. Falha ali vira aviso, nunca impede de salvar.
 - **Prompts são artefatos da pesquisa** (`prompts/*.md`): serão citados no Apêndice A da
   dissertação. Mudanças neles afetam o texto acadêmico — trate como mudança de conteúdo.
 - O catálogo BNCC (`dados/bncc_em_matematica.json`) tem descrições parafraseadas **a conferir**

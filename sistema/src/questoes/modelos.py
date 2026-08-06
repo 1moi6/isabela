@@ -8,10 +8,27 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field
 
 from .especificacao import Especificacao
+
+
+def _para_texto(valor):
+    """Aceita número onde o contrato pede texto.
+
+    O Gerador escreve JSON, e em JSON `-2` é número: o LLM devolve `{"ponto": -2}`
+    tanto quanto `{"ponto": "-2"}`. O núcleo simbólico trabalha com texto (tudo passa
+    por `sympify`), então a conversão acontece aqui, na fronteira, e não em cada
+    verificador. `bool` fica de fora: `True` não é expressão matemática.
+    """
+    if isinstance(valor, bool):
+        return valor
+    return str(valor) if isinstance(valor, (int, float)) else valor
+
+
+TextoMatematico = Annotated[str, BeforeValidator(_para_texto)]
 
 
 class Alternativa(BaseModel):
@@ -33,10 +50,10 @@ class ExpressaoVerificavel(BaseModel):
     """
 
     tipo: str = Field(description="Roteia a estratégia de verificação: 'equacao', 'funcao', 'progressao'")
-    expressao: str = Field(description="Expressão/equação em sintaxe SymPy, ex.: 'Eq(2*x**2 - 5*x + 3, 0)'")
+    expressao: TextoMatematico = Field(description="Expressão/equação em sintaxe SymPy, ex.: 'Eq(2*x**2 - 5*x + 3, 0)'")
     incognitas: list[str] = Field(default_factory=lambda: ["x"])
-    resposta_esperada: str = Field(description="Gabarito em sintaxe SymPy, ex.: '[1, 3/2]'")
-    parametros: dict[str, str] = Field(
+    resposta_esperada: TextoMatematico = Field(description="Gabarito em sintaxe SymPy, ex.: '[1, 3/2]'")
+    parametros: dict[str, TextoMatematico] = Field(
         default_factory=dict,
         description="Dados extras por tipo, ex.: {'a1': '2', 'razao': '3', 'n': '10', 'consulta': 'termo_geral'}",
     )
@@ -47,7 +64,7 @@ class Questao(BaseModel):
 
     enunciado: str
     resolucao: str = Field(description="Resolução passo a passo, em Markdown/LaTeX")
-    gabarito: str = Field(description="Resposta final em linguagem natural")
+    gabarito: TextoMatematico = Field(description="Resposta final em linguagem natural")
     alternativas: list[Alternativa] | None = Field(
         default=None, description="Presente apenas em múltipla escolha (4 alternativas)"
     )
@@ -89,6 +106,28 @@ class ParecerDidatico(BaseModel):
 
     def nota_minima(self) -> int:
         return min(n.nota for n in self.notas) if self.notas else 0
+
+
+class DecisaoProfessor(str, Enum):
+    """Julgamento humano sobre a questão aprovada pelos agentes."""
+
+    ACEITA = "aceita"
+    ACEITA_COM_AJUSTE = "aceita_com_ajuste"
+    RECUSADA = "recusada"
+
+
+class AvaliacaoProfessor(BaseModel):
+    """Avaliação do professor sobre uma questão já no banco.
+
+    É o dado que separa "os agentes aprovaram" de "serve para a minha turma" —
+    e a matéria-prima da avaliação empírica do Capítulo 6.
+    """
+
+    decisao: DecisaoProfessor
+    comentario: str | None = Field(
+        default=None, description="Por que aceitou, ajustou ou recusou — o dado qualitativo"
+    )
+    avaliada_em: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class RegistroIteracao(BaseModel):
