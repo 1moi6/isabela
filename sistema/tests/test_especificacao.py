@@ -29,7 +29,7 @@ def _spec(**kw):
 
 def test_especificacao_valida():
     spec = _spec()
-    assert spec.descricao_habilidade().startswith("Construir modelos")
+    assert spec.descricao_habilidade().startswith("Resolver e elaborar problemas")
 
 
 def test_codigo_bncc_invalido_rejeitado():
@@ -40,6 +40,28 @@ def test_codigo_bncc_invalido_rejeitado():
 def test_catalogo_tem_recorte_completo():
     catalogo = carregar_habilidades()
     assert {"EM13MAT302", "EM13MAT507", "EM13MAT508"} <= set(catalogo)
+
+
+def test_unidade_da_bncc_esta_completa():
+    """A BNCC agrupa estas sete habilidades numa unidade (seção 5.2.1.1).
+
+    O catálogo trazia só quatro delas: faltavam 501, 502 e 503 --- lacuna
+    dentro do próprio recorte, não do recorte para fora. Se alguém remover
+    uma, a unidade citada no texto deixa de corresponder ao catálogo.
+    """
+    catalogo = carregar_habilidades()
+    unidade = {
+        c for c, h in catalogo.items() if h["unidade"] == "funcoes_polinomiais_1_2_graus"
+    }
+    assert unidade == {
+        "EM13MAT501",
+        "EM13MAT401",
+        "EM13MAT507",
+        "EM13MAT502",
+        "EM13MAT402",
+        "EM13MAT503",
+        "EM13MAT302",
+    }
 
 
 def test_tema_incompativel_com_a_habilidade_e_recusado():
@@ -64,3 +86,70 @@ def test_todo_tema_tem_ao_menos_uma_habilidade():
     habilidades = carregar_habilidades()
     for tema in Tema:
         assert any(tema.value in h["temas"] for h in habilidades.values()), tema
+
+
+def _spec_multi(**kw):
+    base = {
+        "habilidade_bncc": "EM13MAT302",
+        "temas": [Tema.FUNCAO_AFIM, Tema.FUNCAO_QUADRATICA],
+        "nivel_bloom": NivelBloom.APLICAR,
+        "dificuldade": Dificuldade.MEDIA,
+        "natureza": Natureza.APLICADA,
+        "formato": Formato.DISCURSIVA,
+    }
+    base.update(kw)
+    return Especificacao(**base)
+
+
+def test_habilidade_enumerativa_aceita_um_ou_varios_temas():
+    """EM13MAT302 enumera o repertório coberto: combinar é opção, não obrigação."""
+    assert len(_spec_multi().temas) == 2
+    assert len(_spec_multi(temas=[Tema.FUNCAO_AFIM]).temas) == 1
+
+
+def test_habilidade_conjuntiva_exige_todos_os_temas():
+    """EM13MAT507 *é* a associação entre PA e função afim: pedir só a PA não a realiza."""
+    with pytest.raises(ValidationError, match="descaracteriza"):
+        _spec_multi(habilidade_bncc="EM13MAT507", temas=[Tema.PROGRESSAO_ARITMETICA])
+
+    completa = _spec_multi(
+        habilidade_bncc="EM13MAT507",
+        temas=[Tema.PROGRESSAO_ARITMETICA, Tema.FUNCAO_AFIM],
+    )
+    assert len(completa.temas) == 2
+
+
+def test_tema_no_singular_ainda_e_aceito():
+    """As questões já gravadas no banco guardam `tema`, não `temas`.
+
+    Sem esta ponte, uma mudança de nome de campo tornaria ilegível o histórico
+    inteiro de quem já usou o sistema.
+    """
+    antiga = Especificacao(
+        tema="funcao_quadratica", habilidade_bncc="EM13MAT302",
+        nivel_bloom=NivelBloom.APLICAR, dificuldade=Dificuldade.MEDIA,
+        natureza=Natureza.TEORICA, formato=Formato.DISCURSIVA,
+    )
+    assert antiga.temas == [Tema.FUNCAO_QUADRATICA]
+
+
+def test_tema_repetido_e_recusado():
+    with pytest.raises(ValidationError, match="repetido"):
+        _spec_multi(temas=[Tema.FUNCAO_AFIM, Tema.FUNCAO_AFIM])
+
+
+def test_toda_habilidade_tem_exigencias_e_bloom_sugerido():
+    """São o que torna a habilidade uma restrição de geração, não um rótulo."""
+    for codigo, h in carregar_habilidades().items():
+        assert h["exigencias"], codigo
+        assert h["bloom_sugerido"], codigo
+        assert h["relacao_temas"] in {"unica", "enumerativa", "conjuntiva"}, codigo
+        # 'unica' com dois temas (ou o contrário) faria a interface travar ou
+        # liberar a escolha errada.
+        assert (h["relacao_temas"] == "unica") == (len(h["temas"]) == 1), codigo
+
+
+def test_bloom_divergente_e_sinalizado_sem_ser_barrado():
+    """Pedir um nível fora dos verbos da habilidade é permitido — e registrado."""
+    assert _spec_multi(nivel_bloom=NivelBloom.LEMBRAR).bloom_diverge()
+    assert not _spec_multi(nivel_bloom=NivelBloom.APLICAR).bloom_diverge()

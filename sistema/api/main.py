@@ -203,8 +203,19 @@ def opcoes() -> dict:
         "naturezas": [{"valor": n.value, "rotulo": ROTULO_NATUREZA[n.value]} for n in Natureza],
         "formatos": [{"valor": f.value, "rotulo": ROTULO_FORMATO[f.value]} for f in Formato],
         "decisoes": [{"valor": v, "rotulo": r} for v, r in ROTULO_DECISAO.items()],
+        # O formulário monta os temas a partir da habilidade escolhida, e não o
+        # contrário: por isso cada habilidade carrega seus temas, como eles se
+        # combinam, o que a questão precisa cumprir e que níveis de Bloom os
+        # verbos dela sugerem.
         "habilidades": [
-            {"codigo": c, "descricao": h["descricao"], "temas": h["temas"]}
+            {
+                "codigo": c,
+                "descricao": h["descricao"],
+                "temas": h["temas"],
+                "relacao_temas": h["relacao_temas"],
+                "bloom_sugerido": h["bloom_sugerido"],
+                "exigencias": h["exigencias"],
+            }
             for c, h in sorted(habilidades.items())
         ],
     }
@@ -280,8 +291,11 @@ def salvar_config(cfg: Configuracao, quem: dict = Depends(identificar)) -> dict:
 
 # ------------------------------------------------------------------ geração
 class PedidoGeracao(BaseModel):
-    tema: Tema
     habilidade_bncc: str
+    # `tema` no singular continua aceito: a Especificação converte. Assim um
+    # cliente antigo (ou um script da aluna) não quebra com a multisseleção.
+    temas: list[Tema] | None = None
+    tema: Tema | None = None
     nivel_bloom: NivelBloom
     dificuldade: Dificuldade
     natureza: Natureza
@@ -333,8 +347,12 @@ def _executar_ciclo(tarefa_id: str, spec: Especificacao, quem: dict, url: str | 
 @app.post("/api/gerar")
 def gerar(pedido: PedidoGeracao, quem: dict = Depends(identificar)) -> dict:
     """Inicia um ciclo e devolve o identificador para acompanhar."""
+    campos = pedido.model_dump(exclude={"url_ollama", "tema", "temas"})
+    temas = pedido.temas or ([pedido.tema] if pedido.tema else [])
+    if not temas:
+        raise HTTPException(status_code=422, detail="Escolha ao menos um tema da habilidade.")
     try:
-        spec = Especificacao(**pedido.model_dump(exclude={"url_ollama"}))
+        spec = Especificacao(**campos, temas=temas)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -398,7 +416,9 @@ def listar_banco(
     """Questões curadas de quem está conectado, da mais recente para a mais antiga."""
     registros = []
     for reg in reversed(_banco.registros(dono=quem["dono"])):
-        if tema and reg["tema"] != tema:
+        # Basta ser um dos temas: uma questão que articula PA e função afim
+        # aparece no filtro de qualquer um dos dois.
+        if tema and tema not in reg["temas"]:
             continue
         if dificuldade and reg["dificuldade"] != dificuldade:
             continue

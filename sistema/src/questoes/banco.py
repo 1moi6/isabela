@@ -42,7 +42,25 @@ _COLUNAS_NOVAS = {
     # Quem é dono da questão, quando o sistema roda em modo compartilhado.
     # Linhas antigas ficam com NULL e pertencem ao dono local (ver DONO_LOCAL).
     "dono": "TEXT",
+    # Uma questão pode articular mais de um tema (habilidades conjuntivas como
+    # a EM13MAT507). A coluna `tema`, singular, continua existindo com o
+    # primeiro tema: ela é NOT NULL desde a primeira versão do esquema e ainda
+    # serve de rótulo curto. A busca por tema usa esta coluna.
+    "temas": "TEXT",
 }
+
+# Sentinelas em volta de cada valor: sem elas, `LIKE '%funcao_afim%'` casaria
+# com qualquer tema que o contivesse como pedaço. Guardar ",a,b," e buscar
+# ",a," mantém a comparação exata mesmo dentro de um LIKE.
+def _empacotar_temas(valores: list[str]) -> str:
+    return "," + ",".join(valores) + ","
+
+
+def _desempacotar_temas(bruto: str | None, tema: str) -> list[str]:
+    """Lê a coluna nova; cai no `tema` singular para linhas anteriores à migração."""
+    if not bruto:
+        return [tema] if tema else []
+    return [t for t in bruto.split(",") if t]
 
 
 class BancoQuestoes:
@@ -62,6 +80,12 @@ class BancoQuestoes:
         for coluna, tipo in _COLUNAS_NOVAS.items():
             if coluna not in existentes:
                 self._conn.execute(f"ALTER TABLE questoes ADD COLUMN {coluna} {tipo}")
+        # Linhas gravadas antes da multisseleção têm um tema só: preenche a
+        # coluna nova a partir dele, para que a busca por tema continue achando
+        # as questões antigas.
+        self._conn.execute(
+            "UPDATE questoes SET temas = ',' || tema || ',' WHERE temas IS NULL"
+        )
 
     def salvar(self, resultado: ResultadoCiclo, dono: str = DONO_LOCAL) -> int:
         """Persiste um ciclo aprovado; retorna o id da questão."""
@@ -71,13 +95,14 @@ class BancoQuestoes:
         spec = q.especificacao
         ultima = resultado.iteracoes[-1]
         cur = self._conn.execute(
-            "INSERT INTO questoes (criada_em, tema, habilidade_bncc, nivel_bloom, dificuldade,"
+            "INSERT INTO questoes (criada_em, tema, temas, habilidade_bncc, nivel_bloom, dificuldade,"
             " natureza, formato, veredicto_verificacao, questao_json, historico_json,"
             " nota_minima_critico, iteracoes, dono)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 resultado.criada_em,
-                spec.tema.value,
+                spec.temas[0].value,
+                _empacotar_temas([t.value for t in spec.temas]),
                 spec.habilidade_bncc,
                 spec.nivel_bloom.value,
                 spec.dificuldade.value,
@@ -133,7 +158,7 @@ class BancoQuestoes:
     def registros(self, dono: str = DONO_LOCAL) -> list[dict]:
         """Uma linha por questão, com metadados e avaliação — base do índice exportado."""
         linhas = self._conn.execute(
-            "SELECT id, criada_em, tema, habilidade_bncc, nivel_bloom, dificuldade, natureza,"
+            "SELECT id, criada_em, tema, temas, habilidade_bncc, nivel_bloom, dificuldade, natureza,"
             " formato, veredicto_verificacao, nota_minima_critico, iteracoes, avaliacao_json,"
             f" questao_json FROM questoes WHERE {_FILTRO_DONO} ORDER BY id",
             (dono,),
@@ -141,6 +166,7 @@ class BancoQuestoes:
         registros = []
         for r in linhas:
             reg = dict(r)
+            reg["temas"] = _desempacotar_temas(reg["temas"], reg["tema"])
             avaliacao = json.loads(reg.pop("avaliacao_json") or "null")
             reg["decisao_professor"] = (avaliacao or {}).get("decisao", "")
             reg["comentario_professor"] = (avaliacao or {}).get("comentario", "") or ""
@@ -157,10 +183,17 @@ class BancoQuestoes:
         limite: int | None = None,
         dono: str = DONO_LOCAL,
     ) -> list[tuple[int, Questao]]:
-        """Filtra o banco pelos metadados; retorna pares (id, Questao)."""
+        """Filtra o banco pelos metadados; retorna pares (id, Questao).
+
+        `tema` casa com questões em que ele é *um dos* temas, não só o primeiro:
+        uma questão que articula PA e função afim aparece na busca por qualquer
+        um dos dois.
+        """
         clausulas, valores = [_FILTRO_DONO], [dono]
+        if tema is not None:
+            clausulas.append("temas LIKE ?")
+            valores.append(f"%{_empacotar_temas([tema])}%")
         for coluna, valor in (
-            ("tema", tema),
             ("dificuldade", dificuldade),
             ("habilidade_bncc", habilidade_bncc),
             ("formato", formato),

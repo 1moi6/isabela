@@ -98,18 +98,29 @@ class Orquestrador:
                 RegistroIteracao(numero=numero, questao=questao, verificacao=verificacao, parecer=parecer)
             )
             resultado = ResultadoCiclo(aprovada=True, questao_final=questao, iteracoes=iteracoes)
-            self._logar(resultado)
+            self._logar(resultado, spec)
             return resultado
 
         resultado = ResultadoCiclo(aprovada=False, questao_final=None, iteracoes=iteracoes)
-        self._logar(resultado)
+        self._logar(resultado, spec)
         return resultado
 
-    def _logar(self, resultado: ResultadoCiclo) -> None:
-        """Registro completo do ciclo em JSONL (reprodutibilidade, Seção 5.5 do projeto)."""
+    def _logar(self, resultado: ResultadoCiclo, spec: Especificacao) -> None:
+        """Registro completo do ciclo em JSONL (reprodutibilidade, Seção 5.5 do projeto).
+
+        Junto do ciclo vai a divergência entre o nível cognitivo pedido e os
+        verbos da habilidade. Não é erro nem impede a geração --- é o dado que
+        permite, na avaliação empírica, perguntar se pedidos fora do nível
+        sugerido custam mais iterações ou terminam mais em descarte.
+        """
         if self._log_dir is None:
             return
         self._log_dir.mkdir(parents=True, exist_ok=True)
         arquivo = self._log_dir / "ciclos.jsonl"
+        registro = {
+            **resultado.model_dump(mode="json"),
+            "bloom_divergente": spec.bloom_diverge(),
+            "bloom_sugerido": spec.bloom_sugerido(),
+        }
         with open(arquivo, "a", encoding="utf-8") as f:
-            f.write(json.dumps(resultado.model_dump(mode="json"), ensure_ascii=False) + "\n")
+            f.write(json.dumps(registro, ensure_ascii=False) + "\n")

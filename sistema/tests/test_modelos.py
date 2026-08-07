@@ -17,7 +17,8 @@ from questoes.verificacao import verificar
 
 def _spec():
     return Especificacao(
-        tema=Tema.PROGRESSAO_ARITMETICA, habilidade_bncc="EM13MAT507",
+        habilidade_bncc="EM13MAT507",
+        temas=[Tema.PROGRESSAO_ARITMETICA, Tema.FUNCAO_AFIM],
         nivel_bloom=NivelBloom.APLICAR, dificuldade=Dificuldade.MEDIA,
         natureza=Natureza.TEORICA, formato=Formato.DISCURSIVA,
     )
