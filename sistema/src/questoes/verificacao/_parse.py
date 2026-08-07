@@ -24,6 +24,15 @@ _LOCAIS = {
     "cos": sp.cos,
     "tan": sp.tan,
     "Abs": sp.Abs,
+    # Domínios e imagens são conjuntos: o gabarito de uma consulta de domínio
+    # chega como "Interval.open(0, oo)" ou "S.Reals".
+    "Interval": sp.Interval,
+    "Union": sp.Union,
+    "oo": sp.oo,
+    "S": sp.S,
+    "EmptySet": sp.S.EmptySet,
+    # Funções definidas por mais de uma sentença (EM13MAT405).
+    "Piecewise": sp.Piecewise,
 }
 
 

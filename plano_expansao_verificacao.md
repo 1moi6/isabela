@@ -3,10 +3,10 @@
 Como incorporar as habilidades da BNCC hoje ausentes do sistema, **declarando por categorias o
 grau de garantia que cada uma admite** em vez de silenciar as que o núcleo simbólico não alcança.
 
-Estado atual: 10 das 45 habilidades da área de Matemática do Ensino Médio estão no catálogo
-(`sistema/dados/bncc_em_matematica.json`). O Verificador tem três estratégias — `equacao`,
-`funcao`, `progressao` — registradas num dicionário em `verificacao/__init__.py`. Um `tipo`
-desconhecido devolve `NAO_VERIFICAVEL`, nunca exceção: o ponto de extensão já existe e é limpo.
+Estado atual (Fases 0, 1, 3 e 2a/2b **feitas**): 15 das 45 habilidades estão no catálogo
+(`sistema/dados/bncc_em_matematica.json`). O Verificador tem quatro estratégias — `equacao`,
+`funcao`, `progressao`, `propriedade` — registradas num dicionário em `verificacao/__init__.py`.
+Um `tipo` desconhecido devolve `NAO_VERIFICAVEL`, nunca exceção: o ponto de extensão é limpo.
 
 Meta: **40 habilidades no catálogo**, cada uma com sua categoria de verificabilidade declarada; 5
 fora de escopo, com a razão registrada.
@@ -129,8 +129,8 @@ catálogo + descrição do tipo no `prompts/gerador.md`.
 
 | Ordem | Tipo | Habilidades novas | Observação |
 |---|---|---|---|
-| 2a | extensão de `funcao`: log e trigonometria | 305, 306, 403, 404 | mesma máquina; acrescenta consultas `dominio`, `imagem`, `periodo`, `crescimento` |
-| 2b | `funcao` com `Piecewise` | 405 | tabela do IR, conta de luz — forte para questões aplicadas |
+| ~~2a~~ **feita** | extensão de `funcao`: log e trigonometria | 305, 306, 403, 404 | consultas `dominio`, `imagem`, `periodo`, `crescimento` |
+| ~~2b~~ **feita** | `funcao` com `Piecewise` | 405 | tabela do IR, conta de luz |
 | 2c | `sistema` | 301 | `linsolve`; `equacoes.py` já aceita várias incógnitas |
 | 2d | `contagem` e `probabilidade` | 310, 311, 312, 511 | aritmética racional exata; `binomial`, `factorial` |
 | 2e | `estatistica` | 316, 408, 409, 510 | tendência central, dispersão, frequências, reta de ajuste |
@@ -141,12 +141,39 @@ catálogo + descrição do tipo no `prompts/gerador.md`.
 **2a e 2b primeiro** por uma razão que não é só técnica: fecham a unidade de funções, que é o
 recorte declarado da dissertação, em vez de espalhar o sistema por sete famílias ao mesmo tempo.
 
+## 3.1. O que o piloto 2a/2b ensinou
+
+Executados como piloto, os dois primeiros blocos custaram **menos que uma sessão** e produziram
+uma lição que vale para todos os blocos seguintes: **as rotinas do SymPy falham em silêncio, e o
+modo de falha perigoso não é a exceção — é a resposta errada.**
+
+Três casos concretos, todos encontrados antes de escrever o módulo:
+
+- `function_range(2**x, x, Reals)` devolve `EmptySet`. Não é a imagem: é o SymPy desistindo. Uma
+  implementação ingênua **reprovaria o gabarito correto** `(0, +∞)` e mandaria o Gerador
+  "corrigir" o que estava certo. Curiosamente, `3*2**x` a mesma rotina resolve.
+- `is_increasing(log(x), Reals, x)` devolve `False` — log é crescente *no seu domínio*, e avaliá-la
+  sobre os reais reprova a resposta certa. Crescimento precisa ser avaliado sobre o domínio.
+- `continuous_domain` levanta `NotImplementedError` para `Piecewise`.
+
+Daí o princípio que ficou no módulo e vale para os blocos 2c–2g: **quando o CAS não conclui, o
+veredicto é `nao_verificavel`, nunca `rejeitado`.** Errar para o lado de não conferir é
+recuperável; reprovar o certo destrói a confiança do professor no verificador — e é uma forma de
+erro silencioso pior que a original, porque vem com autoridade.
+
+Corolário prático para quem for fazer 2c–2g: **teste as rotinas do SymPy contra casos conhecidos
+antes de escrever o módulo.** O tempo gasto ali é menor que o de depurar um veredicto errado
+depois.
+
 ## 4. Riscos e o que medir
 
 - **O Gerador erra mais quanto mais tipos existirem.** Cada tipo é mais uma sintaxe que o LLM pode
   preencher errado, e o sintoma é `nao_verificavel` — que não reprova a questão, só a deixa passar
-  sem conferência. Instrumentar: taxa de `nao_verificavel` **por tipo**, no log do ciclo. Taxa alta
-  denuncia tipo mal especificado no *prompt*, não habilidade difícil.
+  sem conferência. **Instrumentado**: cada afirmação verificada guarda tipo, consulta e veredicto
+  (`ResultadoVerificacao.afirmacoes`), e `sistema/analisar_logs.py` reporta a taxa por tipo a
+  partir do log. Taxa alta denuncia tipo mal especificado no *prompt*, não habilidade difícil.
+  **Ainda sem dados reais**: a suíte usa `LLMFake`, então a taxa só aparece depois de gerações
+  com provedor de verdade. É a primeira medição a fazer antes de encarar 2c–2g.
 - **A categoria pode virar álibi.** Se `sem conferência automática` for confortável demais, o
   Gerador aprende a não formalizar. Medir a distância entre `verificabilidade_esperada` e
   `garantia_obtida` é a defesa — e é justamente o dado do Cap. 6.
