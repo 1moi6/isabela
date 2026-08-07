@@ -34,6 +34,14 @@ class CriticoDidatico:
                 "",
                 "ESPECIFICAÇÃO DECLARADA PELO PROFESSOR:",
                 f"- Habilidade BNCC {spec.habilidade_bncc}: {spec.descricao_habilidade()}",
+                "- Para realizar essa habilidade, a questão precisa cumprir:",
+                *(f"  * {e}" for e in spec.exigencias_habilidade()),
+                f"- Tema(s): {', '.join(t.value for t in spec.temas)}"
+                + (
+                    " (vários: a questão deve articulá-los num único problema)"
+                    if len(spec.temas) > 1
+                    else ""
+                ),
                 f"- Nível cognitivo (Bloom): {spec.nivel_bloom.value}",
                 f"- Dificuldade: {spec.dificuldade.value} | Natureza: {spec.natureza.value} "
                 f"| Formato: {spec.formato.value}",

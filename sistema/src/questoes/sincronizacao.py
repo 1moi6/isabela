@@ -23,7 +23,7 @@ from .modelos import AvaliacaoProfessor, Questao, ResultadoCiclo
 INDICE = "_indice.csv"
 
 COLUNAS_INDICE = [
-    "id", "criada_em", "tema", "habilidade_bncc", "nivel_bloom", "dificuldade",
+    "id", "criada_em", "temas", "habilidade_bncc", "nivel_bloom", "dificuldade",
     "natureza", "formato", "veredicto_verificacao", "nota_minima_critico",
     "iteracoes", "decisao_professor", "comentario_professor", "arquivo",
 ]
@@ -84,13 +84,15 @@ class PastaSincronizada:
             escritor.writeheader()
             for reg in registros:
                 linha = {c: reg.get(c, "") for c in COLUNAS_INDICE}
+                # `temas` chega como lista; o CSV é para o professor ler no Excel.
+                linha["temas"] = "; ".join(linha["temas"] or [])
                 linha["arquivo"] = self._nome(reg["id"], reg["questao"]) + ".md"
                 escritor.writerow(linha)
         return caminho
 
     def _nome(self, questao_id: int, questao: Questao) -> str:
         spec = questao.especificacao
-        return f"questao-{questao_id:04d}_{spec.tema.value}_{spec.dificuldade.value}"
+        return f"questao-{questao_id:04d}_{spec.temas[0].value}_{spec.dificuldade.value}"
 
 
 def _markdown(
@@ -104,7 +106,7 @@ def _markdown(
     linhas = [
         f"# Questão #{questao_id:04d}",
         "",
-        f"- **Tema:** {spec.tema.value}",
+        f"- **Temas:** {', '.join(t.value for t in spec.temas)}",
         f"- **Habilidade BNCC:** {spec.habilidade_bncc}",
         f"- **Nível cognitivo (Bloom):** {spec.nivel_bloom.value}",
         f"- **Dificuldade:** {spec.dificuldade.value}",

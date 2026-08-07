@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gerador de questões · Matemática do Ensino Médio</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2317337a'/><text x='16' y='23' font-size='20' font-family='Georgia,serif' fill='white' text-anchor='middle'>ƒ</text></svg>">
-  <link rel="stylesheet" href="app.css?v=20260807a">
+  <link rel="stylesheet" href="app.css?v=20260807b">
 </head>
 <body>
 
@@ -40,19 +40,21 @@
       </p>
 
       <label class="campo">
-        <span class="campo__rotulo">Tema</span>
-        <select class="campo__controle" name="tema" id="campo-tema"></select>
-      </label>
-
-      <label class="campo">
         <span class="campo__rotulo">Habilidade da BNCC</span>
         <select class="campo__controle" name="habilidade_bncc" id="campo-habilidade"></select>
         <span class="campo__ajuda" id="descricao-habilidade"></span>
       </label>
 
+      <fieldset class="campo">
+        <legend class="campo__rotulo">Tema <span class="campo__fonte">da habilidade</span></legend>
+        <div class="temas" id="campo-temas"></div>
+        <span class="campo__ajuda" id="ajuda-temas"></span>
+      </fieldset>
+
       <label class="campo">
         <span class="campo__rotulo">Nível cognitivo <span class="campo__fonte">Bloom</span></span>
         <select class="campo__controle" name="nivel_bloom" id="campo-bloom"></select>
+        <span class="campo__ajuda campo__ajuda--aviso" id="aviso-bloom"></span>
       </label>
 
       <fieldset class="campo">
@@ -218,7 +220,7 @@
 
 <div class="avisos" id="avisos" aria-live="polite"></div>
 
-<script src="comum.js?v=20260807a"></script>
-<script src="app.js?v=20260807a"></script>
+<script src="comum.js?v=20260807b"></script>
+<script src="app.js?v=20260807b"></script>
 </body>
 </html>

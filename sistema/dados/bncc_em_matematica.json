@@ -1,54 +1,191 @@
 {
-  "nota": "Catálogo das habilidades BNCC do recorte da dissertação (funções afim/quadrática/exponencial e progressões). Descrições parafraseadas a partir da BNCC do Ensino Médio — CONFERIR o texto oficial em bncc_ensino_medio.pdf antes da versão final. 'bloom_sugerido' lê os verbos da habilidade à luz da TBR (Seção 3.3.3 da dissertação).",
+  "nota": "Catálogo das habilidades BNCC do recorte da dissertação (funções polinomiais de 1º e 2º graus, funções exponenciais e progressões). As descrições são TRANSCRIÇÕES LITERAIS da BNCC do Ensino Médio, seção 5.2.1.1 (conferidas contra bncc_ensino_medio.pdf) — não parafrasear. 'bloom_sugerido' é leitura nossa dos verbos da habilidade à luz da TBR (Seção 3.3.3 da dissertação), não texto da BNCC. 'relacao_temas' diz como os temas da habilidade se combinam numa questão: 'unica' (um tema só), 'enumerativa' (a habilidade cobre mais de um tema, mas combiná-los é opcional) ou 'conjuntiva' (a habilidade É a articulação entre os temas — omitir um deles descaracteriza a habilidade). 'exigencias' é leitura nossa do que a questão precisa exibir para realizar a habilidade; alimenta o Gerador como requisito e o Crítico como âncora do critério de alinhamento à BNCC.",
+  "unidades": {
+    "funcoes_polinomiais_1_2_graus": {
+      "nome": "Funções polinomiais de 1º e 2º graus",
+      "fonte": "BNCC do Ensino Médio, seção 5.2.1.1 (Considerações sobre a organização curricular): agrupamento e composição exemplificados pela própria Base. As sete habilidades abaixo são exatamente as que a BNCC lista nesta unidade, na ordem em que as lista."
+    },
+    "funcoes_exponenciais_progressoes_geometricas": {
+      "nome": "Funções exponenciais e progressões geométricas",
+      "fonte": "Agrupamento NOSSO, por analogia ao exemplo de 5.2.1.1. A BNCC autoriza a organização em unidades temáticas, mas não exemplifica esta unidade — não citar como texto da Base."
+    }
+  },
   "habilidades": [
     {
-      "codigo": "EM13MAT302",
-      "descricao": "Construir modelos empregando as funções polinomiais de 1º ou 2º graus, para resolver problemas em contextos diversos, com ou sem apoio de tecnologias digitais.",
-      "unidade_tematica": "Números e Álgebra",
-      "temas": ["funcao_afim", "funcao_quadratica"],
-      "bloom_sugerido": ["aplicar", "criar"]
-    },
-    {
-      "codigo": "EM13MAT303",
-      "descricao": "Interpretar e comparar situações que envolvam juros simples com as que envolvem juros compostos, por meio de representações gráficas ou análise de planilhas, destacando o crescimento linear ou exponencial de cada caso.",
-      "unidade_tematica": "Números e Álgebra",
-      "temas": ["funcao_afim", "funcao_exponencial"],
-      "bloom_sugerido": ["entender", "analisar"]
-    },
-    {
-      "codigo": "EM13MAT304",
-      "descricao": "Resolver e elaborar problemas com funções exponenciais nos quais seja necessário compreender e interpretar a variação das grandezas envolvidas, em contextos como o da Matemática Financeira, entre outros.",
-      "unidade_tematica": "Números e Álgebra",
-      "temas": ["funcao_exponencial"],
-      "bloom_sugerido": ["aplicar", "analisar"]
+      "codigo": "EM13MAT501",
+      "descricao": "Investigar relações entre números expressos em tabelas para representá-los no plano cartesiano, identificando padrões e criando conjecturas para generalizar e expressar algebricamente essa generalização, reconhecendo quando essa representação é de função polinomial de 1º grau.",
+      "unidade": "funcoes_polinomiais_1_2_graus",
+      "temas": [
+        "funcao_afim"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "analisar",
+        "criar"
+      ],
+      "exigencias": [
+        "Os dados devem chegar ao estudante como tabela ou sequência de pares de valores; a expressão algébrica NÃO pode vir pronta no enunciado.",
+        "O que se pede é a generalização algébrica do padrão observado, não o cálculo de um valor isolado.",
+        "A questão deve levar ao reconhecimento de que a relação é de função polinomial de 1º grau."
+      ]
     },
     {
       "codigo": "EM13MAT401",
-      "descricao": "Converter representações algébricas de funções polinomiais de 1º grau em representações geométricas no plano cartesiano, distinguindo os casos nos quais o comportamento é proporcional, recorrendo ou não a softwares ou aplicativos de álgebra e geometria dinâmica.",
-      "unidade_tematica": "Números e Álgebra",
-      "temas": ["funcao_afim"],
-      "bloom_sugerido": ["entender", "aplicar"]
-    },
-    {
-      "codigo": "EM13MAT402",
-      "descricao": "Converter representações algébricas de funções polinomiais de 2º grau em representações geométricas no plano cartesiano, distinguindo os casos nos quais uma variável for diretamente proporcional ao quadrado da outra, recorrendo ou não a softwares ou aplicativos de álgebra e geometria dinâmica.",
-      "unidade_tematica": "Números e Álgebra",
-      "temas": ["funcao_quadratica"],
-      "bloom_sugerido": ["entender", "aplicar"]
+      "descricao": "Converter representações algébricas de funções polinomiais de 1º grau para representações geométricas no plano cartesiano, distinguindo os casos nos quais o comportamento é proporcional, recorrendo ou não a softwares ou aplicativos de álgebra e geometria dinâmica.",
+      "unidade": "funcoes_polinomiais_1_2_graus",
+      "temas": [
+        "funcao_afim"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "entender",
+        "aplicar"
+      ],
+      "exigencias": [
+        "A questão deve exigir trânsito entre a forma algébrica e a representação geométrica no plano cartesiano; pedir apenas raízes ou um valor numérico NÃO realiza esta habilidade.",
+        "Deve levar a distinguir o caso proporcional (y = ax) do caso apenas afim (y = ax + b)."
+      ]
     },
     {
       "codigo": "EM13MAT507",
-      "descricao": "Identificar e associar progressões aritméticas (PA) a funções afins de domínios discretos, para análise de propriedades, dedução de algumas fórmulas e resolução de problemas.",
-      "unidade_tematica": "Números e Álgebra",
-      "temas": ["progressao_aritmetica", "funcao_afim"],
-      "bloom_sugerido": ["analisar", "aplicar"]
+      "descricao": "Identificar e associar sequências numéricas (PA) a funções afins de domínios discretos para análise de propriedades, incluindo dedução de algumas fórmulas e resolução de problemas.",
+      "unidade": "funcoes_polinomiais_1_2_graus",
+      "temas": [
+        "progressao_aritmetica",
+        "funcao_afim"
+      ],
+      "relacao_temas": "conjuntiva",
+      "bloom_sugerido": [
+        "analisar",
+        "aplicar"
+      ],
+      "exigencias": [
+        "A questão deve articular a progressão aritmética com a função afim correspondente, tratando explicitamente o domínio discreto.",
+        "Aplicar a fórmula do termo geral ou da soma NÃO basta: a associação entre a PA e a função afim precisa ser exigida pelo enunciado."
+      ]
+    },
+    {
+      "codigo": "EM13MAT502",
+      "descricao": "Investigar relações entre números expressos em tabelas para representá-los no plano cartesiano, identificando padrões e criando conjecturas para generalizar e expressar algebricamente essa generalização, reconhecendo quando essa representação é de função polinomial de 2º grau do tipo y = ax².",
+      "unidade": "funcoes_polinomiais_1_2_graus",
+      "temas": [
+        "funcao_quadratica"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "analisar",
+        "criar"
+      ],
+      "exigencias": [
+        "Os dados devem chegar ao estudante como tabela ou sequência de pares de valores; a expressão algébrica NÃO pode vir pronta no enunciado.",
+        "O que se pede é a generalização algébrica do padrão observado.",
+        "A questão deve levar ao reconhecimento de que a relação é do tipo y = ax², com uma variável proporcional ao quadrado da outra."
+      ]
+    },
+    {
+      "codigo": "EM13MAT402",
+      "descricao": "Converter representações algébricas de funções polinomiais de 2º grau para representações geométricas no plano cartesiano, distinguindo os casos nos quais uma variável for diretamente proporcional ao quadrado da outra, recorrendo ou não a softwares ou aplicativos de álgebra e geometria dinâmica.",
+      "unidade": "funcoes_polinomiais_1_2_graus",
+      "temas": [
+        "funcao_quadratica"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "entender",
+        "aplicar"
+      ],
+      "exigencias": [
+        "A questão deve exigir trânsito entre a forma algébrica e a representação geométrica no plano cartesiano; pedir apenas raízes ou o vértice em forma numérica NÃO realiza esta habilidade.",
+        "Deve levar a distinguir os casos em que uma variável é diretamente proporcional ao quadrado da outra."
+      ]
+    },
+    {
+      "codigo": "EM13MAT503",
+      "descricao": "Investigar pontos de máximo ou de mínimo de funções quadráticas em contextos da Matemática Financeira ou da Cinemática, entre outros.",
+      "unidade": "funcoes_polinomiais_1_2_graus",
+      "temas": [
+        "funcao_quadratica"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "analisar",
+        "aplicar"
+      ],
+      "exigencias": [
+        "O que se pede é o ponto de máximo ou de mínimo de uma função quadrática.",
+        "O contexto deve ser de Matemática Financeira, Cinemática ou equivalente: a habilidade é de investigação em situação, não de manipulação algébrica pura."
+      ]
+    },
+    {
+      "codigo": "EM13MAT302",
+      "descricao": "Resolver e elaborar problemas cujos modelos são as funções polinomiais de 1º e 2º graus, em contextos diversos, incluindo ou não tecnologias digitais.",
+      "unidade": "funcoes_polinomiais_1_2_graus",
+      "temas": [
+        "funcao_afim",
+        "funcao_quadratica"
+      ],
+      "relacao_temas": "enumerativa",
+      "bloom_sugerido": [
+        "aplicar",
+        "criar"
+      ],
+      "exigencias": [
+        "A questão deve partir de uma situação cujo modelo seja uma função polinomial de 1º ou 2º grau, exigindo construir ou empregar esse modelo.",
+        "Não deve entregar o modelo pronto no enunciado quando o nível cognitivo pedido for aplicar ou superior."
+      ]
+    },
+    {
+      "codigo": "EM13MAT303",
+      "descricao": "Resolver e elaborar problemas envolvendo porcentagens em diversos contextos e sobre juros compostos, destacando o crescimento exponencial.",
+      "unidade": "funcoes_exponenciais_progressoes_geometricas",
+      "temas": [
+        "funcao_exponencial"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "aplicar",
+        "criar"
+      ],
+      "exigencias": [
+        "A questão deve envolver porcentagem ou juros compostos.",
+        "O caráter exponencial do crescimento precisa ficar evidente — não basta uma conta de porcentagem isolada."
+      ]
+    },
+    {
+      "codigo": "EM13MAT304",
+      "descricao": "Resolver e elaborar problemas com funções exponenciais nos quais é necessário compreender e interpretar a variação das grandezas envolvidas, em contextos como o da Matemática Financeira e o do crescimento de seres vivos microscópicos, entre outros.",
+      "unidade": "funcoes_exponenciais_progressoes_geometricas",
+      "temas": [
+        "funcao_exponencial"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "aplicar",
+        "analisar",
+        "criar"
+      ],
+      "exigencias": [
+        "Além de calcular, a questão deve exigir compreender e interpretar a variação das grandezas envolvidas.",
+        "O contexto deve ser realista (Matemática Financeira, crescimento populacional ou de seres vivos microscópicos, decaimento etc.)."
+      ]
     },
     {
       "codigo": "EM13MAT508",
-      "descricao": "Identificar e associar progressões geométricas (PG) a funções exponenciais de domínios discretos, para análise de propriedades, dedução de algumas fórmulas e resolução de problemas.",
-      "unidade_tematica": "Números e Álgebra",
-      "temas": ["progressao_geometrica", "funcao_exponencial"],
-      "bloom_sugerido": ["analisar", "aplicar"]
+      "descricao": "Identificar e associar sequências numéricas (PG) a funções exponenciais de domínios discretos para análise de propriedades, incluindo dedução de algumas fórmulas e resolução de problemas.",
+      "unidade": "funcoes_exponenciais_progressoes_geometricas",
+      "temas": [
+        "progressao_geometrica",
+        "funcao_exponencial"
+      ],
+      "relacao_temas": "conjuntiva",
+      "bloom_sugerido": [
+        "analisar",
+        "aplicar"
+      ],
+      "exigencias": [
+        "A questão deve articular a progressão geométrica com a função exponencial correspondente, tratando explicitamente o domínio discreto.",
+        "Aplicar a fórmula do termo geral ou da soma NÃO basta: a associação entre a PG e a função exponencial precisa ser exigida pelo enunciado."
+      ]
     }
   ]
 }

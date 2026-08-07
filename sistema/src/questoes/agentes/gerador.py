@@ -41,10 +41,20 @@ class Gerador:
 
     @staticmethod
     def _montar_pedido(spec: Especificacao, feedback: str | None) -> str:
+        temas = [t.value.replace("_", " ") for t in spec.temas]
         linhas = [
             "ESPECIFICAÇÃO DA QUESTÃO:",
-            f"- Tema: {spec.tema.value.replace('_', ' ')}",
             f"- Habilidade BNCC {spec.habilidade_bncc}: {spec.descricao_habilidade()}",
+            f"- Tema{'s' if len(temas) > 1 else ''}: {', '.join(temas)}",
+        ]
+        if len(temas) > 1:
+            linhas.append(
+                "  ATENÇÃO: são vários temas. A questão deve ser UMA só, articulando os temas "
+                "num mesmo problema — nunca dois itens independentes emendados."
+            )
+        linhas += [
+            "- A questão só realiza a habilidade se cumprir TODAS as exigências abaixo:",
+            *(f"  * {e}" for e in spec.exigencias_habilidade()),
             f"- Nível cognitivo (Bloom): {spec.nivel_bloom.value}",
             f"- Dificuldade: {_ROTULOS_DIFICULDADE[spec.dificuldade.value]}",
             f"- Natureza: {_ROTULOS_NATUREZA[spec.natureza.value]}",

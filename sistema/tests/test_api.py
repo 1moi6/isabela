@@ -33,14 +33,14 @@ class LLMFake(ProvedorLLM):
         return _questao_json() if eh_geracao else _parecer_json(aprovado=self.aprovado)
 
 
-def gerar_ciclo(cliente, headers=None, espera=10.0):
+def gerar_ciclo(cliente, especificacao=None, headers=None, espera=10.0):
     """Dispara a geração e acompanha até terminar, como faz a interface.
 
     A geração é assíncrona: o POST devolve um identificador e o resultado sai
     no acompanhamento. Um ciclo real leva minutos e estouraria o limite de
     tempo de qualquer proxy reverso se fosse uma requisição só.
     """
-    inicio = cliente.post("/api/gerar", json=ESPECIFICACAO, headers=headers)
+    inicio = cliente.post("/api/gerar", json=especificacao or ESPECIFICACAO, headers=headers)
     if inicio.status_code != 200:
         return inicio
     tarefa = inicio.json()["tarefa"]
@@ -58,7 +58,7 @@ def gerar_ciclo(cliente, headers=None, espera=10.0):
 
 
 ESPECIFICACAO = {
-    "tema": "funcao_quadratica",
+    "temas": ["funcao_quadratica"],
     "habilidade_bncc": "EM13MAT302",
     "nivel_bloom": "aplicar",
     "dificuldade": "media",
@@ -330,3 +330,51 @@ def test_chave_de_api_nunca_vai_para_o_disco(cliente, tmp_path):
     for arquivo in tmp_path.rglob("*"):
         if arquivo.is_file():
             assert "sk-ant-segredo" not in arquivo.read_text(encoding="utf-8", errors="ignore")
+
+
+def test_opcoes_trazem_o_que_a_habilidade_exige(cliente):
+    """O formulário monta os temas a partir da habilidade — precisa desses campos."""
+    o = cliente.get("/api/opcoes").json()
+    por_codigo = {h["codigo"]: h for h in o["habilidades"]}
+    assert por_codigo["EM13MAT507"]["relacao_temas"] == "conjuntiva"
+    assert por_codigo["EM13MAT302"]["relacao_temas"] == "enumerativa"
+    assert por_codigo["EM13MAT402"]["exigencias"]
+    assert por_codigo["EM13MAT302"]["bloom_sugerido"] == ["aplicar", "criar"]
+
+
+def test_gerar_com_varios_temas(cliente):
+    situacao = gerar_ciclo(cliente, {**ESPECIFICACAO, "temas": ["funcao_afim", "funcao_quadratica"]})
+    spec = situacao["resultado"]["questao_final"]["especificacao"]
+    assert spec["temas"] == ["funcao_afim", "funcao_quadratica"]
+
+
+def test_pedido_com_tema_no_singular_ainda_funciona(cliente):
+    """Um cliente antigo (ou um script) não pode quebrar com a multisseleção."""
+    situacao = gerar_ciclo(cliente, {**ESPECIFICACAO, "tema": "funcao_quadratica"})
+    assert situacao["resultado"]["questao_final"]["especificacao"]["temas"] == ["funcao_quadratica"]
+
+
+def test_pedido_sem_tema_nenhum_e_recusado(cliente):
+    pedido = {k: v for k, v in ESPECIFICACAO.items() if k not in ("tema", "temas")}
+    resposta = cliente.post("/api/gerar", json=pedido)
+    assert resposta.status_code == 422
+    assert "tema" in resposta.json()["detail"]
+
+
+def test_pedido_incoerente_e_recusado_antes_de_chamar_o_llm(cliente):
+    resposta = cliente.post(
+        "/api/gerar",
+        json={**ESPECIFICACAO, "habilidade_bncc": "EM13MAT507", "temas": ["progressao_aritmetica"]},
+    )
+    assert resposta.status_code == 422
+    assert "descaracteriza" in resposta.json()["detail"]
+
+
+def test_filtro_do_banco_acha_por_qualquer_tema(cliente):
+    ciclo = gerar_ciclo(
+        cliente, {**ESPECIFICACAO, "temas": ["funcao_afim", "funcao_quadratica"]}
+    )["resultado"]
+    cliente.post("/api/banco", json=ciclo)
+    assert len(cliente.get("/api/banco?tema=funcao_afim").json()) == 1
+    assert len(cliente.get("/api/banco?tema=funcao_quadratica").json()) == 1
+    assert cliente.get("/api/banco?tema=funcao_exponencial").json() == []

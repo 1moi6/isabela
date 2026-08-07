@@ -211,6 +211,29 @@ main { padding: 28px; }
 .campo__controle:focus { border-color: var(--esferografica); }
 .campo__controle--curto { width: 72px; }
 
+/* Temas da habilidade: caixas de marcar, porque uma habilidade pode pedir mais
+   de um tema na mesma questão. Travadas quando a habilidade é a articulação
+   entre eles — desmarcar descaracterizaria a habilidade. */
+.temas { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+
+.temas__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--grafite);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.temas__item:has(input:disabled) { color: var(--lapis); cursor: default; }
+.temas__item input { accent-color: var(--esferografica); }
+
+.campo__ajuda--aviso:not(:empty) {
+  border-left: 2px solid var(--corrigido);
+  padding-left: 7px;
+  color: var(--corrigido);
+}
+
 .opcoes { display: flex; gap: 4px; }
 
 .opcoes__item {

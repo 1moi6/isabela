@@ -135,3 +135,52 @@ def test_log_jsonl_gravado(tmp_path):
     linhas = (tmp_path / "ciclos.jsonl").read_text().strip().splitlines()
     assert len(linhas) == 1
     assert json.loads(linhas[0])["aprovada"] is True
+
+
+def test_gerador_recebe_as_exigencias_da_habilidade():
+    """A habilidade tem de chegar ao Gerador como requisito, não como rótulo.
+
+    Antes ela entrava no prompt só como uma linha de descrição, e o único
+    guardião do alinhamento curricular era o julgamento em prosa do Crítico.
+    """
+    llm = LLMFake([_questao_json(), _parecer_json(aprovado=True)])
+    orq = Orquestrador(Gerador(llm), VerificadorSimbolico(), CriticoDidatico(llm))
+    orq.produzir(SPEC)
+
+    pedido_ao_gerador = llm.pedidos[0]
+    for exigencia in SPEC.exigencias_habilidade():
+        assert exigencia in pedido_ao_gerador
+
+
+def test_pedido_multitema_instrui_a_articular():
+    """Dois temas devem virar UMA questão que os articule, não dois itens colados."""
+    spec = Especificacao(
+        habilidade_bncc="EM13MAT302",
+        temas=[Tema.FUNCAO_AFIM, Tema.FUNCAO_QUADRATICA],
+        nivel_bloom=NivelBloom.APLICAR, dificuldade=Dificuldade.MEDIA,
+        natureza=Natureza.APLICADA, formato=Formato.DISCURSIVA,
+    )
+    llm = LLMFake([_questao_json(), _parecer_json(aprovado=True)])
+    Orquestrador(Gerador(llm), VerificadorSimbolico(), CriticoDidatico(llm)).produzir(spec)
+
+    pedido = llm.pedidos[0]
+    assert "funcao afim, funcao quadratica" in pedido
+    assert "articulando os temas" in pedido
+
+
+def test_divergencia_de_bloom_vai_para_o_log(tmp_path):
+    """Não barra o pedido — registra, para a avaliação empírica poder analisar."""
+    spec = Especificacao(
+        habilidade_bncc="EM13MAT302", temas=[Tema.FUNCAO_QUADRATICA],
+        nivel_bloom=NivelBloom.LEMBRAR, dificuldade=Dificuldade.MEDIA,
+        natureza=Natureza.TEORICA, formato=Formato.DISCURSIVA,
+    )
+    llm = LLMFake([_questao_json(), _parecer_json(aprovado=True)])
+    orq = Orquestrador(
+        Gerador(llm), VerificadorSimbolico(), CriticoDidatico(llm), log_dir=tmp_path
+    )
+    assert orq.produzir(spec).aprovada
+
+    registro = json.loads((tmp_path / "ciclos.jsonl").read_text(encoding="utf-8").strip())
+    assert registro["bloom_divergente"] is True
+    assert registro["bloom_sugerido"] == ["aplicar", "criar"]

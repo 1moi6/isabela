@@ -22,7 +22,14 @@ REGRAS OBRIGATÓRIAS:
    A resposta_esperada DEVE ser exatamente o gabarito da questão.
 6. Se a questão não puder ser formalizada nesses tipos, use "verificavel": null — mas prefira
    sempre questões formalizáveis.
-7. Se receber FEEDBACK de uma tentativa anterior, corrija exatamente o que foi apontado,
+7. A habilidade da BNCC não é um rótulo: ela determina o que a questão precisa exigir do
+   estudante. Cumpra as exigências listadas na especificação — uma questão sobre o conteúdo
+   certo que não faça o que a habilidade pede NÃO serve. Exemplo: numa habilidade de converter
+   representação algébrica em geométrica, pedir apenas as raízes não realiza a habilidade,
+   ainda que a matemática esteja correta.
+8. Quando a especificação trouxer mais de um tema, produza UMA questão que os articule no mesmo
+   problema (a relação entre eles é parte do que se avalia), e não dois itens justapostos.
+9. Se receber FEEDBACK de uma tentativa anterior, corrija exatamente o que foi apontado,
    preservando o que estava bom.
 
 ESQUEMA DO JSON DE SAÍDA:

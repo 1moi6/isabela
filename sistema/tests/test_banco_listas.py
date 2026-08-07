@@ -97,3 +97,46 @@ def test_lista_latex_compilavel_na_estrutura():
     assert tex.count(r"\item") >= 2
     assert tex.strip().endswith(r"\end{document}")
     assert r"\begin{document}" in tex
+
+
+def _resultado_multitema():
+    r = _resultado()
+    r.questao_final.especificacao = Especificacao(
+        habilidade_bncc="EM13MAT507",
+        temas=[Tema.PROGRESSAO_ARITMETICA, Tema.FUNCAO_AFIM],
+        nivel_bloom=NivelBloom.ANALISAR, dificuldade=Dificuldade.MEDIA,
+        natureza=Natureza.TEORICA, formato=Formato.MULTIPLA_ESCOLHA,
+    )
+    return r
+
+
+def test_banco_guarda_e_acha_por_qualquer_tema(tmp_path):
+    banco = BancoQuestoes(tmp_path / "b.db")
+    banco.salvar(_resultado_multitema())
+
+    assert banco.registros()[0]["temas"] == ["progressao_aritmetica", "funcao_afim"]
+    assert len(banco.buscar(tema="progressao_aritmetica")) == 1
+    assert len(banco.buscar(tema="funcao_afim")) == 1
+    assert banco.buscar(tema="progressao_geometrica") == []
+    banco.fechar()
+
+
+def test_banco_anterior_a_multissecao_e_migrado(tmp_path):
+    """O banco do professor não pode ficar ilegível por uma coluna nova."""
+    import sqlite3
+
+    caminho = tmp_path / "antigo.db"
+    antigo = BancoQuestoes(caminho)
+    antigo.salvar(_resultado(tema=Tema.FUNCAO_QUADRATICA))
+    antigo.fechar()
+
+    # desfaz a migração, deixando o banco no formato anterior
+    conn = sqlite3.connect(caminho)
+    conn.execute("UPDATE questoes SET temas = NULL")
+    conn.commit()
+    conn.close()
+
+    banco = BancoQuestoes(caminho)
+    assert banco.registros()[0]["temas"] == ["funcao_quadratica"]
+    assert len(banco.buscar(tema="funcao_quadratica")) == 1
+    banco.fechar()

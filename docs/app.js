@@ -150,33 +150,99 @@ function grupoOpcoes(container, itens, valorInicial) {
   }
 }
 
-function habilidadesDoTema(tema) {
-  const compativeis = estadoApp.opcoes.habilidades.filter((h) => h.temas.includes(tema));
-  return compativeis.length ? compativeis : estadoApp.opcoes.habilidades;
+function habilidadeEscolhida() {
+  const codigo = document.getElementById("campo-habilidade").value;
+  return estadoApp.opcoes.habilidades.find((h) => h.codigo === codigo);
 }
 
-function atualizarHabilidades() {
-  const tema = document.getElementById("campo-tema").value;
-  const campo = document.getElementById("campo-habilidade");
-  preencherSelect(campo, habilidadesDoTema(tema), (h) => h.codigo, (h) => h.codigo);
-  mostrarDescricaoHabilidade();
+/* A habilidade manda: são os temas dela que aparecem, e é a relação declarada
+   no catálogo que decide se dá para escolher entre eles.
+     - "conjuntiva": a habilidade É a articulação dos dois (EM13MAT507 associa PA
+       a função afim). Desmarcar um descaracteriza a habilidade, então ficam
+       marcados e travados.
+     - "enumerativa": a habilidade cobre mais de um tema mas não exige combiná-los
+       (EM13MAT302). Livre; marcar os dois pede um problema que os articule.
+     - "unica": não há o que escolher. */
+function atualizarTemas() {
+  const habilidade = habilidadeEscolhida();
+  const container = document.getElementById("campo-temas");
+  const ajuda = document.getElementById("ajuda-temas");
+  container.replaceChildren();
+  if (!habilidade) return;
+
+  const travado = habilidade.relacao_temas !== "enumerativa";
+  for (const tema of habilidade.temas) {
+    const item = el("label", "temas__item");
+    const caixa = document.createElement("input");
+    caixa.type = "checkbox";
+    caixa.value = tema;
+    caixa.checked = travado || tema === habilidade.temas[0];
+    caixa.disabled = travado;
+    caixa.addEventListener("change", garantirUmTema);
+    item.append(caixa, el("span", null, rotulo(estadoApp.opcoes.temas, tema)));
+    container.append(item);
+  }
+
+  if (habilidade.relacao_temas === "conjuntiva") {
+    ajuda.textContent =
+      "Esta habilidade é a articulação entre os dois temas: a questão precisa tratar dos dois.";
+  } else if (habilidade.relacao_temas === "enumerativa") {
+    ajuda.textContent =
+      "Marque os dois para pedir uma questão que os articule num mesmo problema.";
+  } else {
+    ajuda.textContent = "";
+  }
+}
+
+/** Desmarcar o último tema deixaria o pedido sem tema nenhum; remarca na hora. */
+function garantirUmTema(evento) {
+  if (temasEscolhidos().length === 0) evento.target.checked = true;
+}
+
+function temasEscolhidos() {
+  return [...document.querySelectorAll("#campo-temas input:checked")].map((c) => c.value);
+}
+
+/* O nível de Bloom pedido pode destoar dos verbos da habilidade — "lembrar"
+   numa habilidade cujo verbo é "resolver e elaborar". Não é proibido: o
+   professor pode ter suas razões. Mas é avisado, e a divergência vai para o
+   registro do ciclo. */
+function avisarSobreBloom() {
+  const habilidade = habilidadeEscolhida();
+  const nivel = document.getElementById("campo-bloom").value;
+  const aviso = document.getElementById("aviso-bloom");
+  if (!habilidade || habilidade.bloom_sugerido.includes(nivel)) {
+    aviso.textContent = "";
+    return;
+  }
+  const sugeridos = habilidade.bloom_sugerido
+    .map((b) => rotulo(estadoApp.opcoes.bloom, b))
+    .join(" ou ");
+  aviso.textContent =
+    `Os verbos de ${habilidade.codigo} sugerem ${sugeridos}. ` +
+    "Dá para pedir assim mesmo, mas a questão tende a exigir mais revisões.";
 }
 
 function mostrarDescricaoHabilidade() {
-  const codigo = document.getElementById("campo-habilidade").value;
-  const habilidade = estadoApp.opcoes.habilidades.find((h) => h.codigo === codigo);
+  const habilidade = habilidadeEscolhida();
   document.getElementById("descricao-habilidade").textContent = habilidade ? habilidade.descricao : "";
+  atualizarTemas();
+  avisarSobreBloom();
 }
 
 async function montarFormulario() {
   const o = estadoApp.opcoes;
-  preencherSelect(document.getElementById("campo-tema"), o.temas);
+  // A habilidade vem primeiro e não é mais filtrada por tema: é ela que define
+  // quais temas ficam disponíveis.
+  preencherSelect(
+    document.getElementById("campo-habilidade"), o.habilidades, (h) => h.codigo, (h) => h.codigo
+  );
   preencherSelect(document.getElementById("campo-bloom"), o.bloom);
   document.getElementById("campo-bloom").value = "aplicar";
   grupoOpcoes(document.getElementById("campo-dificuldade"), o.dificuldades, "media");
   grupoOpcoes(document.getElementById("campo-natureza"), o.naturezas, "aplicada");
   grupoOpcoes(document.getElementById("campo-formato"), o.formatos, "discursiva");
-  atualizarHabilidades();
+  mostrarDescricaoHabilidade();
 
   preencherSelect(document.getElementById("filtro-tema"), [{ valor: "", rotulo: "Todos" }, ...o.temas]);
   preencherSelect(
@@ -188,8 +254,8 @@ async function montarFormulario() {
 function lerEspecificacao() {
   const form = document.getElementById("form-gerar");
   return {
-    tema: document.getElementById("campo-tema").value,
     habilidade_bncc: document.getElementById("campo-habilidade").value,
+    temas: temasEscolhidos(),
     nivel_bloom: document.getElementById("campo-bloom").value,
     dificuldade: document.getElementById("campo-dificuldade").dataset.valor,
     natureza: document.getElementById("campo-natureza").dataset.valor,
@@ -307,7 +373,8 @@ function cabecaDaQuestao(questao, identificacao) {
   cabeca.append(el("span", "questao__id", identificacao));
   const spec = questao.especificacao;
   const meta = [
-    rotulo(estadoApp.opcoes.temas, spec.tema),
+    // Questões salvas antes da multisseleção têm `tema` no singular.
+    (spec.temas || [spec.tema]).map((t) => rotulo(estadoApp.opcoes.temas, t)).join(" + "),
     spec.habilidade_bncc,
     rotulo(estadoApp.opcoes.bloom, spec.nivel_bloom),
     rotulo(estadoApp.opcoes.dificuldades, spec.dificuldade),
@@ -642,8 +709,8 @@ async function iniciar() {
     return;  // 401 já mostrou a tela de acesso
   }
 
-  document.getElementById("campo-tema").addEventListener("change", atualizarHabilidades);
   document.getElementById("campo-habilidade").addEventListener("change", mostrarDescricaoHabilidade);
+  document.getElementById("campo-bloom").addEventListener("change", avisarSobreBloom);
   document.getElementById("form-gerar").addEventListener("submit", gerar);
   document.getElementById("filtro-tema").addEventListener("change", carregarBanco);
   document.getElementById("filtro-dificuldade").addEventListener("change", carregarBanco);

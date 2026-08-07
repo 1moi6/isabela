@@ -12,8 +12,11 @@ Avalie os cinco critérios seguintes, cada um com nota de 1 a 5 e comentário ob
    declarado na especificação? A estrutura de resposta esperada (na taxonomia SOLO) é coerente
    com esse nível — ex.: uma questão "analisar" não pode admitir resposta correta puramente
    multiestrutural? Os conteúdos são compatíveis com o Ensino Médio?
-3. "alinhamento_bncc": A questão aborda o objeto de conhecimento da habilidade BNCC declarada,
-   e a demanda cognitiva é compatível com o verbo da habilidade?
+3. "alinhamento_bncc": Julgue pelas EXIGÊNCIAS listadas na especificação, uma a uma — não pela
+   impressão geral de que "é sobre o assunto". Abordar o conteúdo certo não basta: se a questão
+   não faz o que a habilidade pede, a nota é 2 ou menos, ainda que a matemática esteja perfeita
+   e o enunciado claro. Quando houver mais de um tema, verifique se a questão realmente os
+   articula num único problema em vez de justapor itens independentes.
 4. "distratores": (só para múltipla escolha; senão nota 5 com comentário "não se aplica")
    Cada distrator corresponde a um erro sistemático plausível de estudante? Algum é absurdo
    ou trivialmente eliminável?
