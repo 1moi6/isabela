@@ -48,6 +48,24 @@ class RelacaoTemas(str, Enum):
     CONJUNTIVA = "conjuntiva"
 
 
+class Garantia(str, Enum):
+    """Grau de conferência automática — declarado por habilidade, obtido por questão.
+
+    São dois níveis distintos e a diferença é essencial. `verificabilidade_esperada`
+    diz o que a habilidade *admite* em princípio; `garantia_obtida` (em `modelos.py`)
+    diz o que a questão *recebeu* de fato, porque o Gerador nem sempre consegue
+    formalizar o que a habilidade permitiria. Confundir os dois faria "esta
+    habilidade é verificável" ser lido como "esta questão foi verificada" --- o erro
+    silencioso outra vez, agora nos metadados.
+
+    Os rótulos são lidos por professores: ver ROTULO_GARANTIA na API.
+    """
+
+    CONFERIDO = "conferido"
+    CONFERIDO_EM_PARTE = "conferido_em_parte"
+    SEM_CONFERENCIA = "sem_conferencia"
+
+
 class NivelBloom(str, Enum):
     """Processos cognitivos da Taxonomia de Bloom Revisada (Seção 3.2.1)."""
 
@@ -187,6 +205,13 @@ class Especificacao(BaseModel):
 
     def relacao_temas(self) -> RelacaoTemas:
         return RelacaoTemas(self._habilidade()["relacao_temas"])
+
+    def verificabilidade_esperada(self) -> Garantia:
+        """Que garantia esta habilidade admite, em princípio (leitura nossa, não da BNCC).
+
+        Não é o que a questão obteve: para isso, `garantia_de` em `modelos.py`.
+        """
+        return Garantia(self._habilidade()["verificabilidade_esperada"])
 
     def bloom_sugerido(self) -> list[str]:
         """Níveis cognitivos compatíveis com os verbos da habilidade."""

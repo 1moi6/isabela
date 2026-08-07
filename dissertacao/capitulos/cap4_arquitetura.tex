@@ -121,15 +121,32 @@ anotado com o erro sistemático de estudante que ele representa; e o campo mais 
 ponto de vista arquitetural, a \textbf{formalização verificável}.
 
 A formalização verificável é a ponte entre a prosa da questão e o verificador simbólico. Trata-se
-de um objeto com quatro campos --- o \emph{tipo} de verificação (equação, propriedade de função
-ou progressão), a \emph{expressão} em sintaxe SymPy, a \emph{resposta esperada} (o gabarito, na
-mesma sintaxe) e \emph{parâmetros} auxiliares --- que o Gerador preenche no momento da criação da
-questão. Essa decisão resolve o segundo limite da verificação simbólica apontado na
-Seção~\ref{sub:cas-limites}: o Verificador nunca precisa interpretar o enunciado em linguagem
-natural, pois quem traduz a prosa para a forma simbólica é o próprio agente que a escreveu ---
-e a tradução é, ela mesma, parte do objeto auditável que o professor pode inspecionar. Quando a
-questão não admite formalização nos tipos suportados, o campo é nulo e a questão segue o caminho
-do veredicto \emph{não-verificável} (Seção~\ref{sec:ag-verificador}).
+de um objeto com quatro campos --- o \emph{tipo} de verificação, a \emph{expressão} em sintaxe
+SymPy, a \emph{resposta esperada} (o gabarito, na mesma sintaxe) e \emph{parâmetros} auxiliares ---
+que o Gerador preenche no momento da criação da questão. Essa decisão resolve o segundo limite da
+verificação simbólica apontado na Seção~\ref{sub:cas-limites}: o Verificador nunca precisa
+interpretar o enunciado em linguagem natural, pois quem traduz a prosa para a forma simbólica é o
+próprio agente que a escreveu --- e a tradução é, ela mesma, parte do objeto auditável que o
+professor pode inspecionar.
+
+O Gerador produz uma \textbf{lista} dessas formalizações, e não uma só, porque uma questão faz
+com frequência mais de uma afirmação verificável: quando articula dois temas, quando a habilidade
+cobra uma propriedade além do resultado. Guardar uma única formalização significaria conferir
+metade da questão e deixar a outra metade passar sem conferência nenhuma --- exatamente o tipo de
+silêncio que esta arquitetura existe para eliminar. O Verificador agrega os vereditos por
+conjunção (Seção~\ref{sec:ag-verificador}). Quando a questão não admite formalização nos tipos
+suportados, a lista fica vazia e a questão segue o caminho do veredicto \emph{não-verificável}.
+
+Entre os tipos suportados, um merece destaque por não seguir o formato dos demais. As estratégias
+usuais respondem à pergunta ``o resultado afirmado é o que o SymPy calcula?''. Há habilidades em
+que essa pergunta não cabe: a \texttt{EM13MAT501} pede investigar uma tabela e \emph{expressar
+algebricamente a generalização}, e não há um valor a comparar --- há uma expressão que precisa
+reproduzir os pontos dados e ter o grau declarado. O tipo \emph{propriedade} verifica predicados
+sobre a expressão produzida em vez de comparar gabaritos, e é o que permite conferir simbolicamente
+a generalização de padrões (\texttt{EM13MAT501} e \texttt{EM13MAT502}) e a associação entre uma
+progressão e a função de domínio discreto correspondente (\texttt{EM13MAT507} e
+\texttt{EM13MAT508}) --- afirmações que antes ficavam fora do alcance do núcleo simbólico ainda
+que a habilidade estivesse no recorte.
 
 O \emph{prompt} do Gerador é um artefato versionado da pesquisa (reproduzido no Apêndice A) e
 possui três blocos: a instrução de papel (elaborador experiente de questões para o EM), as
@@ -156,21 +173,63 @@ A verificação é organizada por \textbf{estratégias por tipo de questão}:
   calculado pela via simbólica adequada (resolução, derivada, substituição).
 \item \textbf{Progressões} --- termo geral e soma de PA e PG, calculados pelas fórmulas fechadas,
   incluindo o caso degenerado da PG de razão unitária.
+\item \textbf{Propriedades de expressões} --- em vez de comparar um resultado, confere predicados
+  sobre a expressão que o estudante deve produzir: que ela reproduza os pontos de uma tabela, que
+  tenha o grau declarado, que apresente apenas os termos de uma forma dada, ou que coincida com
+  uma progressão nos primeiros termos.
 \item \textbf{Verificação numérica complementar} --- quando a simplificação simbólica não é
   conclusiva, as expressões são avaliadas em pontos aleatórios com semente fixa; a concordância
   gera o veredicto \emph{aprovado com ressalva numérica} (Seção~\ref{sub:cas-limites}).
 \end{itemize}
 
-A saída é um veredicto de quatro valores --- \emph{aprovado}, \emph{rejeitado},
-\emph{não-verificável} ou \emph{aprovado com ressalva numérica} --- acompanhado de justificativa
-e, quando houver, do resultado calculado independentemente. Esse resultado calculado integra o
-\emph{feedback} devolvido ao Gerador em caso de rejeição: o agente que errou recebe não apenas a
-informação de que errou, mas o valor correto contra o qual revisar seu trabalho.
+Como a questão traz uma lista de formalizações, o Verificador aplica a estratégia de cada uma e
+\textbf{agrega os vereditos por conjunção}: a questão vale o que vale a sua afirmação mais fraca.
+Uma reprovação basta para reprovar --- não adianta o termo geral da progressão estar correto se a
+função afim associada está errada. E uma afirmação não formalizável rebaixa o conjunto ao veredicto
+\emph{aprovado parcialmente}, em vez de deixá-lo passar como se tudo tivesse sido conferido.
+
+A saída é, assim, um veredicto de cinco valores --- \emph{aprovado}, \emph{rejeitado},
+\emph{não-verificável}, \emph{aprovado com ressalva numérica} ou \emph{aprovado parcialmente} ---
+acompanhado de justificativa e, quando houver, do resultado calculado independentemente. Esse
+resultado calculado integra o \emph{feedback} devolvido ao Gerador em caso de rejeição: o agente
+que errou recebe não apenas a informação de que errou, mas o valor correto contra o qual revisar
+seu trabalho. Para o Orquestrador, apenas a rejeição muda o curso do ciclo: as demais seguem ao
+Crítico, e a distinção entre elas é o que define a \emph{garantia} declarada ao professor
+(Seção~\ref{sec:garantia}).
 
 Um princípio de robustez completa o projeto deste agente: formalizações malformadas (sintaxe
 inválida produzida pelo LLM, tipo desconhecido) nunca interrompem o ciclo com erro --- degradam
 para o veredicto \emph{não-verificável}, e a decisão sobre o que fazer com a questão permanece
 onde deve estar, no Orquestrador.
+
+\section{A garantia declarada}
+\label{sec:garantia}
+
+Nem toda habilidade da BNCC admite o mesmo grau de conferência automática, e nem toda questão
+recebe a conferência que sua habilidade admitiria. Deixar isso implícito seria reproduzir, no
+plano dos metadados, o problema que o sistema combate: o professor veria questões aparentemente
+equivalentes, sem saber quais tiveram o gabarito recalculado e quais passaram apenas pelo
+julgamento de um modelo de linguagem. O sistema torna essa distinção explícita em dois níveis.
+
+A \textbf{verificabilidade esperada} é declarada por habilidade, no catálogo, e afirma o que ela
+admite em princípio. A \texttt{EM13MAT302} admite conferência plena: seu gabarito é um valor que
+o SymPy recalcula. Já a \texttt{EM13MAT402} pede converter uma representação algébrica em
+geométrica; a matéria matemática da questão é conferível, mas se o enunciado de fato exige a
+conversão de registro é juízo que nenhum sistema de computação algébrica emite. Sua
+verificabilidade esperada é, portanto, parcial. Essa classificação é leitura nossa --- não texto
+da Base --- e cada habilidade registra a razão que a sustenta.
+
+A \textbf{garantia obtida} é uma propriedade de cada questão, derivada do veredicto do
+Verificador, e responde ao que aquela questão de fato recebeu: gabarito conferido, conferido em
+parte, ou sem conferência automática. É ela que aparece junto da questão na interface e permite
+filtrar o banco curado --- e o terceiro rótulo é redigido como instrução ao professor, não como
+etiqueta, porque é disso que se trata.
+
+Os dois níveis não coincidem, e é justamente a distância entre eles que interessa: uma habilidade
+pode admitir conferência plena e, numa questão particular, o Gerador não conseguir formalizar o
+problema. Quantificar essa distância --- em que habilidades a garantia prometida não se realiza
+na prática --- é objeto da avaliação empírica, e o registro de cada ciclo já carrega o dado
+necessário.
 
 \section{Agente Crítico Didático}
 \label{sec:ag-critico}

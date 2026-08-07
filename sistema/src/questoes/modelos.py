@@ -10,9 +10,9 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Annotated
 
-from pydantic import BaseModel, BeforeValidator, Field
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
 
-from .especificacao import Especificacao
+from .especificacao import Especificacao, Garantia
 
 
 def _para_texto(valor):
@@ -43,10 +43,13 @@ class Alternativa(BaseModel):
 
 
 class ExpressaoVerificavel(BaseModel):
-    """Formalização SymPy-friendly do problema, preenchida pelo Gerador.
+    """Formalização SymPy-friendly de **uma** afirmação da questão, preenchida pelo Gerador.
 
     É esta ponte que permite ao Verificador operar sem interpretar prosa
     (limite discutido na Seção 2.4.3 da dissertação).
+
+    Uma questão pode ter mais de uma: quando articula dois temas, ou quando a
+    habilidade cobra propriedades além do resultado (ver `Questao.verificaveis`).
     """
 
     tipo: str = Field(description="Roteia a estratégia de verificação: 'equacao', 'funcao', 'progressao'")
@@ -68,10 +71,29 @@ class Questao(BaseModel):
     alternativas: list[Alternativa] | None = Field(
         default=None, description="Presente apenas em múltipla escolha (4 alternativas)"
     )
-    verificavel: ExpressaoVerificavel | None = Field(
-        default=None, description="None quando o Gerador julga a questão não formalizável"
+    verificaveis: list[ExpressaoVerificavel] = Field(
+        default_factory=list,
+        description="Uma entrada por afirmação verificável; vazia quando o Gerador julga a "
+        "questão não formalizável. Uma questão que articula dois temas costuma ter duas.",
     )
     especificacao: Especificacao
+
+    @model_validator(mode="before")
+    @classmethod
+    def _aceitar_verificavel_no_singular(cls, dados):
+        """Aceita o campo `verificavel` das versões anteriores.
+
+        As questões já gravadas no banco guardam `"verificavel": {...}` ou `null`.
+        Sem esta ponte, reler o banco de quem já usou o sistema falharia --- e o
+        LLM, que aprendeu o esquema antigo, também continua atendido.
+        """
+        if isinstance(dados, dict) and "verificavel" in dados and "verificaveis" not in dados:
+            dados = dict(dados)
+            unico = dados.pop("verificavel")
+            dados["verificaveis"] = [] if unico is None else (
+                unico if isinstance(unico, list) else [unico]
+            )
+        return dados
 
 
 class Veredicto(str, Enum):
@@ -81,6 +103,28 @@ class Veredicto(str, Enum):
     REJEITADO = "rejeitado"
     NAO_VERIFICAVEL = "nao_verificavel"
     APROVADO_RESSALVA_NUMERICA = "aprovado_ressalva_numerica"
+    # Parte das afirmações foi conferida e o resto não era formalizável. Não é
+    # rejeição: para o Orquestrador, segue ao Crítico como qualquer aprovação.
+    APROVADO_PARCIAL = "aprovado_parcial"
+
+
+_GARANTIA_POR_VEREDICTO = {
+    Veredicto.APROVADO: Garantia.CONFERIDO,
+    Veredicto.APROVADO_RESSALVA_NUMERICA: Garantia.CONFERIDO_EM_PARTE,
+    Veredicto.APROVADO_PARCIAL: Garantia.CONFERIDO_EM_PARTE,
+    Veredicto.NAO_VERIFICAVEL: Garantia.SEM_CONFERENCIA,
+    Veredicto.REJEITADO: Garantia.SEM_CONFERENCIA,
+}
+
+
+def garantia_de(veredicto: Veredicto) -> Garantia:
+    """Que conferência a questão **recebeu** de fato.
+
+    Distinta da `verificabilidade_esperada` da habilidade, que diz o que ela
+    admitiria. A diferença entre as duas é dado da avaliação empírica: em quais
+    habilidades a garantia prometida não se realiza na prática?
+    """
+    return _GARANTIA_POR_VEREDICTO[veredicto]
 
 
 class ResultadoVerificacao(BaseModel):

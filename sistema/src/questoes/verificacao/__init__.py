@@ -5,12 +5,13 @@ usando exclusivamente SymPy — nenhum LLM participa desta camada.
 """
 
 from ..modelos import ExpressaoVerificavel, ResultadoVerificacao, Veredicto
-from . import equacoes, funcoes, numerica, progressoes
+from . import equacoes, funcoes, numerica, progressoes, propriedades
 
 _ESTRATEGIAS = {
     "equacao": equacoes.verificar,
     "funcao": funcoes.verificar,
     "progressao": progressoes.verificar,
+    "propriedade": propriedades.verificar,
 }
 
 
