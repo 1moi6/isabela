@@ -288,8 +288,13 @@ def test_interface_e_servida_com_caminhos_relativos():
     assert c.get("/").status_code == 200
     assert c.get("/app.css").status_code == 200
     assert c.get("/app.js").status_code == 200
-    assert 'href="app.css"' in c.get("/").text
-    assert 'src="app.js"' in c.get("/").text
+    pagina = c.get("/").text
+    # Caminho relativo (o Pages publica em subdiretório) e com marca de versão:
+    # sem a marca, o navegador serve a cópia em cache e correções não chegam a
+    # quem já visitou — aconteceu, e a página ficou presa a um túnel morto.
+    for arquivo in ("app.css", "comum.js", "app.js"):
+        assert f'"{arquivo}?v=' in pagina, f"{arquivo} sem marca de versão"
+        assert f'"/{arquivo}' not in pagina, f"{arquivo} com caminho absoluto"
 
 
 def test_cors_so_libera_as_origens_declaradas(tmp_path, monkeypatch):

@@ -89,6 +89,13 @@ reabrir o acesso.
 
 `convites.json` fica fora do controle de versão: quem tem o código entra como a pessoa.
 
+## Ao mudar a interface, troque a versão dos arquivos
+
+`docs/index.html` e `docs/gerar_convites/index.html` referenciam CSS e JS com um sufixo
+`?v=AAAAMMDDx`. **Atualize esse sufixo em toda mudança no frontend.** O GitHub Pages manda
+cachear os arquivos, e sem a troca quem já visitou continua executando a versão antiga —
+inclusive correções de defeito não chegam a quem mais precisa delas.
+
 ## Publicar na internet (túnel cloudflared)
 
 ```bash
