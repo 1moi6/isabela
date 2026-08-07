@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi — suficiente para os testes
-python -m pytest            # 139 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 153 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -96,9 +96,15 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   como cálculo válido reprovaria o gabarito correto, mandando o Gerador "corrigir" o que estava
   certo. Idem `is_increasing`, que precisa ser avaliado **no domínio** (`log(x)` sobre R dá
   `False`). Ao escrever um tipo novo, teste as rotinas do SymPy contra casos conhecidos ANTES.
-- **`sistema/analisar_logs.py`** reporta a taxa de `nao_verificavel` por tipo/consulta a partir
-  de `logs/ciclos.jsonl`. É como se descobre que um tipo novo está mal descrito no prompt — o
-  sintoma é invisível na interface. Requer gerações com provedor real; a suíte usa `LLMFake`.
+- **`sistema/analisar_logs.py`** reporta a taxa de `nao_verificavel` por tipo/consulta e
+  `sistema/exportar_medicao.py` transforma o log em `.md` legíveis + índice CSV. Requerem
+  gerações com provedor real; a suíte usa `LLMFake`. Resultados em `sistema/medicoes/`.
+- **A suíte não alcança os defeitos que importam.** A medição de 2026-08-07 (`medicoes/`)
+  achou três, todos dependentes de escolhas do Gerador impossíveis de antecipar: incógnita
+  chamada `E` (número de Euler no SymPy) reprovava gabarito certo; domínio restrito pelo
+  contexto (`t >= 0`, `n` natural) reprovava as EM13MAT507/508, que são *sobre* domínio
+  discreto; e uma formalização malformada derrubava o ciclo inteiro. **Ao acrescentar tipo
+  novo, meça com provedor real — não confie na suíte.**
 
 ## Documentos que governam o trabalho (leia antes de editar o texto)
 
