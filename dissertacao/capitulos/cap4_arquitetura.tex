@@ -63,13 +63,24 @@ A especificação é o contrato entre o professor e o sistema. Ela é composta p
 obrigatórios e dois opcionais, todos validados antes do início do ciclo:
 
 \begin{itemize}
-\item \textbf{Tema} --- o tópico matemático, dentro do recorte da dissertação: função afim,
-  função quadrática, função exponencial, progressão aritmética ou progressão geométrica.
 \item \textbf{Habilidade BNCC} --- o código da habilidade (por exemplo, \texttt{EM13MAT302}),
   validado contra um catálogo local derivado da BNCC; códigos desconhecidos são rejeitados na
-  entrada, antes de qualquer chamada ao LLM.
+  entrada, antes de qualquer chamada ao LLM. É o \emph{primeiro} parâmetro, e não por acaso: a
+  habilidade é a unidade normativa do planejamento do professor e é ela que delimita os temas
+  disponíveis (Seção~\ref{sub:bncc-habilidades}).
+\item \textbf{Tema ou temas} --- o tópico matemático, escolhido \emph{dentro} da habilidade:
+  função afim, função quadrática, função exponencial, progressão aritmética ou progressão
+  geométrica. Uma habilidade pode cobrir mais de um tema, e o catálogo registra como eles se
+  combinam. Em \texttt{EM13MAT302} a enumeração é do repertório coberto, e combinar os dois
+  temas num mesmo problema é opção do professor; já em \texttt{EM13MAT507}, cujo texto é
+  ``identificar e associar sequências numéricas (PA) a funções afins de domínios discretos'', a
+  articulação entre os temas \emph{é} a habilidade --- pedir apenas a progressão a
+  descaracteriza, e o sistema recusa a especificação. Com mais de um tema, a questão pedida é
+  uma só, articulando-os, e não dois itens justapostos.
 \item \textbf{Nível cognitivo} --- um dos seis processos da Taxonomia de Bloom Revisada
-  (Seção~\ref{sub:bloom}).
+  (Seção~\ref{sub:bloom}). O catálogo registra os níveis compatíveis com os verbos de cada
+  habilidade; pedir um nível fora deles é permitido --- o professor pode ter suas razões ---, mas
+  a interface avisa e a divergência fica registrada no ciclo, como dado da avaliação empírica.
 \item \textbf{Dificuldade} --- fácil, média ou difícil, com descritores operacionais que
   acompanham o \emph{prompt} (fácil: aplicação direta; média: articulação de dois ou mais
   passos; difícil: estratégia não evidente ou análise de casos).
@@ -85,6 +96,19 @@ obrigatórios e dois opcionais, todos validados antes do início do ciclo:
 A validação antecipada do código BNCC merece destaque: ela impede, por construção, que o
 sistema produza questões associadas a habilidades inexistentes --- um erro que um LLM cometeria
 com naturalidade e que seria invisível ao professor que não tem o documento da BNCC de memória.
+
+A habilidade, porém, não entra no sistema apenas como rótulo a ser validado. O catálogo associa
+a cada habilidade um conjunto de \textbf{exigências}: o que a questão precisa efetivamente
+exibir para realizá-la. Para \texttt{EM13MAT402} --- ``converter representações algébricas de
+funções polinomiais de 2º grau para representações geométricas no plano cartesiano'' --- exige-se
+que a questão faça o estudante transitar entre a forma algébrica e o gráfico; pedir apenas as
+raízes não realiza a habilidade, ainda que o conteúdo seja o correto e a matemática esteja certa.
+Essas exigências são repassadas ao Gerador como requisito de elaboração e ao Crítico como
+âncora do critério de alinhamento curricular. Sem elas, o alinhamento à BNCC dependeria de um
+juízo em prosa do LLM sobre se a questão ``é sobre o assunto'' --- e uma questão correta,
+clara e sobre o conteúdo certo poderia ser aprovada sem cumprir a habilidade declarada, um
+erro silencioso de natureza curricular, análogo ao erro silencioso matemático discutido na
+Seção~\ref{sec:erro-silencioso}.
 
 \section{Agente Gerador}
 \label{sec:ag-gerador}
@@ -156,6 +180,12 @@ Seção~\ref{sec:criterios}. Como a correção matemática já foi julgada pelo 
 Crítico avalia os cinco critérios restantes --- clareza do enunciado, adequação ao nível
 cognitivo, alinhamento à habilidade BNCC, plausibilidade dos distratores e originalidade ---
 atribuindo a cada um nota de 1 a 5 e comentário objetivo.
+
+O critério de alinhamento à BNCC recebe tratamento distinto dos demais: em vez de pedir um juízo
+global sobre o assunto da questão, o \emph{prompt} apresenta ao Crítico as exigências da
+habilidade declarada (Seção~\ref{sec:especificacao}) e o instrui a julgá-las uma a uma. Abordar o
+conteúdo certo não basta: se a questão não faz o que a habilidade pede, a nota é baixa ainda que
+o enunciado esteja claro e a matemática correta.
 
 A rubrica é traduzida em \emph{prompt} (Apêndice A) com uma instrução de decisão explícita: a
 questão é aprovada somente se nenhum critério receber nota inferior a 3. Em caso de reprovação,
