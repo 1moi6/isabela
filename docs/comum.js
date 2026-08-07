@@ -50,21 +50,36 @@ function avisar(mensagem, tipo = "") {
  *  `raiz` é o prefixo até a pasta publicada — "" na página principal e ".."
  *  numa subpágina, porque o backend.json fica na raiz do site. */
 async function descobrirApi(raiz = "") {
-  if (localStorage.getItem("questoes.api")) return;
   if (API_PADRAO) { guardado.api = API_PADRAO; return; }
 
-  try {
-    const r = await fetch("/api/identificacao");
-    if (r.ok) { guardado.api = ""; return; }
-  } catch (_) { /* origem não atende a API: seguimos para o backend.json */ }
+  // O endereço guardado é um palpite, não um dogma: o túnel muda de endereço a
+  // cada reinício, e confiar cegamente no valor antigo deixava a pessoa presa a
+  // um túnel morto para sempre — justamente o que o backend.json evita.
+  if (localStorage.getItem("questoes.api") && await apiResponde(guardado.api)) return;
+
+  // Servida pelo próprio servidor? Então a API é a mesma origem.
+  if (await apiResponde("")) { guardado.api = ""; return; }
 
   try {
     const caminho = raiz ? `${raiz}/backend.json` : "backend.json";
     // Sem cache: o endereço muda e um valor velho leva a um túnel morto.
     const cfg = await (await fetch(`${caminho}?t=${Date.now()}`)).json();
-    if (cfg.endereco) guardado.api = cfg.endereco;
+    if (cfg.endereco && await apiResponde(cfg.endereco)) {
+      guardado.api = cfg.endereco;
+      return;
+    }
+  } catch (_) { /* sem backend.json publicado */ }
+
+  avisar("O servidor não está respondendo. Ele pode estar fora do ar no momento.", "erro");
+}
+
+/** A API atende neste endereço? Usa a rota pública, que não exige convite. */
+async function apiResponde(base) {
+  try {
+    const r = await fetch(`${base}/api/identificacao`, { cache: "no-store" });
+    return r.ok;
   } catch (_) {
-    avisar("Não encontrei o endereço do servidor. Peça um link novo a quem administra.", "erro");
+    return false;
   }
 }
 
