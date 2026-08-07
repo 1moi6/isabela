@@ -27,7 +27,7 @@ class CriticoDidatico:
             [
                 "QUESTÃO A AVALIAR:",
                 json.dumps(
-                    questao.model_dump(exclude={"especificacao", "verificavel"}),
+                    questao.model_dump(exclude={"especificacao", "verificaveis"}),
                     ensure_ascii=False,
                     indent=2,
                 ),

@@ -18,15 +18,22 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi — suficiente para os testes
-python -m pytest            # 110 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 128 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
 
 Pontos estruturais que não são óbvios pelos nomes de arquivo:
 - **O Verificador não usa LLM.** `agentes/verificador.py` delega a `verificacao/` (SymPy puro).
-  A ponte entre a prosa da questão e o SymPy é o campo `verificavel` (`ExpressaoVerificavel` em
-  `modelos.py`), que o Gerador preenche — o Verificador nunca interpreta enunciado.
+  A ponte entre a prosa da questão e o SymPy é o campo `verificaveis` (`ExpressaoVerificavel` em
+  `modelos.py`), que o Gerador preenche — o Verificador nunca interpreta enunciado. É uma
+  **lista**: uma questão faz mais de uma afirmação verificável quando articula dois temas ou
+  quando a habilidade cobra propriedade além do resultado. O Verificador agrega por conjunção
+  (a mais fraca manda) e o Orquestrador continua vendo um veredicto só.
+- **`tipo: "propriedade"`** (`verificacao/propriedades.py`) verifica predicados sobre a
+  expressão que o estudante deve produzir — reproduz os pontos da tabela, tem o grau declarado,
+  coincide com a progressão — em vez de comparar um gabarito. É o que torna 501, 502, 507 e 508
+  conferíveis. Predicado ausente não é verificado; nenhum predicado devolve `nao_verificavel`.
 - **A política de decisão vive só no Orquestrador** (`agentes/orquestrador.py`): rejeição do
   verificador volta ao Gerador sem passar pelo Crítico; `nao_verificavel` segue ao Crítico;
   3 iterações sem aprovação = descarte. Testes de política usam `LLMFake` (test_orquestrador.py).
@@ -70,13 +77,20 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   (501, 401, 507, 502, 402, 503, 302), mais 303/304/508 por analogia; o segundo agrupamento é
   construção nossa e está marcado como tal. `bloom_sugerido` e `exigencias` também são leitura
   nossa, não texto da Base.
-- **Compatibilidade com o que já foi gravado**: a especificação aceita `tema` no singular além de
-  `temas` (as questões no banco guardam o campo antigo — sem a ponte, o histórico do professor
-  fica ilegível), e `banco.py` preenche a coluna `temas` na migração a partir da antiga. Não
-  remova nenhuma das duas.
-- **A formalização verificável ainda é singular** (`verificavel`, um `tipo`/`expressao`/
-  `resposta_esperada`): numa questão que articula dois temas, o SymPy confere só uma afirmação.
-  Passar para `verificaveis: list[...]` com veredicto por conjunção é tarefa aberta.
+- **Duas categorias de verificabilidade, em dois níveis** — não as confunda. A
+  `verificabilidade_esperada` está no catálogo, por habilidade, e diz o que ela *admite*; a
+  `garantia_obtida` (`garantia_de` em `modelos.py`, coluna `garantia` no banco) diz o que a
+  questão *recebeu*. Se a categoria vivesse só na habilidade, "esta habilidade é verificável"
+  seria lido como "esta questão foi verificada" — o erro silencioso nos metadados. A distância
+  entre as duas é dado do Cap. 6.
+- **Compatibilidade com o que já foi gravado** (três pontes, nenhuma removível): a especificação
+  aceita `tema` no singular além de `temas`; `Questao` aceita `verificavel` no singular além de
+  `verificaveis`; e `banco.py` preenche `temas` e `garantia` na migração a partir das colunas
+  antigas. Sem elas o histórico do professor fica ilegível.
+- **Tipo novo de verificação** = módulo em `verificacao/` + uma linha no dicionário
+  `_ESTRATEGIAS` + testes + descrição no `prompts/gerador.md`. Os módulos existentes têm 50–85
+  linhas: o SymPy é a parte barata; calibrar o *prompt* para o LLM emitir a formalização certa
+  é o que custa, e falha em silêncio (`nao_verificavel` não reprova a questão).
 
 ## Documentos que governam o trabalho (leia antes de editar o texto)
 
@@ -150,11 +164,12 @@ Cada arquivo de capítulo tem um cabeçalho em comentário `% =====` que reafirm
 ## Tarefas abertas
 
 Elementos pré-textuais (resumo, abstract, folha de rosto, listas); validação da bibliografia
-(`% CONFERIR`); migração para `abntex2cite`; formalização verificável em lista
-(`verificaveis`), sem a qual questões multitema ficam parcialmente verificadas.
+(`% CONFERIR`); migração para `abntex2cite`.
 
-Fora do alcance do núcleo simbólico, hoje: as habilidades `401`, `402`, `501` e `502` pedem
-conversão de registro ou generalização de padrão, que nenhum dos tipos `equacao`/`funcao`/
-`progressao` atesta — quem as cobra é o Crítico (um LLM), não o SymPy. Verificar "a expressão
-generalizada reproduz os pontos da tabela" fecharia 501, 502 e a metade não verificada de
-507/508.
+A expansão do catálogo tem plano próprio em `plano_expansao_verificacao.md`, com a
+classificação das 45 habilidades por verificabilidade. As Fases 0, 1 e 3 estão feitas; a Fase 2
+(sete famílias de tipos novos, ~30 habilidades) está aberta — comece por 2a/2b (log,
+trigonometria, `Piecewise`), que fecham a unidade de funções.
+
+Segue fora do alcance do SymPy, por natureza e não por falta de implementação: `401` e `402`
+(conversão de registro é propriedade do enunciado). Elas declaram `conferido_em_parte`.

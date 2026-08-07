@@ -11,7 +11,7 @@ import sqlite3
 from pathlib import Path
 
 from .convites import DONO_LOCAL
-from .modelos import AvaliacaoProfessor, Questao, ResultadoCiclo
+from .modelos import AvaliacaoProfessor, Questao, ResultadoCiclo, Veredicto, garantia_de
 
 # Questões gravadas antes do modo compartilhado têm dono NULL e pertencem ao
 # uso local. Todo acesso passa por este filtro: ninguém enxerga o banco de outro.
@@ -47,6 +47,10 @@ _COLUNAS_NOVAS = {
     # primeiro tema: ela é NOT NULL desde a primeira versão do esquema e ainda
     # serve de rótulo curto. A busca por tema usa esta coluna.
     "temas": "TEXT",
+    # Que conferência automática a questão recebeu de fato ('conferido',
+    # 'conferido_em_parte', 'sem_conferencia'). Derivada do veredicto, guardada
+    # para poder filtrar o banco sem reabrir o histórico de cada questão.
+    "garantia": "TEXT",
 }
 
 # Sentinelas em volta de cada valor: sem elas, `LIKE '%funcao_afim%'` casaria
@@ -86,6 +90,17 @@ class BancoQuestoes:
         self._conn.execute(
             "UPDATE questoes SET temas = ',' || tema || ',' WHERE temas IS NULL"
         )
+        # A garantia é função do veredicto, que as linhas antigas já guardam:
+        # dá para preenchê-la sem reabrir o histórico. O mapeamento vem de
+        # `garantia_de`, e não é repetido em SQL, para não divergir dele.
+        pendentes = self._conn.execute(
+            "SELECT id, veredicto_verificacao FROM questoes WHERE garantia IS NULL"
+        ).fetchall()
+        for linha in pendentes:
+            self._conn.execute(
+                "UPDATE questoes SET garantia = ? WHERE id = ?",
+                (garantia_de(Veredicto(linha["veredicto_verificacao"])).value, linha["id"]),
+            )
 
     def salvar(self, resultado: ResultadoCiclo, dono: str = DONO_LOCAL) -> int:
         """Persiste um ciclo aprovado; retorna o id da questão."""
@@ -96,9 +111,9 @@ class BancoQuestoes:
         ultima = resultado.iteracoes[-1]
         cur = self._conn.execute(
             "INSERT INTO questoes (criada_em, tema, temas, habilidade_bncc, nivel_bloom, dificuldade,"
-            " natureza, formato, veredicto_verificacao, questao_json, historico_json,"
+            " natureza, formato, veredicto_verificacao, garantia, questao_json, historico_json,"
             " nota_minima_critico, iteracoes, dono)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 resultado.criada_em,
                 spec.temas[0].value,
@@ -109,6 +124,7 @@ class BancoQuestoes:
                 spec.natureza.value,
                 spec.formato.value,
                 ultima.verificacao.veredicto.value,
+                garantia_de(ultima.verificacao.veredicto).value,
                 q.model_dump_json(),
                 json.dumps([i.model_dump(mode="json") for i in resultado.iteracoes], ensure_ascii=False),
                 ultima.parecer.nota_minima() if ultima.parecer else None,
@@ -159,7 +175,7 @@ class BancoQuestoes:
         """Uma linha por questão, com metadados e avaliação — base do índice exportado."""
         linhas = self._conn.execute(
             "SELECT id, criada_em, tema, temas, habilidade_bncc, nivel_bloom, dificuldade, natureza,"
-            " formato, veredicto_verificacao, nota_minima_critico, iteracoes, avaliacao_json,"
+            " formato, veredicto_verificacao, garantia, nota_minima_critico, iteracoes, avaliacao_json,"
             f" questao_json FROM questoes WHERE {_FILTRO_DONO} ORDER BY id",
             (dono,),
         ).fetchall()
@@ -180,6 +196,7 @@ class BancoQuestoes:
         dificuldade: str | None = None,
         habilidade_bncc: str | None = None,
         formato: str | None = None,
+        garantia: str | None = None,
         limite: int | None = None,
         dono: str = DONO_LOCAL,
     ) -> list[tuple[int, Questao]]:
@@ -194,6 +211,7 @@ class BancoQuestoes:
             clausulas.append("temas LIKE ?")
             valores.append(f"%{_empacotar_temas([tema])}%")
         for coluna, valor in (
+            ("garantia", garantia),
             ("dificuldade", dificuldade),
             ("habilidade_bncc", habilidade_bncc),
             ("formato", formato),

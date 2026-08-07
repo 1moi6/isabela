@@ -7,6 +7,7 @@ from questoes.especificacao import (
     Dificuldade,
     Especificacao,
     Formato,
+    Garantia,
     Natureza,
     NivelBloom,
     Tema,
@@ -153,3 +154,27 @@ def test_bloom_divergente_e_sinalizado_sem_ser_barrado():
     """Pedir um nível fora dos verbos da habilidade é permitido — e registrado."""
     assert _spec_multi(nivel_bloom=NivelBloom.LEMBRAR).bloom_diverge()
     assert not _spec_multi(nivel_bloom=NivelBloom.APLICAR).bloom_diverge()
+
+
+def test_toda_habilidade_declara_verificabilidade_e_razao():
+    """Categoria sem razão registrada seria classificação arbitrária."""
+    for codigo, h in carregar_habilidades().items():
+        assert h["verificabilidade_esperada"] in {
+            "conferido", "conferido_em_parte", "sem_conferencia"
+        }, codigo
+        assert h["grupo_verificabilidade"] in {1, 2, 3, 4}, codigo
+        assert h["razao_verificabilidade"], codigo
+
+
+def test_conversao_de_registro_nao_promete_conferencia_plena():
+    """401 e 402 pedem converter álgebra em gráfico — nenhum CAS decide isso.
+
+    Estavam no catálogo aparentando a mesma garantia das demais; agora dizem
+    que só parte da questão é conferida.
+    """
+    catalogo = carregar_habilidades()
+    for codigo in ("EM13MAT401", "EM13MAT402"):
+        assert catalogo[codigo]["verificabilidade_esperada"] == "conferido_em_parte"
+        assert catalogo[codigo]["grupo_verificabilidade"] == 3
+    assert _spec_multi(habilidade_bncc="EM13MAT402", temas=[Tema.FUNCAO_QUADRATICA]) \
+        .verificabilidade_esperada() == Garantia.CONFERIDO_EM_PARTE

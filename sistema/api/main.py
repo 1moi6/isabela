@@ -36,7 +36,8 @@ from questoes.agentes import (  # noqa: E402
 from questoes.banco import BancoQuestoes  # noqa: E402
 from questoes.convites import DONO_LOCAL, Convites  # noqa: E402
 from questoes.especificacao import (  # noqa: E402
-    Dificuldade, Especificacao, Formato, Natureza, NivelBloom, Tema, carregar_habilidades,
+    Dificuldade, Especificacao, Formato, Garantia, Natureza, NivelBloom, Tema,
+    carregar_habilidades,
 )
 from questoes.listas import para_docx, para_latex, para_markdown  # noqa: E402
 from questoes.llm import criar_provedor  # noqa: E402
@@ -60,6 +61,13 @@ ROTULO_TEMA = {
 ROTULO_NATUREZA = {"teorica": "Teórica", "aplicada": "Aplicada"}
 ROTULO_FORMATO = {"discursiva": "Discursiva", "multipla_escolha": "Múltipla escolha"}
 ROTULO_DIFICULDADE = {"facil": "Fácil", "media": "Média", "dificil": "Difícil"}
+# Escrito para quem dá aula, não para quem programa: o terceiro rótulo precisa
+# ler como instrução, senão vira etiqueta decorativa.
+ROTULO_GARANTIA = {
+    "conferido": "Gabarito conferido",
+    "conferido_em_parte": "Conferido em parte",
+    "sem_conferencia": "Sem conferência automática — revise o gabarito",
+}
 ROTULO_DECISAO = {
     "aceita": "Aceita",
     "aceita_com_ajuste": "Aceita com ajuste",
@@ -203,6 +211,7 @@ def opcoes() -> dict:
         "naturezas": [{"valor": n.value, "rotulo": ROTULO_NATUREZA[n.value]} for n in Natureza],
         "formatos": [{"valor": f.value, "rotulo": ROTULO_FORMATO[f.value]} for f in Formato],
         "decisoes": [{"valor": v, "rotulo": r} for v, r in ROTULO_DECISAO.items()],
+        "garantias": [{"valor": g.value, "rotulo": ROTULO_GARANTIA[g.value]} for g in Garantia],
         # O formulário monta os temas a partir da habilidade escolhida, e não o
         # contrário: por isso cada habilidade carrega seus temas, como eles se
         # combinam, o que a questão precisa cumprir e que níveis de Bloom os
@@ -215,6 +224,8 @@ def opcoes() -> dict:
                 "relacao_temas": h["relacao_temas"],
                 "bloom_sugerido": h["bloom_sugerido"],
                 "exigencias": h["exigencias"],
+                "verificabilidade_esperada": h["verificabilidade_esperada"],
+                "razao_verificabilidade": h["razao_verificabilidade"],
             }
             for c, h in sorted(habilidades.items())
         ],
@@ -411,6 +422,7 @@ def salvar_no_banco(resultado: ResultadoCiclo, quem: dict = Depends(identificar)
 def listar_banco(
     tema: str | None = None,
     dificuldade: str | None = None,
+    garantia: str | None = None,
     quem: dict = Depends(identificar),
 ) -> list[dict]:
     """Questões curadas de quem está conectado, da mais recente para a mais antiga."""
@@ -421,6 +433,8 @@ def listar_banco(
         if tema and tema not in reg["temas"]:
             continue
         if dificuldade and reg["dificuldade"] != dificuldade:
+            continue
+        if garantia and reg["garantia"] != garantia:
             continue
         questao = reg.pop("questao")
         registros.append({**reg, "questao": questao.model_dump(mode="json")})

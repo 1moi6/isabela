@@ -378,3 +378,22 @@ def test_filtro_do_banco_acha_por_qualquer_tema(cliente):
     assert len(cliente.get("/api/banco?tema=funcao_afim").json()) == 1
     assert len(cliente.get("/api/banco?tema=funcao_quadratica").json()) == 1
     assert cliente.get("/api/banco?tema=funcao_exponencial").json() == []
+
+
+def test_opcoes_trazem_a_verificabilidade_esperada(cliente):
+    o = cliente.get("/api/opcoes").json()
+    por_codigo = {h["codigo"]: h for h in o["habilidades"]}
+    assert por_codigo["EM13MAT402"]["verificabilidade_esperada"] == "conferido_em_parte"
+    assert por_codigo["EM13MAT302"]["verificabilidade_esperada"] == "conferido"
+    assert por_codigo["EM13MAT402"]["razao_verificabilidade"]
+    rotulos = {g["valor"]: g["rotulo"] for g in o["garantias"]}
+    assert "revise" in rotulos["sem_conferencia"]  # lê como instrução, não como etiqueta
+
+
+def test_banco_guarda_e_filtra_pela_garantia_obtida(cliente):
+    ciclo = gerar_ciclo(cliente)["resultado"]
+    cliente.post("/api/banco", json=ciclo)
+    registro = cliente.get("/api/banco").json()[0]
+    assert registro["garantia"] == "conferido"
+    assert len(cliente.get("/api/banco?garantia=conferido").json()) == 1
+    assert cliente.get("/api/banco?garantia=sem_conferencia").json() == []

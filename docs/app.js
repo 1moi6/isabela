@@ -249,6 +249,10 @@ async function montarFormulario() {
     document.getElementById("filtro-dificuldade"),
     [{ valor: "", rotulo: "Todas" }, ...o.dificuldades]
   );
+  preencherSelect(
+    document.getElementById("filtro-garantia"),
+    [{ valor: "", rotulo: "Todas" }, ...o.garantias]
+  );
 }
 
 function lerEspecificacao() {
@@ -279,7 +283,33 @@ const VEREDICTO = {
   rejeitado: ["reprovou o gabarito", "erro"],
   nao_verificavel: ["não formalizável", "neutro"],
   aprovado_ressalva_numerica: ["conferiu por amostragem", "ok"],
+  aprovado_parcial: ["conferiu em parte", "parcial"],
 };
+
+/* A garantia é o que o professor precisa ler de relance: diz o que ESTA questão
+   recebeu de conferência, não o que a habilidade dela admitiria. Sem conferência
+   automática vira aviso, não etiqueta neutra — é pedido de revisão. */
+/* Espelha `garantia_de` em modelos.py — a questão recém-gerada ainda não passou
+   pelo banco, então o rótulo é derivado aqui a partir do veredicto. */
+const GARANTIA_POR_VEREDICTO = {
+  aprovado: "conferido",
+  aprovado_ressalva_numerica: "conferido_em_parte",
+  aprovado_parcial: "conferido_em_parte",
+  nao_verificavel: "sem_conferencia",
+  rejeitado: "sem_conferencia",
+};
+
+const ESTILO_GARANTIA = {
+  conferido: "ok",
+  conferido_em_parte: "parcial",
+  sem_conferencia: "erro",
+};
+
+function etiquetaDeGarantia(garantia) {
+  if (!garantia) return null;
+  const estilo = ESTILO_GARANTIA[garantia] || "neutra";
+  return el("span", `etiqueta etiqueta--${estilo}`, rotulo(estadoApp.opcoes.garantias, garantia));
+}
 
 function montarTrilha(iteracao) {
   const trilha = el("ol", "trilha");
@@ -440,6 +470,8 @@ function cartaoGerado(entrada, indice) {
   blocosDeApoio(cartao, r.questao_final, ultima);
 
   const rodape = el("div", "questao__rodape");
+  const garantia = etiquetaDeGarantia(GARANTIA_POR_VEREDICTO[ultima.verificacao.veredicto]);
+  if (garantia) rodape.append(garantia);
   if (entrada.id) {
     rodape.append(el("span", "etiqueta etiqueta--ok", "no banco"));
     rodape.append(el("span", "campo__ajuda", "Avalie esta questão na aba Banco curado."));
@@ -615,7 +647,9 @@ function cartaoDoBanco(registro) {
   const rodape = el("div", "questao__rodape");
   const [texto, estilo] = VEREDICTO[registro.veredicto_verificacao]
     || [registro.veredicto_verificacao, "neutro"];
-  const classeEtiqueta = { ok: "ok", erro: "erro" }[estilo] || "neutra";
+  const classeEtiqueta = { ok: "ok", erro: "erro", parcial: "parcial" }[estilo] || "neutra";
+  const garantia = etiquetaDeGarantia(registro.garantia);
+  if (garantia) rodape.append(garantia);
   rodape.append(el("span", `etiqueta etiqueta--${classeEtiqueta}`, `verificador: ${texto}`));
   if (registro.nota_minima_critico != null) {
     rodape.append(el("span", "etiqueta etiqueta--neutra", `nota mínima ${registro.nota_minima_critico}/5`));
@@ -631,9 +665,11 @@ function cartaoDoBanco(registro) {
 async function carregarBanco() {
   const tema = document.getElementById("filtro-tema").value;
   const dificuldade = document.getElementById("filtro-dificuldade").value;
+  const garantia = document.getElementById("filtro-garantia").value;
   const busca = new URLSearchParams();
   if (tema) busca.set("tema", tema);
   if (dificuldade) busca.set("dificuldade", dificuldade);
+  if (garantia) busca.set("garantia", garantia);
 
   estadoApp.banco = await (await api(`/api/banco?${busca}`)).json();
   const area = document.getElementById("lista-banco");
@@ -714,6 +750,7 @@ async function iniciar() {
   document.getElementById("form-gerar").addEventListener("submit", gerar);
   document.getElementById("filtro-tema").addEventListener("change", carregarBanco);
   document.getElementById("filtro-dificuldade").addEventListener("change", carregarBanco);
+  document.getElementById("filtro-garantia").addEventListener("change", carregarBanco);
 
   for (const botao of document.querySelectorAll(".abas__item")) {
     botao.addEventListener("click", () => trocarAba(botao.dataset.aba));

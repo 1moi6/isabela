@@ -511,6 +511,8 @@ main { padding: 28px; }
 .etiqueta--ok { background: var(--conferido-fraco); color: var(--conferido); }
 .etiqueta--erro { background: var(--corrigido-fraco); color: var(--corrigido); }
 .etiqueta--neutra { background: var(--esferografica-fraca); color: var(--esferografica); }
+/* Garantia intermediária: nem o verde de conferido, nem o vermelho de revisar. */
+.etiqueta--parcial { background: #fdf3e3; color: #8a5a12; }
 
 /* ------------------------------------------------------- barra de montagem */
 .barra-lista {

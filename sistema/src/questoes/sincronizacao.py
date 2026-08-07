@@ -18,13 +18,13 @@ import csv
 import json
 from pathlib import Path
 
-from .modelos import AvaliacaoProfessor, Questao, ResultadoCiclo
+from .modelos import AvaliacaoProfessor, Questao, ResultadoCiclo, garantia_de
 
 INDICE = "_indice.csv"
 
 COLUNAS_INDICE = [
     "id", "criada_em", "temas", "habilidade_bncc", "nivel_bloom", "dificuldade",
-    "natureza", "formato", "veredicto_verificacao", "nota_minima_critico",
+    "natureza", "formato", "veredicto_verificacao", "garantia", "nota_minima_critico",
     "iteracoes", "decisao_professor", "comentario_professor", "arquivo",
 ]
 
@@ -136,6 +136,7 @@ def _markdown(
         "## Resolução", "", q.resolucao, "",
         "## Verificação simbólica", "",
         f"- **Veredicto:** {ultima.verificacao.veredicto.value}",
+        f"- **Garantia:** {garantia_de(ultima.verificacao.veredicto).value}",
         f"- **Justificativa:** {ultima.verificacao.justificativa}",
     ]
     if ultima.verificacao.resultado_calculado:
