@@ -14,9 +14,9 @@ from ._parse import parse, parse_lista, simbolo
 
 
 def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
-    equacao = parse(ev.expressao)
-    incognitas = [simbolo(n) for n in ev.incognitas]
-    esperadas = parse_lista(ev.resposta_esperada)
+    equacao = parse(ev.expressao, ev.incognitas)
+    incognitas = [simbolo(n, ev.incognitas) for n in ev.incognitas]
+    esperadas = parse_lista(ev.resposta_esperada, ev.incognitas)
 
     calculadas = sp.solve(equacao, incognitas if len(incognitas) > 1 else incognitas[0])
     if isinstance(calculadas, dict):  # sistemas retornam dict {simbolo: valor}

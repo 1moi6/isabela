@@ -66,3 +66,32 @@ def test_dominio_indeterminavel_degrada_sem_reprovar():
 
 def test_crescimento_com_resposta_fora_do_vocabulario():
     assert _ev("2*x+1", "crescimento", "sobe sempre").veredicto == Veredicto.NAO_VERIFICAVEL
+
+
+def test_dominio_restrito_pelo_contexto_nao_e_reprovado():
+    """Encontrado numa medição com provedor real: quatro falsos negativos.
+
+    Uma questão restringe legitimamente o domínio ao que o contexto admite —
+    `t` é tempo e não pode ser negativo, `n` conta termos e é natural. Exigir
+    igualdade com o domínio máximo reprovava gabaritos corretos, e nas
+    EM13MAT507/508 isso era sistemático: elas tratam de funções de domínios
+    discretos, então declarar o domínio como os naturais é o que a habilidade
+    pede — e era exatamente o que reprovava.
+    """
+    assert _ev("5*n + 7", "dominio", "S.Naturals").veredicto == Veredicto.APROVADO
+    assert _ev("8 - 6*cos(pi*t/15)", "dominio", "Interval(0, oo)").veredicto == Veredicto.APROVADO
+    assert _ev("500*2**x", "dominio", "Interval(0, oo)").veredicto == Veredicto.APROVADO
+
+
+def test_dominio_que_afirma_pontos_inexistentes_continua_reprovado():
+    """A tolerância é para restrição, não para erro: log(x-2) não existe em x=0."""
+    r = _ev("log(x-2)", "dominio", "S.Reals")
+    assert r.veredicto == Veredicto.REJEITADO
+    assert "não está definida" in r.justificativa
+    assert _ev("log(x-2)", "dominio", "Interval.open(2, oo)").veredicto == Veredicto.APROVADO
+
+
+def test_imagem_calculada_sobre_o_dominio_de_contexto():
+    """`500*2**x` com x contando períodos tem imagem [500, oo), não (0, oo)."""
+    r = _ev("500*2**x", "imagem", "Interval(500, oo)", dominio="Interval(0, oo)")
+    assert r.veredicto == Veredicto.APROVADO

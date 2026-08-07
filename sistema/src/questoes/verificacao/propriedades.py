@@ -34,12 +34,12 @@ _TERMOS_CONFERIDOS = 5
 
 
 def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
-    f = parse(ev.resposta_esperada)
-    x = simbolo(ev.incognitas[0] if ev.incognitas else "x")
+    f = parse(ev.resposta_esperada, ev.incognitas)
+    x = simbolo(ev.incognitas[0] if ev.incognitas else "x", ev.incognitas)
     conferidos: list[str] = []
 
     if "pontos" in ev.parametros:
-        for ponto in _pares(ev.parametros["pontos"]):
+        for ponto in _pares(ev.parametros["pontos"], ev.incognitas):
             xi, yi = ponto
             obtido = sp.simplify(f.subs(x, xi))
             if sp.simplify(obtido - yi) != 0:
@@ -49,20 +49,20 @@ def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
         conferidos.append(f"reproduz os {len(_pares(ev.parametros['pontos']))} pontos dados")
 
     if "grau" in ev.parametros:
-        esperado = int(parse(ev.parametros["grau"]))
+        esperado = int(parse(ev.parametros["grau"], ev.incognitas))
         obtido = sp.degree(sp.Poly(f, x))
         if obtido != esperado:
             return _rejeitado(f"a expressão {f} tem grau {obtido}, e não {esperado}")
         conferidos.append(f"grau {esperado}")
 
     if "forma" in ev.parametros:
-        erro = _conferir_forma(f, x, ev.parametros["forma"])
+        erro = _conferir_forma(f, x, ev.parametros["forma"], ev.incognitas)
         if erro:
             return _rejeitado(erro)
         conferidos.append(f"forma {ev.parametros['forma']}")
 
     if "sequencia" in ev.parametros:
-        erro = _conferir_sequencia(f, x, ev.parametros)
+        erro = _conferir_sequencia(f, x, ev.parametros, ev.incognitas)
         if erro:
             return _rejeitado(erro)
         conferidos.append(f"coincide com a {ev.parametros['sequencia'].upper()} declarada")
@@ -81,20 +81,20 @@ def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
     )
 
 
-def _pares(bruto: str) -> list[tuple]:
+def _pares(bruto: str, incognitas=None) -> list[tuple]:
     """Lê "[(1,5),(2,8)]" como pares de expressões SymPy."""
-    lido = parse(bruto) if not isinstance(bruto, (list, tuple)) else bruto
+    lido = parse(bruto, incognitas) if not isinstance(bruto, (list, tuple)) else bruto
     return [tuple(sp.sympify(c) for c in par) for par in lido]
 
 
-def _conferir_forma(f, x, forma: str) -> str | None:
+def _conferir_forma(f, x, forma: str, incognitas=None) -> str | None:
     """Confere que só os termos da forma declarada aparecem.
 
     Distingue y = ax² (EM13MAT502, "diretamente proporcional ao quadrado") de uma
     quadrática qualquer: o que a habilidade pede é justamente a ausência dos
     termos de grau menor.
     """
-    graus_permitidos = {sp.degree(sp.Poly(t, x)) for t in parse(forma).as_ordered_terms()}
+    graus_permitidos = {sp.degree(sp.Poly(t, x)) for t in parse(forma, incognitas).as_ordered_terms()}
     for termo in sp.expand(f).as_ordered_terms():
         grau = sp.degree(sp.Poly(termo, x))
         if grau not in graus_permitidos:
@@ -102,11 +102,11 @@ def _conferir_forma(f, x, forma: str) -> str | None:
     return None
 
 
-def _conferir_sequencia(f, n, parametros: dict) -> str | None:
+def _conferir_sequencia(f, n, parametros: dict, incognitas=None) -> str | None:
     """Confere que f(n) reproduz a progressão declarada nos primeiros termos."""
     tipo = str(parametros["sequencia"]).lower()
-    a1 = parse(parametros["a1"])
-    razao = parse(parametros["razao"])
+    a1 = parse(parametros["a1"], incognitas)
+    razao = parse(parametros["razao"], incognitas)
     for k in range(1, _TERMOS_CONFERIDOS + 1):
         termo = a1 + (k - 1) * razao if tipo == "pa" else a1 * razao ** (k - 1)
         obtido = sp.simplify(f.subs(n, k))

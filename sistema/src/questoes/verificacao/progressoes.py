@@ -17,9 +17,10 @@ from ._parse import parse
 def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
     p = ev.parametros
     tipo = p.get("tipo_progressao", "pa")
-    a1, razao, n = parse(p["a1"]), parse(p["razao"]), parse(p["n"])
+    a1, razao, n = (parse(p["a1"], ev.incognitas), parse(p["razao"], ev.incognitas),
+                    parse(p["n"], ev.incognitas))
     consulta = p.get("consulta", "termo")
-    esperado = parse(ev.resposta_esperada)
+    esperado = parse(ev.resposta_esperada, ev.incognitas)
 
     if tipo == "pa":
         calculado = a1 + (n - 1) * razao if consulta == "termo" else n * (2 * a1 + (n - 1) * razao) / 2
