@@ -219,37 +219,48 @@ obrigatória para todos os estudantes, ficando os itinerários, por sua implemen
 do escopo.
 
 A estrutura tem uma consequência direta para o sistema: o código de habilidade --- da forma
-\texttt{EM13MATxxx}, em que os dois primeiros algarismos após \texttt{MAT} identificam a competência e
-os últimos a habilidade --- funciona como identificador único e não ambíguo da expectativa de
+\texttt{EM13MATxxx}, em que o primeiro algarismo após \texttt{MAT} identifica a competência específica e
+os dois seguintes numeram a habilidade dentro dela --- funciona como identificador único e não ambíguo da expectativa de
 aprendizagem associada a cada questão gerada, permitindo rastrear qual conteúdo ela aborda e como se
 posiciona no currículo.
 
 \subsection{Habilidades de Matemática}
 \label{sub:bncc-habilidades}
 
-% CORRIGIDO: o rascunho dizia "quatro unidades temáticas" mas listava
-% três. O texto discute exatamente estas três. CONFERIR a nomenclatura
-% e a contagem contra o documento da BNCC antes da versão final.
-A área de Matemática e suas Tecnologias organiza seus conteúdos em três unidades temáticas:
-\textbf{Números e Álgebra}, \textbf{Geometria e Medidas} e \textbf{Probabilidade e Estatística}
-% CONFERIR contagem/nomenclatura na BNCC
-\citep{brasil2018bncc}. A unidade \textbf{Números e Álgebra} abrange a interpretação e o uso de funções
-(polinomiais, exponenciais, logarítmicas e trigonométricas), progressões aritméticas e geométricas e a
-análise de situações de variação de grandezas; é a unidade com maior densidade de habilidades e maior
-abrangência para a geração de questões com diferentes níveis cognitivos. A unidade \textbf{Geometria e
-Medidas} contempla geometria plana e espacial, semelhança, trigonometria e transformações geométricas;
-do ponto de vista da verificação simbólica, é a que apresenta maior proporção de habilidades de difícil
-formalização computacional, correspondendo ao limite discutido na Seção~\ref{sub:cas-limites}. A unidade
-\textbf{Probabilidade e Estatística} reúne análise combinatória, probabilidade, medidas de tendência
-central e dispersão e interpretação de dados, sendo a de maior potencial para questões contextualizadas.
+Diferentemente do Ensino Fundamental, a área de Matemática e suas Tecnologias não distribui suas
+habilidades por unidades temáticas: as quarenta e cinco habilidades da formação básica comum estão
+organizadas pelas cinco competências específicas, e é o primeiro algarismo do código que indica a qual
+delas cada habilidade pertence. A própria Base, contudo, registra que essa não é a única organização
+possível e admite que, na elaboração de currículos, as habilidades sejam reagrupadas em unidades
+temáticas, à maneira do Ensino Fundamental \citep{brasil2018bncc}. O documento ilustra esse
+reagrupamento com uma unidade --- \textbf{Funções polinomiais de 1º e 2º graus} --- que reúne sete
+habilidades provenientes de três competências distintas: \texttt{EM13MAT501} e \texttt{EM13MAT502}
+(investigar padrões em tabelas e expressar algebricamente a generalização), \texttt{EM13MAT401} e
+\texttt{EM13MAT402} (converter representações algébricas em geométricas no plano cartesiano),
+\texttt{EM13MAT503} (investigar pontos de máximo e de mínimo), \texttt{EM13MAT507} (associar
+progressões aritméticas a funções afins de domínio discreto) e \texttt{EM13MAT302} (resolver e
+elaborar problemas modelados por essas funções).
 
-Para o recorte desta dissertação, o sistema foi desenvolvido e testado com foco prioritário nas
-unidades de Números e Álgebra e de Probabilidade e Estatística, por duas razões: a maior cobertura da
-verificação simbólica via SymPy para esses conteúdos --- equações, funções, sequências e expressões
-admitem verificação determinística na maioria dos casos --- e a representatividade dessas unidades nas
-avaliações externas brasileiras, em particular no ENEM. As habilidades de Geometria e Medidas que
-admitem verificação simbólica --- equações de retas, circunferências e distâncias na geometria analítica
---- também foram incluídas, com as ressalvas da Seção~\ref{sub:cas-limites}.
+Essa unidade exemplificada pela BNCC é adotada nesta dissertação como recorte curricular, na íntegra.
+A ela acrescenta-se um segundo agrupamento, construído por analogia --- e não extraído do texto da Base
+---, que reúne as habilidades correspondentes no campo do crescimento exponencial:
+\texttt{EM13MAT303} (porcentagens e juros compostos), \texttt{EM13MAT304} (problemas com funções
+exponenciais) e \texttt{EM13MAT508} (associar progressões geométricas a funções exponenciais de domínio
+discreto). O recorte totaliza, portanto, dez habilidades, cobrindo funções afins, funções quadráticas,
+funções exponenciais e as duas progressões.
+
+A delimitação não é de conveniência: ela decorre do critério de verificabilidade que sustenta a
+hipótese arquitetural desta dissertação (Seção~\ref{sec:hipotese}). Equações, funções e sequências
+admitem formalização em um sistema de computação algébrica e, portanto, verificação determinística da
+resposta, ao passo que habilidades de geometria plana e espacial, de contagem e probabilidade e de
+estatística exigiriam núcleos de verificação de natureza inteiramente distinta, quando não recaem nos
+limites de formalização discutidos na Seção~\ref{sub:cas-limites}. Pelo mesmo motivo ficam de fora, por
+ora, as funções logarítmicas e trigonométricas, ainda que sejam vizinhas imediatas do recorte e
+constituam a extensão mais natural do sistema. Como o recorte é curricular e não meramente
+computacional, ele coincide com uma unidade que a própria Base reconhece como coerente --- o que
+permite ao professor situar o que o sistema gera dentro de um bloco de ensino já constituído. A
+tradução desse recorte em parâmetros de entrada do sistema é descrita na
+Seção~\ref{sec:especificacao}.
 
 \subsection{Articulação entre BNCC e taxonomias cognitivas}
 \label{sub:bncc-taxonomias}
