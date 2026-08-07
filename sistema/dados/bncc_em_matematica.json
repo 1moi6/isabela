@@ -8,6 +8,18 @@
     "funcoes_exponenciais_progressoes_geometricas": {
       "nome": "Funções exponenciais e progressões geométricas",
       "fonte": "Agrupamento NOSSO, por analogia ao exemplo de 5.2.1.1. A BNCC autoriza a organização em unidades temáticas, mas não exemplifica esta unidade — não citar como texto da Base."
+    },
+    "funcoes_logaritmicas": {
+      "nome": "Funções logarítmicas",
+      "fonte": "Agrupamento NOSSO, por analogia ao exemplo de 5.2.1.1 — não consta da BNCC."
+    },
+    "funcoes_trigonometricas": {
+      "nome": "Funções trigonométricas",
+      "fonte": "Agrupamento NOSSO, por analogia ao exemplo de 5.2.1.1 — não consta da BNCC."
+    },
+    "funcoes_por_partes": {
+      "nome": "Funções definidas por várias sentenças",
+      "fonte": "Agrupamento NOSSO, por analogia ao exemplo de 5.2.1.1 — não consta da BNCC."
     }
   },
   "habilidades": [
@@ -215,6 +227,114 @@
       "exigencias": [
         "A questão deve articular a progressão geométrica com a função exponencial correspondente, tratando explicitamente o domínio discreto.",
         "Aplicar a fórmula do termo geral ou da soma NÃO basta: a associação entre a PG e a função exponencial precisa ser exigida pelo enunciado."
+      ]
+    },
+    {
+      "codigo": "EM13MAT305",
+      "descricao": "Resolver e elaborar problemas com funções logarítmicas nos quais é necessário compreender e interpretar a variação das grandezas envolvidas, em contextos como os de abalos sísmicos, pH, radioatividade, Matemática Financeira, entre outros.",
+      "verificabilidade_esperada": "conferido",
+      "grupo_verificabilidade": 1,
+      "razao_verificabilidade": "A resposta é computável e há estratégia de verificação para ela.",
+      "unidade": "funcoes_logaritmicas",
+      "temas": [
+        "funcao_logaritmica"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "aplicar",
+        "analisar",
+        "criar"
+      ],
+      "exigencias": [
+        "A questão deve envolver uma função logarítmica e exigir compreender e interpretar a variação das grandezas.",
+        "O contexto deve ser realista (abalos sísmicos, pH, radioatividade, Matemática Financeira).",
+        "Não basta aplicar a definição de logaritmo: a variação precisa ser objeto da questão."
+      ]
+    },
+    {
+      "codigo": "EM13MAT306",
+      "descricao": "Resolver e elaborar problemas em contextos que envolvem fenômenos periódicos reais, como ondas sonoras, ciclos menstruais, movimentos cíclicos, entre outros, e comparar suas representações com as funções seno e cosseno, no plano cartesiano, com ou sem apoio de aplicativos de álgebra e geometria.",
+      "verificabilidade_esperada": "conferido",
+      "grupo_verificabilidade": 1,
+      "razao_verificabilidade": "A resposta é computável e há estratégia de verificação para ela.",
+      "unidade": "funcoes_trigonometricas",
+      "temas": [
+        "funcao_trigonometrica"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "aplicar",
+        "analisar",
+        "criar"
+      ],
+      "exigencias": [
+        "A questão deve partir de um fenômeno periódico real (onda sonora, movimento cíclico, maré).",
+        "Deve exigir comparar a situação com a representação por seno ou cosseno no plano cartesiano.",
+        "Amplitude, período ou deslocamento precisam ser objeto da questão, não dados decorativos."
+      ]
+    },
+    {
+      "codigo": "EM13MAT403",
+      "descricao": "Comparar e analisar as representações, em plano cartesiano, das funções exponencial e logarítmica para identificar as características fundamentais (domínio, imagem, crescimento) de cada uma, com ou sem apoio de tecnologias digitais, estabelecendo relações entre elas.",
+      "verificabilidade_esperada": "conferido_em_parte",
+      "grupo_verificabilidade": 3,
+      "razao_verificabilidade": "O que a habilidade cobra é a forma da questão (comparação entre representações), que nenhum sistema de computação algébrica decide; só as características calculadas são conferidas.",
+      "unidade": "funcoes_logaritmicas",
+      "temas": [
+        "funcao_exponencial",
+        "funcao_logaritmica"
+      ],
+      "relacao_temas": "conjuntiva",
+      "bloom_sugerido": [
+        "entender",
+        "analisar"
+      ],
+      "exigencias": [
+        "A questão deve tratar da exponencial E da logarítmica, estabelecendo relação entre elas — não uma de cada vez.",
+        "O que se compara são as características fundamentais: domínio, imagem e crescimento.",
+        "Calcular um valor de cada função NÃO realiza a habilidade: a comparação entre as representações é o que se pede."
+      ]
+    },
+    {
+      "codigo": "EM13MAT404",
+      "descricao": "Identificar as características fundamentais das funções seno e cosseno (periodicidade, domínio, imagem), por meio da comparação das representações em ciclos trigonométricos e em planos cartesianos, com ou sem apoio de tecnologias digitais.",
+      "verificabilidade_esperada": "conferido_em_parte",
+      "grupo_verificabilidade": 3,
+      "razao_verificabilidade": "O que a habilidade cobra é a forma da questão (comparação entre representações), que nenhum sistema de computação algébrica decide; só as características calculadas são conferidas.",
+      "unidade": "funcoes_trigonometricas",
+      "temas": [
+        "funcao_trigonometrica"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "entender",
+        "analisar"
+      ],
+      "exigencias": [
+        "O que se pede são as características fundamentais de seno ou cosseno: periodicidade, domínio e imagem.",
+        "A questão deve mobilizar a comparação entre o ciclo trigonométrico e o plano cartesiano.",
+        "Calcular o seno de um ângulo NÃO realiza a habilidade."
+      ]
+    },
+    {
+      "codigo": "EM13MAT405",
+      "descricao": "Reconhecer funções definidas por uma ou mais sentenças (como a tabela do Imposto de Renda, contas de luz, água, gás etc.), em suas representações algébrica e gráfica, convertendo essas representações de uma para outra e identificando domínios de validade, imagem, crescimento e decrescimento.",
+      "verificabilidade_esperada": "conferido_em_parte",
+      "grupo_verificabilidade": 1,
+      "razao_verificabilidade": "A resposta é computável e há estratégia de verificação para ela.",
+      "unidade": "funcoes_por_partes",
+      "temas": [
+        "funcao_por_partes"
+      ],
+      "relacao_temas": "unica",
+      "bloom_sugerido": [
+        "entender",
+        "aplicar"
+      ],
+      "exigencias": [
+        "A função deve ser definida por mais de uma sentença, em contexto real (tabela do Imposto de Renda, conta de luz, água ou gás).",
+        "A questão deve exigir converter entre a representação algébrica e a gráfica, ou identificar domínios de validade, imagem, crescimento ou decrescimento.",
+        "Avaliar a função num único ponto NÃO realiza a habilidade: é preciso mobilizar a mudança de sentença."
       ]
     }
   ]

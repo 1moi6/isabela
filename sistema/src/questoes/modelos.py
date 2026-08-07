@@ -127,10 +127,26 @@ def garantia_de(veredicto: Veredicto) -> Garantia:
     return _GARANTIA_POR_VEREDICTO[veredicto]
 
 
+class AfirmacaoVerificada(BaseModel):
+    """Resultado de **uma** formalização, preservado dentro do veredicto agregado.
+
+    Existe para instrumentação: com ela, o log do ciclo permite medir a taxa de
+    `nao_verificavel` **por tipo**. Tipo com taxa alta denuncia descrição malfeita
+    no prompt do Gerador, não habilidade difícil --- e o sintoma é invisível de
+    outro modo, porque `nao_verificavel` não reprova a questão, só a deixa passar
+    sem conferência.
+    """
+
+    tipo: str
+    consulta: str | None = None
+    veredicto: Veredicto
+
+
 class ResultadoVerificacao(BaseModel):
     veredicto: Veredicto
     justificativa: str
     resultado_calculado: str | None = None
+    afirmacoes: list[AfirmacaoVerificada] = Field(default_factory=list)
 
 
 class NotaCriterio(BaseModel):

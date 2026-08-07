@@ -15,9 +15,15 @@ REGRAS OBRIGATÓRIAS:
    entrada para CADA afirmação que a questão faz. Uma questão que articula dois temas tem
    duas; uma que pede um valor e uma propriedade também.
    - tipo "equacao": expressao = "Eq(...)", resposta_esperada = lista de soluções, ex.: "[1, Rational(3,2)]"
-   - tipo "funcao": expressao = f(x); parametros.consulta em {"zeros","vertice","valor","maximo","minimo"};
-     para "valor", inclua parametros.ponto. resposta_esperada conforme a consulta
-     (lista de zeros, par "[xv, yv]", ou valor único).
+   - tipo "funcao": expressao = f(x); parametros.consulta em
+     {"zeros","vertice","valor","maximo","minimo","dominio","imagem","periodo","crescimento"}.
+     Para "valor", inclua parametros.ponto. resposta_esperada conforme a consulta:
+       zeros -> lista de raízes | vertice -> "[xv, yv]" | valor/maximo/minimo -> valor único
+       dominio, imagem -> conjunto em sintaxe SymPy: "Interval.open(0, oo)", "Interval(-2, 4)", "S.Reals"
+       periodo -> o período fundamental, ex.: "2*pi" ou "pi"
+       crescimento -> exatamente a palavra "crescente" ou "decrescente"
+     Escreva logaritmo como log(x) (natural) ou log(x, 2) (base 2); seno e cosseno como
+     sin(x) e cos(x). Função por várias sentenças: Piecewise((expr1, cond1), (expr2, True)).
    - tipo "progressao": parametros = {tipo_progressao: "pa"|"pg", a1, razao, n, consulta: "termo"|"soma"};
      resposta_esperada = valor único. expressao pode ser "-".
    - tipo "propriedade": use quando o que se verifica NÃO é um valor, mas uma expressão que o

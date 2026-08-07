@@ -30,6 +30,9 @@ class Tema(str, Enum):
     FUNCAO_EXPONENCIAL = "funcao_exponencial"
     PROGRESSAO_ARITMETICA = "progressao_aritmetica"
     PROGRESSAO_GEOMETRICA = "progressao_geometrica"
+    FUNCAO_LOGARITMICA = "funcao_logaritmica"
+    FUNCAO_TRIGONOMETRICA = "funcao_trigonometrica"
+    FUNCAO_POR_PARTES = "funcao_por_partes"
 
 
 class RelacaoTemas(str, Enum):

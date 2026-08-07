@@ -87,3 +87,29 @@ def test_questao_antiga_com_verificavel_no_singular_continua_lendo():
         "verificavel": None, "especificacao": SPEC.model_dump(),
     })
     assert nula.verificaveis == []
+
+
+def test_afirmacoes_ficam_registradas_para_medir_por_tipo():
+    """Sem isto não dá para medir a taxa de não-verificável por tipo.
+
+    O sintoma é invisível de outro modo: `nao_verificavel` não reprova a questão,
+    só a deixa passar sem conferência — e é o modo de falha esperado quando o
+    Gerador não sabe preencher um tipo novo.
+    """
+    r = VerificadorSimbolico().verificar(_questao(TERMO_CERTO, SEM_PREDICADO))
+    assert [(a.tipo, a.veredicto.value) for a in r.afirmacoes] == [
+        ("progressao", "aprovado"),
+        ("propriedade", "nao_verificavel"),
+    ]
+
+
+def test_consulta_fica_registrada_junto_do_tipo():
+    """'funcao/imagem' falhando não é o mesmo problema que 'funcao/zeros' falhando."""
+    from questoes.modelos import ExpressaoVerificavel
+
+    imagem = ExpressaoVerificavel(
+        tipo="funcao", expressao="3*sin(2*x)+1", incognitas=["x"],
+        resposta_esperada="Interval(-2, 4)", parametros={"consulta": "imagem"},
+    )
+    r = VerificadorSimbolico().verificar(_questao(imagem))
+    assert (r.afirmacoes[0].tipo, r.afirmacoes[0].consulta) == ("funcao", "imagem")

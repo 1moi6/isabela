@@ -178,3 +178,21 @@ def test_conversao_de_registro_nao_promete_conferencia_plena():
         assert catalogo[codigo]["grupo_verificabilidade"] == 3
     assert _spec_multi(habilidade_bncc="EM13MAT402", temas=[Tema.FUNCAO_QUADRATICA]) \
         .verificabilidade_esperada() == Garantia.CONFERIDO_EM_PARTE
+
+
+def test_habilidades_de_funcoes_log_e_trigonometricas_entraram():
+    """Fase 2a/2b: a unidade de funções deixa de parar na exponencial."""
+    catalogo = carregar_habilidades()
+    assert {"EM13MAT305", "EM13MAT306", "EM13MAT403", "EM13MAT404", "EM13MAT405"} <= set(catalogo)
+    # 403 compara exponencial COM logarítmica: a articulação é a habilidade
+    assert catalogo["EM13MAT403"]["relacao_temas"] == "conjuntiva"
+    with pytest.raises(ValidationError, match="descaracteriza"):
+        _spec_multi(habilidade_bncc="EM13MAT403", temas=[Tema.FUNCAO_EXPONENCIAL])
+
+
+def test_comparacao_entre_representacoes_declara_conferencia_parcial():
+    """403 e 404 pedem comparar representações — nenhum CAS decide isso."""
+    catalogo = carregar_habilidades()
+    for codigo in ("EM13MAT403", "EM13MAT404"):
+        assert catalogo[codigo]["verificabilidade_esperada"] == "conferido_em_parte"
+        assert catalogo[codigo]["grupo_verificabilidade"] == 3

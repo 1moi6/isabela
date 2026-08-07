@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi — suficiente para os testes
-python -m pytest            # 128 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 139 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -88,9 +88,17 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   `verificaveis`; e `banco.py` preenche `temas` e `garantia` na migração a partir das colunas
   antigas. Sem elas o histórico do professor fica ilegível.
 - **Tipo novo de verificação** = módulo em `verificacao/` + uma linha no dicionário
-  `_ESTRATEGIAS` + testes + descrição no `prompts/gerador.md`. Os módulos existentes têm 50–85
+  `_ESTRATEGIAS` + testes + descrição no `prompts/gerador.md`. Os módulos existentes têm 50–160
   linhas: o SymPy é a parte barata; calibrar o *prompt* para o LLM emitir a formalização certa
   é o que custa, e falha em silêncio (`nao_verificavel` não reprova a questão).
+- **Quando o CAS não conclui, o veredicto é `nao_verificavel` — nunca `rejeitado`.** Não é
+  preciosismo: `function_range(2**x)` devolve `EmptySet` (mas acerta `3*2**x`), e tratar isso
+  como cálculo válido reprovaria o gabarito correto, mandando o Gerador "corrigir" o que estava
+  certo. Idem `is_increasing`, que precisa ser avaliado **no domínio** (`log(x)` sobre R dá
+  `False`). Ao escrever um tipo novo, teste as rotinas do SymPy contra casos conhecidos ANTES.
+- **`sistema/analisar_logs.py`** reporta a taxa de `nao_verificavel` por tipo/consulta a partir
+  de `logs/ciclos.jsonl`. É como se descobre que um tipo novo está mal descrito no prompt — o
+  sintoma é invisível na interface. Requer gerações com provedor real; a suíte usa `LLMFake`.
 
 ## Documentos que governam o trabalho (leia antes de editar o texto)
 
@@ -167,9 +175,8 @@ Elementos pré-textuais (resumo, abstract, folha de rosto, listas); validação 
 (`% CONFERIR`); migração para `abntex2cite`.
 
 A expansão do catálogo tem plano próprio em `plano_expansao_verificacao.md`, com a
-classificação das 45 habilidades por verificabilidade. As Fases 0, 1 e 3 estão feitas; a Fase 2
-(sete famílias de tipos novos, ~30 habilidades) está aberta — comece por 2a/2b (log,
-trigonometria, `Piecewise`), que fecham a unidade de funções.
+classificação das 45 habilidades por verificabilidade. Feitas: Fases 0, 1, 3 e 2a/2b — 15 das 45
+habilidades. Aberta: o resto da Fase 2 (2c a 2g, ~25 habilidades).
 
 Segue fora do alcance do SymPy, por natureza e não por falta de implementação: `401` e `402`
 (conversão de registro é propriedade do enunciado). Elas declaram `conferido_em_parte`.

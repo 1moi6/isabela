@@ -57,6 +57,9 @@ ROTULO_TEMA = {
     "funcao_exponencial": "Função exponencial",
     "progressao_aritmetica": "Progressão aritmética (PA)",
     "progressao_geometrica": "Progressão geométrica (PG)",
+    "funcao_logaritmica": "Função logarítmica",
+    "funcao_trigonometrica": "Função trigonométrica (seno e cosseno)",
+    "funcao_por_partes": "Função definida por várias sentenças",
 }
 ROTULO_NATUREZA = {"teorica": "Teórica", "aplicada": "Aplicada"}
 ROTULO_FORMATO = {"discursiva": "Discursiva", "multipla_escolha": "Múltipla escolha"}

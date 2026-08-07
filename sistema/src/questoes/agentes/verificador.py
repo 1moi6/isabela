@@ -11,7 +11,7 @@ recebe: a política de decisão continua lá, e continua vendo um veredicto úni
 
 from __future__ import annotations
 
-from ..modelos import Questao, ResultadoVerificacao, Veredicto
+from ..modelos import AfirmacaoVerificada, Questao, ResultadoVerificacao, Veredicto
 from ..verificacao import verificar
 
 
@@ -25,9 +25,16 @@ class VerificadorSimbolico:
             )
 
         resultados = [verificar(ev) for ev in questao.verificaveis]
-        if len(resultados) == 1:
-            return resultados[0]
-        return _agregar(resultados)
+        agregado = resultados[0] if len(resultados) == 1 else _agregar(resultados)
+        agregado.afirmacoes = [
+            AfirmacaoVerificada(
+                tipo=ev.tipo,
+                consulta=ev.parametros.get("consulta"),
+                veredicto=r.veredicto,
+            )
+            for ev, r in zip(questao.verificaveis, resultados)
+        ]
+        return agregado
 
 
 def _agregar(resultados: list[ResultadoVerificacao]) -> ResultadoVerificacao:
