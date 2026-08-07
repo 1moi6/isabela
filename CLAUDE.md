@@ -10,7 +10,7 @@ descreve**: um sistema multiagente para geração assistida de questões de Mate
 (LLM gerador + verificador simbólico via SymPy + crítico didático + orquestrador).
 
 Dois artefatos:
-- `dissertacao/` — o texto em LaTeX (Caps. 1–3 escritos; 4–7 pendentes).
+- `dissertacao/` — o texto em LaTeX (Caps. 1–7 escritos; falta o material pré-textual).
 - `sistema/` — o código Python do sistema (produto educacional; ver `sistema/README.md`).
 
 ## Trabalhar no código (`sistema/`)
@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi — suficiente para os testes
-python -m pytest            # 56 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 110 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -34,10 +34,13 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   dependências de provedor são opcionais no `pyproject.toml` — não as torne obrigatórias.
   Os modelos atuais da Anthropic **rejeitam `temperature`**: `anthropic_llm.py` só envia o
   parâmetro para as famílias legadas listadas ali (padrão = não enviar).
-- **A interface é FastAPI + HTML/CSS/JS sem passo de build** (`api/main.py` + `web/`). Um
-  `POST /api/gerar` produz **uma** questão; o lote é o cliente repetindo a chamada, para o
-  professor ver cada questão chegar. Nada de Node: `instalar.bat` continua sendo só `pip install`.
-- **Texto vindo do LLM entra na página por `textContent`, nunca por `innerHTML`** (`web/app.js`).
+- **A interface é FastAPI + HTML/CSS/JS sem passo de build** (`api/main.py` + `docs/` na raiz do
+  repositório, não dentro de `sistema/`: é a pasta que o GitHub Pages publica, então existe uma
+  cópia só, servida pelo processo local e pelo Pages). Um `POST /api/gerar` produz **uma**
+  questão; o lote é o cliente repetindo a chamada, para o professor ver cada questão chegar.
+  Nada de Node: `instalar.bat` continua sendo só `pip install`. Ao mexer em `docs/app.css` ou
+  `docs/app.js`, suba o `?v=` em `docs/index.html` — senão a correção não chega a quem já visitou.
+- **Texto vindo do LLM entra na página por `textContent`, nunca por `innerHTML`** (`docs/app.js`).
 - **Modo local vs. compartilhado** (`convites.py`): sem `convites.json` não há autenticação
   (uso individual); criar o primeiro convite liga a exigência. O modo depende da **existência**
   do arquivo, não do conteúdo — senão revogar o último convite reabriria o acesso a todos.
@@ -50,8 +53,30 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   Drive replica — sem OAuth, sem chamada de rede. Falha ali vira aviso, nunca impede de salvar.
 - **Prompts são artefatos da pesquisa** (`prompts/*.md`): serão citados no Apêndice A da
   dissertação. Mudanças neles afetam o texto acadêmico — trate como mudança de conteúdo.
-- O catálogo BNCC (`dados/bncc_em_matematica.json`) tem descrições parafraseadas **a conferir**
-  contra `bncc_ensino_medio.pdf`; não invente códigos/descrições novas.
+- **A habilidade da BNCC é a origem da especificação, não um rótulo dela.** É o primeiro
+  parâmetro; os temas são derivados dela (`especificacao.py`), e o campo `relacao_temas` do
+  catálogo decide se dá para escolher entre eles: `conjuntiva` (a habilidade *é* a articulação —
+  `EM13MAT507` associa PA a função afim; pedir só a PA é recusado), `enumerativa` (combinar é
+  opção) ou `unica`. Não reintroduza a escolha do tema antes da habilidade: era o que permitia
+  montar pedidos incoerentes.
+- **O catálogo carrega `exigencias` por habilidade** — o que a questão precisa exibir para
+  realizá-la. Vão ao Gerador como requisito e ao Crítico como âncora do critério
+  `alinhamento_bncc`. Sem elas, uma questão correta, clara e sobre o conteúdo certo passa sem
+  cumprir a habilidade (a `EM13MAT402` pede converter álgebra em gráfico; "ache as raízes"
+  satisfaz o Verificador e não realiza a habilidade). Habilidade nova **precisa** de exigências.
+- O catálogo BNCC (`dados/bncc_em_matematica.json`) tem **transcrições literais** da seção 5.2.1.1,
+  conferidas contra `bncc_ensino_medio.pdf` — não parafraseie, não invente códigos/descrições. O
+  recorte é a unidade "Funções polinomiais de 1º e 2º graus" que a própria BNCC exemplifica
+  (501, 401, 507, 502, 402, 503, 302), mais 303/304/508 por analogia; o segundo agrupamento é
+  construção nossa e está marcado como tal. `bloom_sugerido` e `exigencias` também são leitura
+  nossa, não texto da Base.
+- **Compatibilidade com o que já foi gravado**: a especificação aceita `tema` no singular além de
+  `temas` (as questões no banco guardam o campo antigo — sem a ponte, o histórico do professor
+  fica ilegível), e `banco.py` preenche a coluna `temas` na migração a partir da antiga. Não
+  remova nenhuma das duas.
+- **A formalização verificável ainda é singular** (`verificavel`, um `tipo`/`expressao`/
+  `resposta_esperada`): numa questão que articula dois temas, o SymPy confere só uma afirmação.
+  Passar para `verificaveis: list[...]` com veredicto por conjunção é tarefa aberta.
 
 ## Documentos que governam o trabalho (leia antes de editar o texto)
 
@@ -64,7 +89,9 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   partir deste PDF** (o `.tex` original havia sido perdido) já com a revisão aplicada.
 - `plano_revisao_dissertacao.md` — o **diagnóstico e plano de revisão**. Contém o mapa de repetições e
   o princípio de correção. Consulte-o antes de mexer no conteúdo dos capítulos.
-- `bncc_ensino_medio.pdf` — referência da BNCC para conferir habilidades e unidades temáticas.
+- `bncc_ensino_medio.pdf` — referência da BNCC (seção 5.2.1, Matemática e suas Tecnologias no EM:
+  45 habilidades sob 5 competências específicas). `bncc_ensino_medio.md` é o texto já extraído dele
+  — use este para buscar e citar; o PDF fica como fonte de conferência.
 
 ## Compilar o documento
 
@@ -103,23 +130,31 @@ Cada arquivo de capítulo tem um cabeçalho em comentário `% =====` que reafirm
 - **Bibliografia inferida.** As entradas de `referencias.bib` foram deduzidas do texto (autor + ano) e
   os detalhes (páginas, editora, DOI) são rascunho. Cada entrada a validar está marcada com
   `% CONFERIR`. Não invente dados bibliográficos; mantenha a marca até a aluna confirmar.
-- **Referências a capítulos ainda não escritos** (4 — arquitetura; 5 — implementação; 6 — avaliação)
-  são feitas **em prosa** ("no capítulo de arquitetura"), **sem `\ref`**, para não gerar `??`. Ao
-  escrever esses capítulos, criar o `\label` e trocar pela referência cruzada.
+- **Todos os capítulos já existem e estão no `\include` do `main.tex`**, com `\label` próprios:
+  use `\ref` normalmente entre eles. A regra antiga de referenciar em prosa valia enquanto os
+  Caps. 4–6 estavam por escrever; se encontrar remissão em prosa a um capítulo existente, troque
+  pela referência cruzada.
 - Nome do autor grafado **Pólya** (com acento) no texto corrido.
 - Estilo de citação em `natbib` por portabilidade; a migração para `abntex2cite` (padrão ABNT/PROFMAT)
   é uma tarefa aberta e não deve alterar o conteúdo dos capítulos.
 
 ## Fluxo de trabalho / Git
 
-- Desenvolver na branch designada (atualmente `claude/dissertation-repetition-review-dcv1bt`), commitar,
-  push e abrir PR em rascunho. A aluna mescla na `main` e sincroniza o Overleaf via GitHub.
+- Desenvolver numa branch `claude/<assunto>` (nunca commitar direto na `main`), commitar, push e
+  abrir PR em rascunho. A aluna mescla na `main` e sincroniza o Overleaf via GitHub. O histórico
+  da `main` é linear — mesclar com rebase, sem commit de merge.
 - Ao terminar uma rodada de mudanças no texto, verifique antes do commit: nenhum `[?]`/`??`/chave crua
   no corpo, todo `\ref` com `\label` correspondente, e nenhuma repetição de conteúdo entre casas
   canônicas (ver plano de revisão).
 
 ## Tarefas abertas
 
-Elementos pré-textuais (resumo, abstract, folha de rosto, listas); Capítulos 4–6; validação da
-bibliografia (`% CONFERIR`); confirmação das unidades temáticas da BNCC em 3.3.2; migração para
-`abntex2cite`.
+Elementos pré-textuais (resumo, abstract, folha de rosto, listas); validação da bibliografia
+(`% CONFERIR`); migração para `abntex2cite`; formalização verificável em lista
+(`verificaveis`), sem a qual questões multitema ficam parcialmente verificadas.
+
+Fora do alcance do núcleo simbólico, hoje: as habilidades `401`, `402`, `501` e `502` pedem
+conversão de registro ou generalização de padrão, que nenhum dos tipos `equacao`/`funcao`/
+`progressao` atesta — quem as cobra é o Crítico (um LLM), não o SymPy. Verificar "a expressão
+generalizada reproduz os pontos da tabela" fecharia 501, 502 e a metade não verificada de
+507/508.
