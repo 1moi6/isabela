@@ -12,3 +12,6 @@ dissertacao/*.toc
 dissertacao/*.synctex.gz
 dissertacao/*.fls
 dissertacao/*.fdb_latexmk
+
+# Residuos de automacao de navegador
+.playwright-mcp/

@@ -1,0 +1,44 @@
+# Serviço de usuário systemd: mantém o gerador publicado.
+#
+# Instalação (sem root):
+#   mkdir -p ~/.config/systemd/user ~/.config/questoes
+#   cp questoes.service ~/.config/systemd/user/
+#   grep -m1 QUESTOES_GITHUB_TOKEN ~/.bashrc | sed 's/^export //' > ~/.config/questoes/ambiente
+#   chmod 600 ~/.config/questoes/ambiente
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now questoes
+#   loginctl enable-linger $USER      # sobe no boot, sem precisar de login
+#
+# Acompanhar:
+#   systemctl --user status questoes
+#   journalctl --user -u questoes -f
+#
+# Só faz sentido com a publicação automática do endereço configurada: cada
+# reinício sorteia um endereço novo, e é ela que impede os convites já enviados
+# de morrerem junto.
+
+[Unit]
+Description=Gerador de questoes de Matematica (API + tunel Cloudflare)
+After=network-online.target
+Wants=network-online.target
+
+# Cada reinício publica um commit com o endereço novo. Sem limite, um serviço
+# em pane ficaria reiniciando em laço e enchendo o repositório de commits.
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=%h/sistema
+EnvironmentFile=%h/.config/questoes/ambiente
+ExecStart=%h/sistema/.venv/bin/python -u publicar.py
+
+Restart=always
+RestartSec=30
+
+# publicar.py trata SIGTERM e derruba o túnel e a API juntos.
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+[Install]
+WantedBy=default.target

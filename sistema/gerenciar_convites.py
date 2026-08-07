@@ -3,6 +3,7 @@
     python gerenciar_convites.py listar
     python gerenciar_convites.py criar "Maria Silva"
     python gerenciar_convites.py remover k3n8p2xq
+    python gerenciar_convites.py senha          # libera a página de convites
 
 O primeiro convite criado liga o modo compartilhado: a partir dele, o endereço
 passa a exigir convite. Apagar todos volta ao modo local.
@@ -46,6 +47,22 @@ def main(argv: list[str]) -> int:
             return 0
         print(f"Convite {argv[2]} não encontrado.")
         return 1
+
+    if comando == "senha":
+        from getpass import getpass
+
+        from questoes import config_app
+
+        nova = getpass("Nova senha de administração: ")
+        if len(nova) < 8:
+            print("Use ao menos 8 caracteres — esta senha cria acessos ao sistema.")
+            return 2
+        if nova != getpass("Repita: "):
+            print("As senhas não conferem.")
+            return 2
+        config_app.salvar({"chave_admin": nova})
+        print("\nSenha gravada. A página de convites já aceita ela.\n")
+        return 0
 
     if comando == "listar":
         lista = convites.listar()

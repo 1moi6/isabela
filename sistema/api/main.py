@@ -13,6 +13,7 @@ um bloco só, e nenhuma requisição fica pendurada por minutos.
 from __future__ import annotations
 
 import os
+import secrets
 import sys
 import threading
 from datetime import datetime, timedelta, timezone
@@ -22,7 +23,7 @@ from uuid import uuid4
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 
-from fastapi import Body, Depends, FastAPI, Header, HTTPException  # noqa: E402
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Request  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import Response  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
@@ -82,8 +83,8 @@ if _origens:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=_origens,
-        allow_methods=["GET", "POST"],
-        allow_headers=["Content-Type", "X-Convite", "X-Chave-API", "X-Provedor"],
+        allow_methods=["GET", "POST", "DELETE"],
+        allow_headers=["Content-Type", "X-Convite", "X-Chave-API", "X-Provedor", "X-Chave-Admin"],
         expose_headers=["Content-Disposition"],  # a interface lê o nome do arquivo da lista
     )
 
@@ -119,6 +120,27 @@ def identificar(
             "compartilhado": True,
         }
     return {**quem, "chave": x_chave_api or None, "provedor": x_provedor or None}
+
+
+def exigir_admin(x_chave_admin: str | None = Header(default=None)) -> None:
+    """Portaria da página de convites.
+
+    A senha é sempre exigida, inclusive em modo local: quem administra convites
+    pode criar acesso ao sistema, e isso não deve depender de o servidor estar
+    ou não compartilhado no momento. Sem senha configurada, os endpoints ficam
+    fechados --- é mais seguro impedir do que abrir por omissão.
+    """
+    esperada = config_app.carregar()["chave_admin"]
+    if not esperada:
+        raise HTTPException(
+            status_code=403,
+            detail="Nenhuma senha de administração configurada. "
+                   "Defina-a com: python gerenciar_convites.py senha",
+        )
+    # compare_digest: a comparação comum vaza o tamanho do prefixo correto pelo
+    # tempo de resposta, o que permite descobrir a senha caractere a caractere.
+    if not x_chave_admin or not secrets.compare_digest(x_chave_admin, esperada):
+        raise HTTPException(status_code=401, detail="Senha de administração incorreta.")
 
 
 # --------------------------------------------------------------------- infra
@@ -398,6 +420,53 @@ def avaliar(
         "id": questao_id,
         "aviso_sincronizacao": _sincronizar(quem["dono"], questao_id),
     }
+
+
+# ---------------------------------------------------------------- convites
+class PedidoConvite(BaseModel):
+    nome: str
+
+
+def _link(codigo: str, cfg: dict, origem: str = "") -> str:
+    """Link pronto para enviar.
+
+    Com `endereco_frontend` configurado, a interface está publicada noutro lugar
+    (o GitHub Pages) e é para lá que o link aponta. Sem ele, quem serve a
+    interface é este mesmo processo — então o endereço certo é o da própria
+    requisição, e não um caminho solto que ninguém consegue abrir.
+    """
+    base = cfg["endereco_frontend"].rstrip("/") or origem.rstrip("/")
+    return f"{base}/?convite={codigo}" if base else f"?convite={codigo}"
+
+
+@app.get("/api/convites", dependencies=[Depends(exigir_admin)])
+def listar_convites(request: Request) -> dict:
+    cfg = config_app.carregar()
+    origem = str(request.base_url)
+    return {
+        "convites": [
+            {**c, "link": _link(c["codigo"], cfg, origem)} for c in _convites.listar()
+        ],
+        "publicacao_automatica": bool(cfg["repositorio_frontend"]) or bool(cfg["endereco_api"]),
+    }
+
+
+@app.post("/api/convites", dependencies=[Depends(exigir_admin)])
+def criar_convite(pedido: PedidoConvite, request: Request) -> dict:
+    """Cria um convite. Nomes iguais compartilham o mesmo banco, de propósito."""
+    nome = pedido.nome.strip()
+    if not nome:
+        raise HTTPException(status_code=422, detail="Informe o nome da pessoa.")
+    convite = _convites.criar(nome)
+    return {**convite, "link": _link(convite["codigo"], config_app.carregar(), str(request.base_url))}
+
+
+@app.delete("/api/convites/{codigo}", dependencies=[Depends(exigir_admin)])
+def remover_convite(codigo: str) -> dict:
+    """Revoga o acesso. O banco da pessoa continua guardado."""
+    if not _convites.remover(codigo):
+        raise HTTPException(status_code=404, detail="Convite não encontrado.")
+    return {"removido": codigo}
 
 
 # -------------------------------------------------------------------- lista

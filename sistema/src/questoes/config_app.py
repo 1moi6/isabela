@@ -40,6 +40,9 @@ PADRAO: dict[str, str] = {
     # interface lê para descobrir a API. Com isso, os links de convite ficam
     # permanentes mesmo com o endereço do túnel mudando a cada reinício.
     # O token vai no ambiente (QUESTOES_GITHUB_TOKEN), nunca aqui.
+    # Senha de administração: libera a página de convites. Fica só aqui, num
+    # arquivo fora do controle de versão, e nunca é devolvida por nenhuma rota.
+    "chave_admin": "",
     "repositorio_frontend": "",
     "caminho_backend_json": "docs/backend.json",
     "ramo_frontend": "main",

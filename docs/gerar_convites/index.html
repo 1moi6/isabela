@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Convites · Gerador de questões</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2317337a'/><text x='16' y='23' font-size='20' font-family='Georgia,serif' fill='white' text-anchor='middle'>ƒ</text></svg>">
+  <link rel="stylesheet" href="../app.css">
+</head>
+<body>
+
+<header class="cabecalho">
+  <div class="marca">
+    <h1 class="marca__nome">Convites</h1>
+    <p class="marca__escopo">Gerador de questões · administração</p>
+  </div>
+  <div class="estado">
+    <a class="botao botao--discreto" href="../">Voltar ao gerador</a>
+  </div>
+</header>
+
+<main>
+  <!-- Porta de entrada: pede a senha antes de mostrar qualquer coisa -->
+  <section class="painel" id="area-senha">
+    <div class="bloqueio__caixa" style="margin: 60px auto 0">
+      <h2 class="bloqueio__titulo">Senha de administração</h2>
+      <p class="bloqueio__texto">
+        Esta página cria acessos ao sistema. A senha fica apenas nesta aba do
+        navegador e é esquecida ao fechá-la.
+      </p>
+      <form id="form-senha" style="margin-top: 18px">
+        <input class="campo__controle" id="campo-senha" type="password"
+               placeholder="senha" autocomplete="current-password" autofocus>
+        <button class="botao botao--principal" type="submit" style="margin-top: 10px; width: 100%">
+          Entrar
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Administração propriamente dita -->
+  <section class="painel" id="area-admin" hidden>
+    <form class="filtros" id="form-novo">
+      <label class="campo campo--linha" style="flex: 1 1 320px">
+        <span class="campo__rotulo">Nome da pessoa</span>
+        <input class="campo__controle" id="campo-nome" placeholder="Maria Silva" required>
+      </label>
+      <button class="botao botao--principal" type="submit">Gerar convite</button>
+    </form>
+
+    <p class="campo__ajuda" style="margin: -8px 0 18px">
+      O banco de questões é derivado do <strong>nome</strong>, não do código. Reemitir um
+      convite para alguém com o nome escrito igual devolve o acervo dela; escrito diferente,
+      cria um acervo novo e vazio.
+    </p>
+
+    <div class="lista-banco" id="lista-convites"></div>
+  </section>
+</main>
+
+<div class="avisos" id="avisos" aria-live="polite"></div>
+
+<script src="../comum.js"></script>
+<script src="convites.js"></script>
+</body>
+</html>

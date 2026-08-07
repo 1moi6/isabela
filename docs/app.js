@@ -6,14 +6,6 @@
    enunciado é conteúdo gerado, e conteúdo gerado não vira marcação.
    ========================================================================== */
 
-/* Endereço fixo do backend, quando houver túnel nomeado. Deixe vazio para o
-   modo local (a página é servida pelo próprio servidor) ou para o túnel
-   rápido (o endereço chega pelo link de convite, em ?api=).
-
-   Com um endereço aqui, os links de convite passam a ser permanentes: não
-   precisam mais carregar o endereço da vez. */
-const API_PADRAO = "";
-
 const estadoApp = {
   opcoes: null,
   gerados: [],      // ciclos desta sessão, ainda não necessariamente salvos
@@ -22,47 +14,6 @@ const estadoApp = {
   compartilhado: false,
 };
 
-/* ------------------------------------------------------------- credenciais
-   A chave de API fica no navegador de quem usa e viaja em cada requisição.
-   O servidor usa e descarta: ninguém guarda credencial de terceiro. */
-const guardado = {
-  get convite() { return localStorage.getItem("questoes.convite") || ""; },
-  set convite(v) { localStorage.setItem("questoes.convite", v); },
-  /* Endereço do backend. Vazio significa "a mesma origem que serviu esta
-     página" — o caso do uso local, em que o próprio servidor entrega o HTML.
-     Quando a interface vem do GitHub Pages, o backend está noutro endereço e
-     ele chega pelo link de convite (?api=...). */
-  get api() { return localStorage.getItem("questoes.api") || API_PADRAO; },
-  set api(v) { v ? localStorage.setItem("questoes.api", v) : localStorage.removeItem("questoes.api"); },
-  get chave() { return localStorage.getItem("questoes.chave") || ""; },
-  set chave(v) { v ? localStorage.setItem("questoes.chave", v) : localStorage.removeItem("questoes.chave"); },
-  get provedor() { return localStorage.getItem("questoes.provedor") || ""; },
-  set provedor(v) { v ? localStorage.setItem("questoes.provedor", v) : localStorage.removeItem("questoes.provedor"); },
-};
-
-/** Descobre onde está a API, na ordem: link → constante → mesma origem → backend.json.
- *
- *  A última etapa é o que torna os convites permanentes: com o túnel rápido o
- *  endereço muda a cada reinício, e o servidor publica o endereço da vez num
- *  `backend.json` ao lado desta página. Assim o link nunca precisa carregá-lo. */
-async function descobrirApi() {
-  if (localStorage.getItem("questoes.api")) return;   // veio pelo link, manda
-  if (API_PADRAO) { guardado.api = API_PADRAO; return; }
-
-  // Servida pelo próprio servidor? Então a API é a mesma origem.
-  try {
-    const r = await fetch("/api/identificacao", { method: "GET" });
-    if (r.ok) { guardado.api = ""; return; }
-  } catch (_) { /* origem não atende a API: seguimos para o backend.json */ }
-
-  try {
-    // Sem cache: o endereço muda e um valor velho leva a um túnel morto.
-    const cfg = await (await fetch(`backend.json?t=${Date.now()}`)).json();
-    if (cfg.endereco) guardado.api = cfg.endereco;
-  } catch (_) {
-    avisar("Não encontrei o endereço do servidor. Peça um link novo a quem administra.", "erro");
-  }
-}
 
 /** Aceita convite e endereço do backend pela URL, e limpa a barra de endereço. */
 function capturarConvite() {
@@ -78,41 +29,6 @@ function capturarConvite() {
 }
 
 /* ------------------------------------------------------------- utilitários */
-function el(tag, classe, texto) {
-  const node = document.createElement(tag);
-  if (classe) node.className = classe;
-  if (texto !== undefined && texto !== null) node.textContent = texto;
-  return node;
-}
-
-function avisar(mensagem, tipo = "") {
-  const caixa = el("div", `aviso ${tipo ? "aviso--" + tipo : ""}`, mensagem);
-  document.getElementById("avisos").append(caixa);
-  setTimeout(() => caixa.remove(), 6000);
-}
-
-async function api(caminho, opcoes = {}) {
-  const cabecalhos = { "Content-Type": "application/json" };
-  if (guardado.convite) cabecalhos["X-Convite"] = guardado.convite;
-  if (guardado.chave) cabecalhos["X-Chave-API"] = guardado.chave;
-  if (guardado.provedor) cabecalhos["X-Provedor"] = guardado.provedor;
-
-  const resposta = await fetch(guardado.api + caminho, { headers: cabecalhos, ...opcoes });
-  if (resposta.status === 401) {
-    mostrarBloqueio();
-    throw new Error("Acesso não autorizado.");
-  }
-  if (!resposta.ok) {
-    let detalhe = `${resposta.status} ${resposta.statusText}`;
-    try {
-      const corpo = await resposta.json();
-      if (corpo.detail) detalhe = typeof corpo.detail === "string" ? corpo.detail : JSON.stringify(corpo.detail);
-    } catch (_) { /* resposta sem corpo JSON */ }
-    throw new Error(detalhe);
-  }
-  return resposta;
-}
-
 const rotulo = (lista, valor) => (lista.find((o) => o.valor === valor) || {}).rotulo || valor;
 
 /** Assinatura de quem mantém o servidor, para quem chega por um link. */
