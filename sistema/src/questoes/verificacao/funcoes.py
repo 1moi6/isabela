@@ -6,8 +6,11 @@ O campo `parametros['consulta']` indica qual propriedade o gabarito afirma:
   - 'vertice'        -> resposta_esperada é o par '(xv, yv)'
   - 'valor'          -> parametros['ponto'] dá x; resposta_esperada é f(x)
   - 'maximo'/'minimo'-> resposta_esperada é o valor extremo de f
-  - 'dominio'        -> resposta_esperada é um conjunto, ex.: 'Interval.open(0, oo)'
-  - 'imagem'         -> idem, ex.: 'Interval(-2, 4)'
+  - 'dominio'        -> resposta_esperada é um conjunto, ex.: 'Interval.open(0, oo)'.
+                        O declarado precisa CABER no domínio máximo, não coincidir com
+                        ele: a questão pode restringi-lo ao que o contexto admite.
+  - 'imagem'         -> idem, ex.: 'Interval(-2, 4)'. Aceita parametros['dominio'] para
+                        calcular a imagem sobre o domínio de contexto.
   - 'periodo'        -> resposta_esperada é o período fundamental, ex.: '2*pi'
   - 'crescimento'    -> resposta_esperada é 'crescente' ou 'decrescente'
 
@@ -35,27 +38,29 @@ from ._parse import parse, parse_lista, simbolo
 
 def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
     consulta = ev.parametros.get("consulta", "zeros")
-    f = parse(ev.expressao)
-    x = simbolo(ev.incognitas[0])
+    f = parse(ev.expressao, ev.incognitas)
+    x = simbolo(ev.incognitas[0], ev.incognitas)
 
     if consulta in ("dominio", "imagem", "periodo", "crescimento"):
-        return _verificar_caracteristica(consulta, f, x, ev.resposta_esperada)
+        return _verificar_caracteristica(
+            consulta, f, x, ev.resposta_esperada, ev.incognitas, ev.parametros
+        )
 
     if consulta == "zeros":
-        return _comparar_conjunto(sp.solve(f, x), parse_lista(ev.resposta_esperada), "zeros da função")
+        return _comparar_conjunto(sp.solve(f, x), parse_lista(ev.resposta_esperada, ev.incognitas), "zeros da função")
 
     if consulta == "vertice":
         xv = sp.solve(sp.diff(f, x), x)[0]
         yv = f.subs(x, xv)
-        esperado = parse_lista(ev.resposta_esperada)
+        esperado = parse_lista(ev.resposta_esperada, ev.incognitas)
         if len(esperado) == 2 and sp.simplify(esperado[0] - xv) == 0 and sp.simplify(esperado[1] - yv) == 0:
             return _aprovado(f"vértice calculado ({xv}, {yv})")
         return _rejeitado(f"vértice calculado ({xv}, {yv})", f"gabarito {esperado}")
 
     if consulta == "valor":
-        ponto = parse(ev.parametros["ponto"])
+        ponto = parse(ev.parametros["ponto"], ev.incognitas)
         calculado = sp.simplify(f.subs(x, ponto))
-        esperado = parse(ev.resposta_esperada)
+        esperado = parse(ev.resposta_esperada, ev.incognitas)
         if sp.simplify(calculado - esperado) == 0:
             return _aprovado(f"f({ponto}) = {calculado}")
         return _rejeitado(f"f({ponto}) = {calculado}", f"gabarito {esperado}")
@@ -68,7 +73,7 @@ def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
                 justificativa="Função sem ponto crítico — consulta de extremo não se aplica.",
             )
         valor = f.subs(x, candidatos[0])
-        esperado = parse(ev.resposta_esperada)
+        esperado = parse(ev.resposta_esperada, ev.incognitas)
         if sp.simplify(valor - esperado) == 0:
             return _aprovado(f"extremo calculado {valor}")
         return _rejeitado(f"extremo calculado {valor}", f"gabarito {esperado}")
@@ -79,7 +84,9 @@ def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
     )
 
 
-def _verificar_caracteristica(consulta, f, x, resposta: str) -> ResultadoVerificacao:
+def _verificar_caracteristica(
+    consulta, f, x, resposta: str, incognitas=None, extras=None
+) -> ResultadoVerificacao:
     """Domínio, imagem, período e crescimento — as características que as habilidades
     de funções logarítmicas e trigonométricas pedem comparar entre representações.
 
@@ -92,20 +99,28 @@ def _verificar_caracteristica(consulta, f, x, resposta: str) -> ResultadoVerific
         return _inconclusivo(f"não foi possível determinar o domínio de {f}")
 
     if consulta == "dominio":
-        return _comparar_conjuntos(dominio, resposta, f, "domínio")
+        return _conferir_dominio(dominio, resposta, f, incognitas)
 
     if consulta == "imagem":
-        imagem = _tentar(lambda: function_range(f, x, dominio))
+        # A imagem depende do domínio que a questão adota: `500*2**x` com x
+        # contando períodos tem imagem [500, oo), não (0, oo). Quando o Gerador
+        # declara o domínio de contexto, é sobre ele que a imagem é calculada.
+        sobre = dominio
+        if "dominio" in (extras or {}):
+            declarado = _tentar(lambda: parse(extras["dominio"], incognitas))
+            if isinstance(declarado, sp.Set) and declarado.is_subset(dominio):
+                sobre = declarado
+        imagem = _tentar(lambda: function_range(f, x, sobre))
         # EmptySet aqui quase nunca é a imagem real: é o SymPy desistindo.
         if imagem is None or imagem == sp.S.EmptySet:
             return _inconclusivo(f"não foi possível determinar a imagem de {f}")
-        return _comparar_conjuntos(imagem, resposta, f, "imagem")
+        return _comparar_conjuntos(imagem, resposta, f, "imagem", incognitas)
 
     if consulta == "periodo":
         periodo = _tentar(lambda: sp.periodicity(f, x))
         if periodo is None:
             return _inconclusivo(f"{f} não é periódica ou o período não foi determinado")
-        esperado = parse(resposta)
+        esperado = parse(resposta, incognitas)
         if sp.simplify(periodo - esperado) == 0:
             return _aprovado(f"período {periodo}")
         return _rejeitado(f"período calculado {periodo}", f"gabarito {esperado}")
@@ -128,6 +143,38 @@ def _verificar_caracteristica(consulta, f, x, resposta: str) -> ResultadoVerific
     return _rejeitado(f"calculada como {obtido} em {dominio}", f"gabarito '{declarado}'")
 
 
+def _conferir_dominio(calculado, resposta: str, f, incognitas) -> ResultadoVerificacao:
+    """O domínio declarado precisa **caber** no domínio máximo --- não coincidir com ele.
+
+    Uma questão restringe legitimamente o domínio da função ao que o contexto
+    admite: `t` é tempo e não pode ser negativo, `n` conta termos e é natural. Foi
+    exigindo igualdade que o verificador reprovou, numa medição com provedor real,
+    quatro gabaritos corretos --- entre eles os das habilidades EM13MAT507 e 508,
+    que tratam justamente de **funções de domínios discretos**: declarar o domínio
+    como os naturais é o que a habilidade pede, e era exatamente o que reprovava.
+
+    O erro genuíno continua barrado, porque é de outra natureza: declarar que
+    `log(x-2)` está definida em todos os reais afirma pontos onde a função não
+    existe, e aí o declarado não cabe no calculado.
+    """
+    esperado = parse(resposta, incognitas)
+    if not isinstance(esperado, sp.Set):
+        return _inconclusivo(f"o gabarito '{resposta}' não descreve um conjunto")
+    if esperado == calculado:
+        return _aprovado(f"domínio de {f}: {calculado}")
+    contido = _tentar(lambda: bool(esperado.is_subset(calculado)))
+    if contido is None:
+        return _inconclusivo(f"não foi possível comparar {esperado} com o domínio {calculado}")
+    if contido:
+        return _aprovado(
+            f"domínio {esperado} — restrição de contexto dentro do domínio máximo {calculado}"
+        )
+    return _rejeitado(
+        f"domínio máximo calculado: {calculado}",
+        f"gabarito {esperado} inclui pontos onde a função não está definida",
+    )
+
+
 def _tentar(calculo):
     """Devolve None quando o SymPy não conclui, em vez de propagar a exceção.
 
@@ -141,8 +188,8 @@ def _tentar(calculo):
     return resultado
 
 
-def _comparar_conjuntos(calculado, resposta: str, f, rotulo: str) -> ResultadoVerificacao:
-    esperado = parse(resposta)
+def _comparar_conjuntos(calculado, resposta: str, f, rotulo: str, incognitas=None) -> ResultadoVerificacao:
+    esperado = parse(resposta, incognitas)
     if not isinstance(esperado, sp.Set):
         return _inconclusivo(f"o gabarito '{resposta}' não descreve um conjunto")
     if calculado == esperado:

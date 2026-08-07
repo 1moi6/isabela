@@ -19,7 +19,10 @@ REGRAS OBRIGATÓRIAS:
      {"zeros","vertice","valor","maximo","minimo","dominio","imagem","periodo","crescimento"}.
      Para "valor", inclua parametros.ponto. resposta_esperada conforme a consulta:
        zeros -> lista de raízes | vertice -> "[xv, yv]" | valor/maximo/minimo -> valor único
-       dominio, imagem -> conjunto em sintaxe SymPy: "Interval.open(0, oo)", "Interval(-2, 4)", "S.Reals"
+       dominio, imagem -> conjunto em sintaxe SymPy: "Interval.open(0, oo)", "Interval(-2, 4)",
+         "S.Reals", "S.Naturals". Em "dominio", declare o domínio COMO A QUESTÃO O DEFINE
+         (se t é tempo, "Interval(0, oo)"; se n conta termos, "S.Naturals"). Em "imagem",
+         inclua parametros.dominio com esse mesmo conjunto quando a questão restringir o domínio.
        periodo -> o período fundamental, ex.: "2*pi" ou "pi"
        crescimento -> exatamente a palavra "crescente" ou "decrescente"
      Escreva logaritmo como log(x) (natural) ou log(x, 2) (base 2); seno e cosseno como

@@ -184,3 +184,32 @@ def test_divergencia_de_bloom_vai_para_o_log(tmp_path):
     registro = json.loads((tmp_path / "ciclos.jsonl").read_text(encoding="utf-8").strip())
     assert registro["bloom_divergente"] is True
     assert registro["bloom_sugerido"] == ["aplicar", "criar"]
+
+
+def test_formalizacao_malformada_nao_derruba_a_questao():
+    """Encontrado numa medição real: o LLM devolveu {"ponto": {"d": 2}}.
+
+    O contrato pede texto, a validação estourou e o ciclo inteiro morreu —
+    perdendo enunciado, gabarito e resolução que estavam bons, além do custo da
+    chamada. Uma formalização inutilizável deve custar a conferência daquela
+    afirmação, e nada mais.
+    """
+    bruto = json.dumps({
+        "enunciado": "Resolva 2x = 8.", "resolucao": "x = 4.", "gabarito": "4",
+        "verificaveis": [
+            {"tipo": "funcao", "expressao": "2*x", "incognitas": ["x"],
+             "resposta_esperada": "8",
+             "parametros": {"consulta": "valor", "ponto": {"d": 2}}},
+            {"tipo": "equacao", "expressao": "Eq(2*x, 8)", "incognitas": ["x"],
+             "resposta_esperada": "[4]", "parametros": {}},
+        ],
+    })
+    llm = LLMFake([bruto, _parecer_json(aprovado=True)])
+    resultado = Orquestrador(
+        Gerador(llm), VerificadorSimbolico(), CriticoDidatico(llm)
+    ).produzir(SPEC)
+
+    assert resultado.aprovada
+    questao = resultado.questao_final
+    assert questao.enunciado  # a questão sobreviveu
+    assert [v.tipo for v in questao.verificaveis] == ["equacao"]  # a boa foi mantida

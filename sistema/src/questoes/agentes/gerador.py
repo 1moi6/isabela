@@ -8,9 +8,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pydantic import ValidationError
+
 from ..especificacao import Especificacao, Formato
 from ..llm import ProvedorLLM
-from ..modelos import Questao
+from ..modelos import ExpressaoVerificavel, Questao
 from ._json_util import extrair_json
 
 _PROMPT = Path(__file__).resolve().parents[3] / "prompts" / "gerador.md"
@@ -27,6 +29,36 @@ _ROTULOS_NATUREZA = {
 }
 
 
+def _formalizacoes_utilizaveis(dados: dict) -> list[ExpressaoVerificavel]:
+    """Fica com as formalizações válidas e descarta as malformadas.
+
+    O Verificador já degrada em vez de estourar quando a expressão não faz
+    sentido; a *leitura* da saída do Gerador não degradava. Numa medição com
+    provedor real, o LLM devolveu `parametros: {"ponto": {"d": 2}}` --- um objeto
+    onde o contrato pede texto --- e a exceção de validação derrubou o ciclo
+    inteiro, perdendo um enunciado, um gabarito e uma resolução que estavam bons,
+    além do custo da chamada.
+
+    Uma formalização inutilizável deve custar a conferência daquela afirmação, e
+    nada mais: as demais seguem, e a questão chega ao professor com a garantia
+    rebaixada em vez de não chegar.
+    """
+    brutas = dados.get("verificaveis")
+    if brutas is None:
+        unico = dados.get("verificavel")
+        brutas = [] if unico is None else (unico if isinstance(unico, list) else [unico])
+    if isinstance(brutas, dict):  # o LLM às vezes manda um objeto onde o contrato pede lista
+        brutas = [brutas]
+
+    utilizaveis = []
+    for bruta in brutas or []:
+        try:
+            utilizaveis.append(ExpressaoVerificavel.model_validate(bruta))
+        except ValidationError:
+            continue
+    return utilizaveis
+
+
 class Gerador:
     def __init__(self, llm: ProvedorLLM):
         self._llm = llm
@@ -37,6 +69,8 @@ class Gerador:
         resposta = self._llm.completar(system=self._system, user=pedido)
         dados = extrair_json(resposta)
         dados["especificacao"] = spec
+        dados["verificaveis"] = _formalizacoes_utilizaveis(dados)
+        dados.pop("verificavel", None)
         return Questao.model_validate(dados)
 
     @staticmethod
