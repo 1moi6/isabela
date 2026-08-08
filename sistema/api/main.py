@@ -117,7 +117,7 @@ def identificar(
     Sem convites cadastrados o sistema roda em modo local, sem autenticação.
     """
     if not _convites.modo_compartilhado:
-        quem = {"dono": DONO_LOCAL, "nome": "", "compartilhado": False}
+        quem = {"dono": DONO_LOCAL, "nome": "", "codigo": None, "compartilhado": False}
     else:
         convite = _convites.identificar(x_convite)
         if convite is None:
@@ -128,6 +128,7 @@ def identificar(
         quem = {
             "dono": convite["identificador"],
             "nome": convite["nome"],
+            "codigo": convite["codigo"],
             "compartilhado": True,
         }
     return {**quem, "chave": x_chave_api or None, "provedor": x_provedor or None}
@@ -183,6 +184,56 @@ def _sincronizar(dono: str, questao_id: int | None = None) -> str | None:
         return None
     except (OSError, ValueError) as exc:
         return str(exc)
+
+
+def _autorizar_chave(quem: dict, provedor: str) -> str | None:
+    """Decide **com que chave** esta geração vai ser paga, ou recusa a geração.
+
+    O ponto sensível é a ausência de chave em modo compartilhado. Antes, a
+    requisição seguia sem cabeçalho, `criar_provedor` recebia `api_key=None`, o
+    SDK caía na variável de ambiente do servidor --- e o dono pagava a geração do
+    convidado, sem aviso, sem registro e sem teto. A interface avisava que
+    faltava chave, mas o aviso era texto: o botão continuava funcionando.
+
+    Agora só há três saídas: a pessoa traz a própria chave; o dono liga
+    explicitamente `chave_do_servidor` e banca dentro de uma cota por convite; ou
+    a geração é recusada com a razão dita.
+    """
+    if provedor == "ollama":  # roda local, não tem chave nem custo
+        return quem["chave"]
+    if quem["chave"]:
+        return quem["chave"]
+    if not quem["compartilhado"]:
+        return None  # uso individual: o SDK lê a variável de ambiente da máquina
+
+    cfg = config_app.carregar()
+    if not cfg["chave_do_servidor"]:
+        raise HTTPException(
+            status_code=402,
+            detail="Informe a sua chave de API em Configurações. Este servidor não "
+                   "usa a chave de quem o mantém para gerar questões de convidados.",
+        )
+
+    variavel = VARIAVEL_CHAVE.get(provedor)
+    chave_do_dono = os.environ.get(variavel) if variavel else None
+    if not chave_do_dono:
+        raise HTTPException(
+            status_code=402,
+            detail=f"O servidor está configurado para bancar as gerações, mas "
+                   f"{variavel} não está definida no ambiente dele.",
+        )
+
+    cota = int(cfg["cota_por_convite"] or 0)
+    codigo = quem.get("codigo")
+    if cota and codigo:
+        if _convites.usos(codigo) >= cota:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Este convite já usou as {cota} gerações incluídas. "
+                       "Informe a sua própria chave de API em Configurações para continuar.",
+            )
+        _convites.registrar_uso(codigo)
+    return chave_do_dono
 
 
 def _orquestrador(quem: dict, url: str | None, ao_progredir=None) -> Orquestrador:
@@ -262,11 +313,22 @@ def estado(quem: dict = Depends(identificar)) -> dict:
     # Em modo compartilhado a chave vem do navegador de cada pessoa; a variável
     # de ambiente do servidor só vale para o uso local.
     chave_do_ambiente = bool(variavel and os.environ.get(variavel))
+    # Em modo compartilhado, a chave do ambiente só vale se o dono decidiu bancar
+    # as gerações dos convidados -- e aí dentro da cota de cada convite.
+    servidor_banca = bool(cfg["chave_do_servidor"]) and chave_do_ambiente and quem["compartilhado"]
+    cota = int(cfg["cota_por_convite"] or 0)
+    restantes = None
+    if servidor_banca and cota and quem.get("codigo"):
+        restantes = max(0, cota - _convites.usos(quem["codigo"]))
     return {
         "total_no_banco": _banco.total(dono=quem["dono"]),
         "provedor": provedor,
         "modelo": cfg["modelo"],
-        "chave_presente": bool(quem["chave"]) or (not quem["compartilhado"] and chave_do_ambiente),
+        "chave_presente": bool(quem["chave"])
+        or (not quem["compartilhado"] and chave_do_ambiente)
+        or (servidor_banca and restantes != 0),
+        "servidor_banca": servidor_banca,
+        "geracoes_restantes": restantes,
         "variavel_chave": variavel,
         "pasta_sincronizada": str(pasta.pasta) if pasta.configurada else "",
         "pasta_acessivel": pasta.configurada and pasta.pasta.is_dir(),
@@ -369,6 +431,11 @@ def gerar(pedido: PedidoGeracao, quem: dict = Depends(identificar)) -> dict:
         spec = Especificacao(**campos, temas=temas)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    # Resolvido aqui, e não dentro da thread: lá o 402 viraria "tarefa com erro"
+    # e a cota seria contada mesmo quando a geração fosse recusada.
+    provedor = quem["provedor"] or config_app.carregar()["provedor"]
+    quem = {**quem, "chave": _autorizar_chave(quem, provedor)}
 
     tarefa_id = uuid4().hex
     with _trava_tarefas:

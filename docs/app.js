@@ -75,15 +75,25 @@ async function carregarEstado() {
   document.getElementById("estado-provedor").textContent =
     dados.nome || (dados.modelo ? `${dados.provedor} · ${dados.modelo}` : dados.provedor);
 
+  /* Sem chave, o botão precisa PARAR de funcionar. Antes isto era só um aviso
+     em texto: quem clicasse mesmo assim tinha a geração paga pela chave de quem
+     mantém o servidor, em silêncio. */
   const aviso = document.getElementById("aviso-chave");
-  if (!dados.chave_presente && dados.provedor !== "ollama") {
+  const podeGerar = dados.chave_presente || dados.provedor === "ollama";
+  if (!podeGerar) {
     aviso.textContent = dados.compartilhado
       ? "Informe a sua chave de API em Configurações para gerar questões."
       : `Sem chave de API. Informe em Configurações ou defina ${dados.variavel_chave} no ambiente.`;
     aviso.hidden = false;
+  } else if (dados.servidor_banca && dados.geracoes_restantes !== null) {
+    aviso.textContent =
+      `Você tem ${dados.geracoes_restantes} geração(ões) incluída(s) neste convite. ` +
+      "Depois disso, informe a sua própria chave de API em Configurações.";
+    aviso.hidden = false;
   } else {
     aviso.hidden = true;
   }
+  document.getElementById("botao-gerar").disabled = !podeGerar;
 
   // Preferências do servidor só são editáveis na máquina onde ele roda.
   document.getElementById("config-servidor").hidden = dados.compartilhado;
