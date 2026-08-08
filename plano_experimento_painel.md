@@ -1,12 +1,37 @@
-# Desenho do experimento — painel docente (Ciclo 3)
+# Desenho da avaliação — duas rodadas
 
-Protocolo para gerar o acervo de questões e coletar a avaliação dos professores que alimenta o
-Capítulo 6. Escrito antes da coleta, de propósito: o plano de análise precisa estar fixado antes
-de qualquer dado aparecer.
+Protocolo para colocar as questões geradas diante de professores. Escrito antes da coleta, de
+propósito: o plano de análise precisa estar fixado antes de qualquer dado aparecer.
 
 Referência: Seção 7 do projeto (`projeto_dissertacao_isabella.pdf`) e Seções 6.1–6.5 previstas em
 `estrutura_dissertacao_isabella.pdf`. Onde este documento se afasta do projeto, diz-se
 explicitamente e com justificativa.
+
+## 0. Duas rodadas, e por quê
+
+| | **Rodada 1 — protótipo** | **Rodada 2 — painel formal** |
+|---|---|---|
+| Quando | agora | depois, se houver prazo |
+| Participantes | 5 professores | 8 a 15 |
+| Ética | sem CEP; participação informada | submissão ao CEP |
+| Detecção de erro | **transparente** | cega |
+| Estatística | descritiva e qualitativa | concordância entre avaliadores |
+| Destino | **Capítulo 7** (produto) | **Capítulo 6** (avaliação) e artigo |
+
+A separação decorre de duas restrições que se reforçam.
+
+**Ética precede coleta.** Aprovação de comitê em geral não é retroativa. Dados colhidos agora, sem
+CEP, provavelmente **não poderão ser reaproveitados** num artigo submetido depois — a Rodada 2 é
+coleta nova, não ampliação desta. Isso não é perda: libera a Rodada 1 para ser leve, rápida e
+francamente exploratória.
+
+**Cinco pessoas não sustentam a estatística prevista.** Kendall's W ou Krippendorff's α com n=5 não
+produzem estimativa utilizável. A Rodada 1 relata decisões e razões, não médias.
+
+> **Risco a decidir, não a adiar:** o objetivo 6 do projeto é avaliar a qualidade das questões por
+> painel docente com instrumento estruturado. A Rodada 1 **não** cumpre isso. Se a Rodada 2 não
+> couber no prazo, ou o Capítulo 6 assume a Rodada 1 como avaliação formativa preliminar e declara
+> o painel como limitação explícita, ou o objetivo fica descumprido. Melhor escolher agora.
 
 ## 1. As três perguntas que o experimento responde
 
@@ -65,42 +90,85 @@ lista "correção matemática" como critério 1 da rubrica; mantê-lo assim perd
 O Bloco I vem primeiro, e o professor não sabe que há itens defeituosos na amostra — sabe apenas
 que a amostra tem qualidade variável.
 
-## 3. Fase A0 — teste de uso com convidados (Capítulo 7)
+## 3. Rodada 1 — protótipo com 5 professores (sem CEP)
 
-Dez convites, dez gerações incluídas em cada. **Não é parte do painel** e não responde P1, P2 nem
-P3: cada convidado gera as próprias questões, então não há conjunto comum — e sem conjunto comum
-não há concordância entre avaliadores. Quem especificou a questão e viu a trilha também não pode
-avaliá-la às cegas.
+Cada participante passa por dois momentos, na mesma sessão, com ~30 minutos cada.
 
-Serve a outra coisa, que nenhuma outra fase alcança: **dado ecológico**. A estratificação da Fase A
-é uma hipótese nossa de equilíbrio; o que os professores de fato pedem — quais habilidades, que
-dificuldade, teórica ou aplicada — só se descobre deixando-os pedir. Se a demanda concentrar em
-poucas habilidades, isso informa o recorte e vira resultado do Capítulo 7. E é o único jeito de
-testar o produto em uso real: fluxo de convite, modo compartilhado, concorrência.
+### 3.1 Momento A — uso livre do aplicativo
 
-### Quem paga
+A pessoa recebe um convite e gera as próprias questões, escolhendo a especificação que quiser.
 
-Decisão que precisa ser tomada antes de qualquer link sair:
+O que se colhe: **o que os professores de fato pedem** — quais habilidades, que dificuldade,
+teórica ou aplicada — e onde eles travam. A estratificação da Rodada 2 é uma hipótese nossa de
+equilíbrio; só o uso livre mostra se ela corresponde à demanda. É também o único jeito de testar o
+produto em operação: fluxo de convite, modo compartilhado, dois ou três gerando ao mesmo tempo.
 
-**(a) Cada convidado traz a própria chave.** É o teste de adoção honesto. A expectativa é que boa
-parte trave aí — criar conta de API exige cartão, interface em inglês e entender o que é uma chave.
-Se travarem, *isso é o resultado*: a chave é a barreira de adoção do produto educacional, e vale
-mais do que as questões que seriam geradas.
+**Quem paga.** Ou cada um traz a própria chave de API — e o quanto disso trava é, em si, o
+resultado sobre a barreira de adoção do produto —, ou o dono liga `chave_do_servidor` com
+`cota_por_convite`. Cinco convites × dez gerações ≈ 145 chamadas. Decidir antes de mandar o
+primeiro link.
 
-**(b) O dono banca, com teto.** Ligar `chave_do_servidor` na configuração e definir
-`cota_por_convite`. Dez convites × dez gerações ≈ 290 chamadas.
+### 3.2 Momento B — avaliação de um conjunto comum
 
-Até 2026-08-08 havia uma terceira possibilidade, indesejada: o convidado sem chave clicava em
-Gerar, a requisição seguia sem credencial e o SDK caía na variável de ambiente do servidor. O dono
-pagava, em silêncio e sem limite. Isso foi fechado — hoje o botão trava e a API recusa com 402 —,
-mas registra-se aqui porque explica por que a decisão acima passou a ser explícita.
+Todos avaliam **os mesmos 12 a 15 itens**, e aqui a detecção é **transparente**:
 
-### Consentimento
+> "Esta amostra contém questões com erro matemático. Aponte quais e onde."
 
-Analisar o uso (que habilidades pediram, o que aceitaram) é pesquisa com pessoas: entra no mesmo
-TCLE do painel.
+Sem CEP, não se retém informação de ninguém: o participante sabe exatamente o que está fazendo.
+Não se informa a proporção — dizer "cinco das quinze" transformaria a tarefa em escolha forçada,
+e omitir uma contagem não é reter informação sobre a natureza do estudo.
 
-## 4. Fase A — geração do acervo
+O que se perde: a estimativa ecológica. Um professor avisado está caçando, então a taxa de detecção
+aqui **não** responde "ele notaria no uso normal" — essa pergunta fica para a Rodada 2, cega.
+
+O que se ganha, e é bastante: **quais erros escapam mesmo de quem está procurando**. Se um
+professor atento deixa passar um gabarito de PG com o primeiro termo omitido, isso é evidência
+forte do erro silencioso — e mais defensável que a versão cega, porque não depende de nenhuma
+omissão.
+
+### 3.3 Instrumento da Rodada 1
+
+Por item, nesta ordem:
+
+1. **Tem erro matemático?** não / sim, aqui: ___ / não sei dizer
+2. **Decisão de uso:** aceita / aceita com ajuste / recusada
+3. **Por quê?** — obrigatório quando a decisão não for "aceita"
+
+A escala Likert dos seis critérios **fica de fora desta rodada**. Com cinco pessoas, médias por
+critério são ruído; a decisão de uso e a justificativa são sinal, e é delas que sai o que ajustar
+no sistema. Quem quiser continuidade com a rubrica da Seção 3.4 pode acrescentá-la, ao custo de
+dobrar o tempo de sessão.
+
+Ao final, três perguntas curtas: usaria isto no seu planejamento? o que faltou? o que atrapalhou?
+
+### 3.4 Material da Rodada 1
+
+12 a 15 itens, dos quais 4 ou 5 com erro matemático confirmado.
+
+O acervo atual não basta: das 17 questões da medição de 2026-08-07, 10 estão limpas mas há apenas
+2 espécimes de erro aproveitáveis. Espécimes aparecem em cerca de um quarto dos ciclos (é a taxa
+observada de reprovação legítima na primeira iteração), então **uma geração enxuta de ~24 questões**
+rende os 5 espécimes necessários e sobra material limpo. Custo estimado: **~2 horas e ~70
+chamadas** — bem abaixo das 7 horas do acervo completo.
+
+**Triagem obrigatória:** conferir cada espécime à mão antes de usá-lo. A medição de 2026-08-07
+mostrou que o Verificador produzia falsos negativos (domínio restrito pelo contexto); está
+corrigido, mas um espécime cujo "erro" não existe destruiria a tarefa inteira. Descartar também as
+4 questões daquela medição que foram moldadas por reprovação falsa.
+
+### 3.5 Cuidados sem CEP
+
+Não há comitê, o que aumenta e não diminui a responsabilidade:
+
+- participação voluntária, com o propósito dito antes de começar;
+- respostas anonimizadas no relato — professor 1 a 5, sem escola nem nome;
+- deixar claro que se avalia o **sistema**, não o participante;
+- ao final, mostrar quais itens tinham erro e qual era, para quem quiser saber;
+- não publicar dado individual identificável, nem em anexo.
+
+Se algum dia esses dados forem para artigo, é preciso recoletar sob CEP.
+
+## 4. Rodada 2 — Fase A: geração do acervo
 
 ### 4.1 Estratificação
 
@@ -144,7 +212,7 @@ Dois filtros humanos, e nenhum é dispensável:
 2. **Revisão de conteúdo sensível ou impróprio** em todas as 90, pela orientação. Contexto gerado
    por LLM ocasionalmente traz situação inadequada para sala de aula, e isso não é papel do Crítico.
 
-## 5. Fase B — composição do material do painel
+## 5. Rodada 2 — Fase B: composição do material
 
 Do acervo de 90, monta-se o material efetivamente avaliado:
 
@@ -164,7 +232,7 @@ Tempo estimado: ~15 min o Bloco I, ~45 min o Bloco II, ~10 min o questionário f
 minutos**, que é o limite do razoável para participação voluntária — e a razão de o acervo ser 90
 mas o material ser 36.
 
-## 6. Fase C — instrumento e procedimento
+## 6. Rodada 2 — Fase C: instrumento e procedimento
 
 ### 6.1 Bloco I (cego)
 
@@ -210,7 +278,7 @@ conjunto. Seria preciso um conjunto de avaliação compartilhado, somente leitur
 Recomendo o formulário externo para o Ciclo 3. O prazo da dissertação não é bom lugar para
 estrear uma funcionalidade, e a coleta não pode falhar por bug.
 
-## 7. Fase D — plano de análise (fixado antes da coleta)
+## 7. Rodada 2 — Fase D: plano de análise (fixado antes da coleta)
 
 **P1 — qualidade.** Média e desvio por critério; distribuição das decisões de uso; concordância
 entre avaliadores por Kendall's W ou Krippendorff's α, conforme o projeto.
@@ -233,38 +301,43 @@ entre as categorias e os critérios de nota baixa.
 
 ## 8. Decisões pendentes e riscos
 
-- **CEP.** O projeto deixa em aberto se o PROFMAT/UFMT exige submissão ao Comitê de Ética. Isso
-  **bloqueia a coleta, não a geração**: a Fase A pode começar hoje. Confirmar antes da Fase C.
-- **O Bloco I mostra questões erradas a professores** de propósito. É defensável e comum em estudos
-  de detecção, mas precisa constar do TCLE e ser explicado no debriefing, junto com a lista de quais
-  itens eram defeituosos e por quê.
-- **Recrutamento é o gargalo real.** 8–15 professores com 70 minutos disponíveis é mais difícil que
-  qualquer parte técnica deste plano. Começar o recrutamento em paralelo à Fase A.
-- **Reaproveitamento parcial da medição de 2026-08-07.** Das 17 questões, 4 foram moldadas por
-  uma reprovação **falsa** do Verificador (o defeito do domínio restrito, já corrigido): o Gerador
-  foi informado de que um domínio correto estava errado e o "corrigiu" para o maximal. Nas
+- **A que capítulo a Rodada 1 serve.** Assumido aqui: Capítulo 7. Se o Capítulo 6 for depender
+  dela, precisa declarar-se explicitamente como avaliação formativa preliminar, com o painel
+  formal listado como limitação. Decidir antes de redigir, não depois.
+- **CEP para a Rodada 2.** O projeto deixou em aberto se o PROFMAT/UFMT exige submissão. Vale
+  perguntar cedo: análise leva semanas ou meses, e o Ciclo 3 está previsto para os meses 8–10.
+  Ao perguntar, mencionar que o instrumento **não revela previamente ao participante que há itens
+  defeituosos** — é esse detalhe que muda a resposta, e é melhor apresentá-lo do que ser
+  questionado depois.
+- **Dados da Rodada 1 provavelmente não migram** para um artigo sob CEP. Planejar recoleta.
+- **Recrutamento é o gargalo real**, nas duas rodadas. Mais difícil que qualquer parte técnica
+  deste plano.
+- **Reaproveitamento parcial da medição de 2026-08-07.** Das 17 questões, 4 foram moldadas por uma
+  reprovação **falsa** do Verificador (o defeito do domínio restrito, já corrigido): o Gerador foi
+  informado de que um domínio correto estava errado e o "corrigiu" para o maximal. Nas
   `EM13MAT507` isso é especialmente ruim, porque a habilidade é sobre domínio discreto. Não usar
   sem reinspecionar.
-- **Risco de piso.** Se a taxa de aprovação continuar em 17/17, as notas podem saturar no teto e a
-  variância some, inutilizando a concordância. Mitigação: manter no Bloco II ao menos 6 itens de
-  habilidades `conferido_em_parte` e as três dificuldades, para garantir dispersão.
+- **Risco de piso na Rodada 2.** Se a taxa de aprovação continuar alta, as notas saturam no teto,
+  a variância some e a concordância fica inutilizável. Mitigação: manter no Bloco II ao menos 6
+  itens de habilidades `conferido_em_parte` e as três dificuldades.
+- **O acervo de 60–100 questões é entregável do produto**, independente das duas rodadas. Não
+  depende de ética nem de recrutamento: pode rodar quando convier.
 
 ## 9. Sequência recomendada
 
-1. Confirmar exigência de CEP e iniciar recrutamento. *(paralelo, começa já)*
-1b. Fase A0: distribuir os convites e observar o uso. Vem **antes** da Fase A: encontra bugs
-   de aplicativo que teste nenhum pega, e o que os convidados pedirem informa a
-   estratificação antes de gastar sete horas de geração.
-2. Gerar as 90 questões com a versão corrigida, registrando modelo e SHA. *(~7 h de máquina)*
-3. Triagem: confirmar espécimes do Bloco I à mão; revisar as 90 quanto a conteúdo.
-4. Compor os 36 itens e montar o instrumento.
-5. **Piloto com 1 ou 2 professores** — mede o tempo real e revela itens ambíguos antes de queimar a
-   amostra. Não pular. O material do piloto **já existe**: das 17 questões da medição de
-   2026-08-07, 10 foram aprovadas na primeira iteração sem qualquer feedback falso, e há 2
-   espécimes de erro confirmáveis. Não servem ao painel — cobrem só 9 das 15 habilidades e têm
-   dificuldade sempre média —, mas bastam para rodar o instrumento de ponta a ponta sem gastar
-   nada.
-6. Coleta, análise conforme a Seção 7, redação de 6.6 e 6.7.
+**Agora (Rodada 1):**
 
-Redigir 6.1 a 6.5 a partir deste documento **antes** da coleta, como o cabeçalho de
-`cap6_avaliacao.tex` já prevê.
+1. Decidir quem paga as gerações dos convidados e configurar (`chave_do_servidor`, `cota_por_convite`).
+2. Geração enxuta de ~24 questões. *(~2 h de máquina)*
+3. Triar espécimes à mão e montar o conjunto comum de 12 a 15 itens.
+4. Sessão com 1 professor como ensaio — mede o tempo real e revela item ambíguo antes de queimar
+   os outros 4. Com n=5, perder um participante por instrumento mal calibrado é 20 % da amostra.
+5. As 4 sessões restantes; relato descritivo e qualitativo.
+
+**Em paralelo, sem depender de nada:**
+
+6. Gerar o acervo de 90 questões do produto educacional. *(~7 h de máquina)*
+7. Perguntar sobre CEP e começar recrutamento da Rodada 2.
+
+**Depois, se houver prazo (Rodada 2):** Fases A a D como descritas, e redação de 6.1–6.5 antes da
+coleta, como o cabeçalho de `cap6_avaliacao.tex` já prevê.
