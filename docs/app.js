@@ -52,7 +52,9 @@ async function mostrarBloqueio() {
   caixa.append(el("p", "bloqueio__texto",
     guardado.convite
       ? "Este convite não vale mais. Peça um link novo a quem administra o sistema."
-      : "Abra o link de convite que você recebeu. Ele identifica você e dá acesso ao seu banco de questões."));
+      : "Este endereço é de uso restrito. Abra o link de convite que você recebeu — "
+        + "ele identifica você e dá acesso ao seu banco de questões. "
+        + "Se ainda não tem um, peça a quem administra o sistema."));
   capa.append(caixa);
   document.body.append(capa);
 
@@ -771,14 +773,19 @@ async function iniciar() {
   try {
     estadoApp.opcoes = await (await api("/api/opcoes")).json();
   } catch (erro) {
-    avisar(`Não foi possível carregar as opções: ${erro.message}`, "erro");
+    /* Sem convite, a primeira chamada já volta 401 — e é o caso mais comum de
+       quem abre o endereço direto, sem o link. Um aviso que some em seis
+       segundos deixava a pessoa diante de uma página vazia sem explicação. */
+    if (erro.status === 401) await mostrarBloqueio();
+    else avisar(`Não foi possível falar com o servidor: ${erro.message}`, "erro");
     return;
   }
   await montarFormulario();
   try {
     await carregarEstado();
   } catch (erro) {
-    return;  // 401 já mostrou a tela de acesso
+    if (erro.status === 401) await mostrarBloqueio();
+    return;
   }
 
   document.getElementById("campo-habilidade").addEventListener("change", mostrarDescricaoHabilidade);
