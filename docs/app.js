@@ -180,7 +180,11 @@ function atualizarTemas() {
   container.replaceChildren();
   if (!habilidade) return;
 
-  const travado = habilidade.relacao_temas !== "enumerativa";
+  // Sem `relacao_temas` (API desatualizada), não dá para saber se os temas se
+  // combinam: deixa escolher em vez de travar o que talvez fosse livre.
+  const travado = habilidade.relacao_temas
+    ? habilidade.relacao_temas !== "enumerativa"
+    : false;
   for (const tema of habilidade.temas) {
     const item = el("label", "temas__item");
     const caixa = document.createElement("input");
@@ -221,7 +225,7 @@ function avisarSobreBloom() {
   const habilidade = habilidadeEscolhida();
   const nivel = document.getElementById("campo-bloom").value;
   const aviso = document.getElementById("aviso-bloom");
-  if (!habilidade || habilidade.bloom_sugerido.includes(nivel)) {
+  if (!habilidade || !habilidade.bloom_sugerido || habilidade.bloom_sugerido.includes(nivel)) {
     aviso.textContent = "";
     return;
   }
@@ -240,8 +244,25 @@ function mostrarDescricaoHabilidade() {
   avisarSobreBloom();
 }
 
+/* A interface é publicada pelo GitHub Pages a cada push; a API só muda quando
+   alguém reinicia o servidor. O descompasso é normal e vai acontecer de novo — o
+   que não pode acontecer é a página degradar calada, mostrando meia dúzia de
+   habilidades como se fossem todas. `garantias` só existe a partir da versão que
+   declara a conferência, e serve de marcador de versão. */
+function conferirVersaoDaApi() {
+  const aviso = document.getElementById("aviso-versao");
+  const desatualizada = !estadoApp.opcoes.garantias;
+  aviso.textContent = desatualizada
+    ? "O servidor desta API está desatualizado: algumas habilidades da BNCC e a " +
+      "indicação de conferência do gabarito não aparecem aqui. Peça a quem o " +
+      "mantém para atualizá-lo."
+    : "";
+  aviso.hidden = !desatualizada;
+}
+
 async function montarFormulario() {
   const o = estadoApp.opcoes;
+  conferirVersaoDaApi();
   // A habilidade vem primeiro e não é mais filtrada por tema: é ela que define
   // quais temas ficam disponíveis.
   preencherSelect(
@@ -259,10 +280,12 @@ async function montarFormulario() {
     document.getElementById("filtro-dificuldade"),
     [{ valor: "", rotulo: "Todas" }, ...o.dificuldades]
   );
-  preencherSelect(
-    document.getElementById("filtro-garantia"),
-    [{ valor: "", rotulo: "Todas" }, ...o.garantias]
-  );
+  if (o.garantias) {
+    preencherSelect(
+      document.getElementById("filtro-garantia"),
+      [{ valor: "", rotulo: "Todas" }, ...o.garantias]
+    );
+  }
 }
 
 function lerEspecificacao() {
@@ -270,6 +293,9 @@ function lerEspecificacao() {
   return {
     habilidade_bncc: document.getElementById("campo-habilidade").value,
     temas: temasEscolhidos(),
+    // `tema` no singular vai junto para que esta página funcione também com uma
+    // API ainda não atualizada. A versão nova ignora este campo quando há `temas`.
+    tema: temasEscolhidos()[0],
     nivel_bloom: document.getElementById("campo-bloom").value,
     dificuldade: document.getElementById("campo-dificuldade").dataset.valor,
     natureza: document.getElementById("campo-natureza").dataset.valor,
