@@ -1,0 +1,18 @@
+{
+  "gerado_em": "2026-08-07T23:15:09-0400",
+  "provedor": "anthropic",
+  "modelo": "claude-sonnet-5",
+  "commit": "16dfec9",
+  "total_planejado": 48,
+  "semente": 20260808,
+  "apenas": [
+    "EM13MAT303",
+    "EM13MAT304",
+    "EM13MAT305",
+    "EM13MAT306",
+    "EM13MAT402",
+    "EM13MAT503",
+    "EM13MAT507",
+    "EM13MAT508"
+  ]
+}
