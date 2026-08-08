@@ -103,19 +103,42 @@ def _conferir_forma(f, x, forma: str, incognitas=None) -> str | None:
 
 
 def _conferir_sequencia(f, n, parametros: dict, incognitas=None) -> str | None:
-    """Confere que f(n) reproduz a progressão declarada nos primeiros termos."""
+    """Confere que f(n) reproduz a progressão declarada nos primeiros termos.
+
+    Aceita as duas indexações. `f(1) = a1` é a convenção das fórmulas de PA e PG;
+    `f(0) = a1` é a que sai naturalmente de "após n meses", e é a que o Gerador
+    usa com frequência --- coerente, aliás, com os `pontos` que ele mesmo declara.
+    Exigir só a primeira reprovou sete gabaritos corretos na geração do acervo de
+    8 de agosto. Ambas são legítimas; qual delas vale é escolha do enunciado, e
+    não cabe ao verificador arbitrar.
+    """
     tipo = str(parametros["sequencia"]).lower()
     a1 = parse(parametros["a1"], incognitas)
     razao = parse(parametros["razao"], incognitas)
-    for k in range(1, _TERMOS_CONFERIDOS + 1):
-        termo = a1 + (k - 1) * razao if tipo == "pa" else a1 * razao ** (k - 1)
-        obtido = sp.simplify(f.subs(n, k))
-        if sp.simplify(obtido - termo) != 0:
-            return (
-                f"a expressão {f} vale {obtido} em {n}={k}, mas o {k}º termo da "
-                f"{tipo.upper()} é {sp.simplify(termo)}"
-            )
-    return None
+
+    def _termo(k):  # k-ésimo termo, 1-indexado
+        return a1 + (k - 1) * razao if tipo == "pa" else a1 * razao ** (k - 1)
+
+    def _divergencia(deslocamento):
+        """Onde f deixa de coincidir com a progressão, nesta indexação."""
+        for k in range(1, _TERMOS_CONFERIDOS + 1):
+            obtido = sp.simplify(f.subs(n, k - deslocamento))
+            if sp.simplify(obtido - _termo(k)) != 0:
+                return (k, obtido, sp.simplify(_termo(k)))
+        return None
+
+    de_um = _divergencia(0)
+    if de_um is None:
+        return None
+    de_zero = _divergencia(1)
+    if de_zero is None:
+        return None
+    k, obtido, esperado = de_um
+    return (
+        f"a expressão {f} não reproduz a {tipo.upper()} em nenhuma das duas "
+        f"indexações; começando em 1, vale {obtido} para {n}={k}, mas o {k}º termo "
+        f"é {esperado}"
+    )
 
 
 def _rejeitado(detalhe: str) -> ResultadoVerificacao:

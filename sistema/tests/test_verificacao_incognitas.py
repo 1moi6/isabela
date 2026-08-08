@@ -44,7 +44,22 @@ def test_funcao_com_incognita_I_e_verificavel():
     assert r.veredicto == Veredicto.APROVADO
 
 
-def test_simbolos_curados_tem_precedencia():
-    """`n` das progressões é inteiro e positivo — declarar não pode perder isso."""
-    n = simbolo("n", ["n"])
-    assert n.is_integer and n.is_positive
+def test_incognita_declarada_perde_as_assuncoes_curadas():
+    """A regra oposta valia até a geração do acervo de 8 de agosto mostrar o custo.
+
+    `n` é inteiro e positivo em `_LOCAIS`, o que é certo enquanto ele é índice de
+    progressão. Quando o Gerador batiza de `n` a incógnita do problema, a mesma
+    restrição faz `solve(5*n + 17 = 150)` devolver vazio — não existe inteiro — e
+    o gabarito correto `133/5` é reprovado. Impor integralidade que o enunciado
+    não pediu é o verificador arbitrando pelo enunciado.
+    """
+    assert simbolo("n").is_integer            # continua curado quando não é declarado
+    assert simbolo("n", ["n"]).is_integer is None   # declarado, é símbolo livre
+
+
+def test_equacao_cuja_incognita_se_chama_n_nao_e_reprovada():
+    r = verificar(ExpressaoVerificavel(
+        tipo="equacao", expressao="Eq(5*n + 17, 150)", incognitas=["n"],
+        resposta_esperada="[Rational(133,5)]",
+    ))
+    assert r.veredicto == Veredicto.APROVADO

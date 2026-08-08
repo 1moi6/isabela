@@ -64,3 +64,25 @@ def test_sem_predicado_declarado_nao_e_verificavel():
     """Afirmar uma propriedade vazia não é conferir nada — e não pode passar por conferência."""
     r = verificar(_ev(resposta="3*n + 2"))
     assert r.veredicto == Veredicto.NAO_VERIFICAVEL
+
+
+def test_sequencia_aceita_as_duas_indexacoes():
+    """`f(1)=a1` é a convenção das fórmulas; `f(0)=a1` sai de "após n meses".
+
+    Exigir só a primeira reprovou sete gabaritos corretos na geração do acervo de
+    8 de agosto. Qual indexação vale é escolha do enunciado, não do verificador.
+    """
+    de_um = verificar(_ev(resposta="800*(Rational(21,20))**(n-1)", sequencia="pg", a1="800", razao="Rational(21,20)"))
+    de_zero = verificar(_ev(resposta="800*(Rational(21,20))**n", sequencia="pg", a1="800", razao="Rational(21,20)"))
+    assert de_um.veredicto == Veredicto.APROVADO
+    assert de_zero.veredicto == Veredicto.APROVADO
+
+    pa_de_zero = verificar(_ev(resposta="60*n + 1000", sequencia="pa", a1="1000", razao="60"))
+    assert pa_de_zero.veredicto == Veredicto.APROVADO
+
+
+def test_sequencia_errada_continua_reprovada():
+    """A tolerância é de indexação, não de razão trocada."""
+    r = verificar(_ev(resposta="70*n + 1000", sequencia="pa", a1="1000", razao="60"))
+    assert r.veredicto == Veredicto.REJEITADO
+    assert "nenhuma das duas" in r.justificativa

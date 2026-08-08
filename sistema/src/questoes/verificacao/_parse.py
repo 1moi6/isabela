@@ -50,14 +50,19 @@ def _locais(incognitas=None) -> dict:
     que estava certo. Encontrado numa medição com provedor real, em que o Gerador
     escolheu `I` para a intensidade de um abalo sísmico.
 
-    Os símbolos curados em `_LOCAIS` (como o `n` inteiro e positivo das
-    progressões) têm precedência: só os nomes que lá não são símbolo é que passam
-    a ser ligados.
+    A incógnita **declarada** vira sempre um símbolo livre, mesmo quando `_LOCAIS`
+    traz uma versão curada dela. O `n` das progressões é inteiro e positivo, o que
+    é certo enquanto ele é índice; quando o Gerador batiza de `n` a incógnita do
+    problema, a mesma restrição faz `solve(5*n + 17 = 150)` devolver vazio --- não
+    há inteiro --- e reprova o gabarito correto `133/5`. Impor integralidade que o
+    enunciado não pediu é o verificador arbitrando pelo enunciado.
+
+    Os símbolos curados seguem valendo para nomes que aparecem na expressão sem
+    terem sido declarados como incógnita.
     """
     locais = dict(_LOCAIS)
     for nome in incognitas or ():
-        if not isinstance(locais.get(nome), sp.Symbol):
-            locais[nome] = sp.Symbol(nome)
+        locais[nome] = sp.Symbol(nome)
     return locais
 
 

@@ -55,7 +55,7 @@ class Orquestrador:
 
         for numero in range(1, self._max + 1):
             self._ao_progredir({"iteracao": numero, "etapa": "gerando"})
-            questao = self._gerador.gerar(spec, feedback=feedback)
+            questao = self._gerar_com_folga(spec, feedback)
 
             self._ao_progredir({"iteracao": numero, "etapa": "verificando"})
             verificacao = self._verificador.verificar(questao)
@@ -104,6 +104,26 @@ class Orquestrador:
         resultado = ResultadoCiclo(aprovada=False, questao_final=None, iteracoes=iteracoes)
         self._logar(resultado, spec)
         return resultado
+
+    def _gerar_com_folga(self, spec: Especificacao, feedback: str | None):
+        """Gera, e tenta uma segunda vez pedindo concisão se a primeira não vier.
+
+        Na geração do acervo de 8 de agosto, um ciclo morreu porque o modelo
+        esgotou o limite de saída antes de fechar o JSON: `max_tokens`. A exceção
+        subia e derrubava o ciclo inteiro. Pedir concisão resolve o caso
+        observado sem mexer no contrato --- e uma segunda falha continua subindo,
+        porque aí não é limite de tamanho, é outra coisa.
+        """
+        try:
+            return self._gerador.gerar(spec, feedback=feedback)
+        except Exception as exc:
+            aviso = (
+                "A resposta anterior não pôde ser lida por inteiro "
+                f"({type(exc).__name__}). Produza a MESMA questão de forma mais "
+                "econômica: resolução mais curta e apenas as afirmações "
+                "verificáveis essenciais."
+            )
+            return self._gerador.gerar(spec, feedback=f"{feedback}\n{aviso}" if feedback else aviso)
 
     def _logar(self, resultado: ResultadoCiclo, spec: Especificacao) -> None:
         """Registro completo do ciclo em JSONL (reprodutibilidade, Seção 5.5 do projeto).

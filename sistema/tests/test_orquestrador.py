@@ -213,3 +213,25 @@ def test_formalizacao_malformada_nao_derruba_a_questao():
     questao = resultado.questao_final
     assert questao.enunciado  # a questão sobreviveu
     assert [v.tipo for v in questao.verificaveis] == ["equacao"]  # a boa foi mantida
+
+
+def test_falha_de_geracao_ganha_segunda_tentativa_pedindo_concisao():
+    """Um ciclo do acervo morreu com max_tokens: o modelo não fechou o JSON.
+
+    A exceção subia e derrubava o ciclo inteiro. Uma segunda tentativa pedindo
+    economia resolve o caso observado sem mexer no contrato.
+    """
+    class Instavel(LLMFake):
+        def completar(self, system, user, temperature=0.3):
+            self.pedidos.append(user)
+            if len(self.pedidos) == 1:
+                raise RuntimeError("O modelo não devolveu texto (motivo: max_tokens).")
+            return self.respostas.pop(0)
+
+    llm = Instavel([_questao_json(), _parecer_json(aprovado=True)])
+    resultado = Orquestrador(
+        Gerador(llm), VerificadorSimbolico(), CriticoDidatico(llm)
+    ).produzir(SPEC)
+
+    assert resultado.aprovada
+    assert "mais econômica" in llm.pedidos[1]

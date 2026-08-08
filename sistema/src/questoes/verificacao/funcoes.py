@@ -66,17 +66,7 @@ def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
         return _rejeitado(f"f({ponto}) = {calculado}", f"gabarito {esperado}")
 
     if consulta in ("maximo", "minimo"):
-        candidatos = sp.solve(sp.diff(f, x), x)
-        if not candidatos:
-            return ResultadoVerificacao(
-                veredicto=Veredicto.NAO_VERIFICAVEL,
-                justificativa="Função sem ponto crítico — consulta de extremo não se aplica.",
-            )
-        valor = f.subs(x, candidatos[0])
-        esperado = parse(ev.resposta_esperada, ev.incognitas)
-        if sp.simplify(valor - esperado) == 0:
-            return _aprovado(f"extremo calculado {valor}")
-        return _rejeitado(f"extremo calculado {valor}", f"gabarito {esperado}")
+        return _conferir_extremo(consulta, f, x, ev)
 
     return ResultadoVerificacao(
         veredicto=Veredicto.NAO_VERIFICAVEL,
@@ -141,6 +131,41 @@ def _verificar_caracteristica(
     if obtido == declarado:
         return _aprovado(f"{obtido} em {dominio}")
     return _rejeitado(f"calculada como {obtido} em {dominio}", f"gabarito '{declarado}'")
+
+
+def _conferir_extremo(consulta, f, x, ev) -> ResultadoVerificacao:
+    """Extremo de f, sobre o domínio que a questão adota.
+
+    Duas armadilhas, ambas encontradas gerando o acervo de 8 de agosto:
+
+    A primeira era resolver `diff(f, x) = 0` e avaliar **o primeiro** ponto
+    crítico. Numa parábola há um só e funciona; numa função trigonométrica há
+    vários, e para `3*cos(pi*t/6) + 7/2` o solve devolve `[0, 6]`, sendo `f(0)`
+    o *máximo* --- de modo que o mínimo correto era reprovado. Sozinho, esse
+    defeito descartou quatro dos seis ciclos da EM13MAT306.
+
+    A segunda era ignorar o domínio declarado. Em `-p²/2 + 380p - 25000` com
+    domínio `[400, ∞)`, o vértice cai em `p=380`, fora do intervalo: o extremo
+    da questão está na borda, não no vértice.
+
+    `sp.maximum`/`sp.minimum` resolvem as duas — consideram todos os pontos
+    críticos e respeitam o intervalo, inclusive as bordas.
+    """
+    intervalo = sp.S.Reals
+    if "dominio" in ev.parametros:
+        declarado = _tentar(lambda: parse(ev.parametros["dominio"], ev.incognitas))
+        if isinstance(declarado, sp.Set):
+            intervalo = declarado
+
+    rotina = sp.maximum if consulta == "maximo" else sp.minimum
+    valor = _tentar(lambda: rotina(f, x, intervalo))
+    if valor is None or valor.has(sp.oo, -sp.oo, sp.zoo, sp.nan):
+        return _inconclusivo(f"não foi possível determinar o {consulta} de {f} em {intervalo}")
+
+    esperado = parse(ev.resposta_esperada, ev.incognitas)
+    if sp.simplify(valor - esperado) == 0:
+        return _aprovado(f"{consulta} de {f} em {intervalo}: {valor}")
+    return _rejeitado(f"{consulta} calculado {valor} em {intervalo}", f"gabarito {esperado}")
 
 
 def _conferir_dominio(calculado, resposta: str, f, incognitas) -> ResultadoVerificacao:
