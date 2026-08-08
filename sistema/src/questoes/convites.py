@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import re
 import secrets
+import threading
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,6 +27,11 @@ RAIZ = Path(__file__).resolve().parents[2]
 ARQUIVO = RAIZ / "convites.json"
 
 DONO_LOCAL = "local"
+
+# O arquivo é lido, alterado e reescrito inteiro. Sem a trava, dois pedidos
+# simultâneos leem o mesmo estado e o segundo apaga a contagem do primeiro ---
+# que é exatamente o cenário de dez convidados testando ao mesmo tempo.
+_TRAVA = threading.Lock()
 
 
 def identificador_de(nome: str) -> str:
@@ -70,23 +76,46 @@ class Convites:
         return dict(convite, codigo=codigo) if convite else None
 
     def criar(self, nome: str) -> dict:
-        convites = self._ler()
-        codigo = secrets.token_urlsafe(8)
-        convites[codigo] = {
-            "nome": nome,
-            "identificador": identificador_de(nome),
-            "criado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        }
-        self._gravar(convites)
-        return dict(convites[codigo], codigo=codigo)
+        with _TRAVA:
+            convites = self._ler()
+            codigo = secrets.token_urlsafe(8)
+            convites[codigo] = {
+                "nome": nome,
+                "identificador": identificador_de(nome),
+                "criado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "usos_da_chave_do_servidor": 0,
+            }
+            self._gravar(convites)
+            return dict(convites[codigo], codigo=codigo)
 
     def remover(self, codigo: str) -> bool:
-        convites = self._ler()
-        if codigo not in convites:
-            return False
-        del convites[codigo]
-        self._gravar(convites)
-        return True
+        with _TRAVA:
+            convites = self._ler()
+            if codigo not in convites:
+                return False
+            del convites[codigo]
+            self._gravar(convites)
+            return True
+
+    def usos(self, codigo: str) -> int:
+        """Quantas gerações este convite já pagou com a chave do servidor."""
+        return int(self._ler().get(codigo, {}).get("usos_da_chave_do_servidor", 0))
+
+    def registrar_uso(self, codigo: str) -> int:
+        """Conta mais uma geração paga pelo servidor; devolve o total.
+
+        Só é chamado quando é a chave do dono que banca a requisição. Quem traz
+        a própria chave não é contabilizado: a cota existe para limitar gasto,
+        não para limitar uso.
+        """
+        with _TRAVA:
+            convites = self._ler()
+            if codigo not in convites:
+                return 0
+            atual = int(convites[codigo].get("usos_da_chave_do_servidor", 0)) + 1
+            convites[codigo]["usos_da_chave_do_servidor"] = atual
+            self._gravar(convites)
+            return atual
 
     def listar(self) -> list[dict]:
         return [dict(c, codigo=k) for k, c in sorted(
