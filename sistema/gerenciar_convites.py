@@ -2,6 +2,7 @@
 
     python gerenciar_convites.py listar
     python gerenciar_convites.py criar "Maria Silva"
+    python gerenciar_convites.py criar "Maria Silva" --banca   # gerações por conta do servidor
     python gerenciar_convites.py remover k3n8p2xq
     python gerenciar_convites.py senha          # libera a página de convites
 
@@ -30,11 +31,17 @@ def main(argv: list[str]) -> int:
         if len(argv) < 3:
             print('Uso: python gerenciar_convites.py criar "Nome da Pessoa"')
             return 2
-        endereco = argv[3] if len(argv) > 3 else ENDERECO_PADRAO
-        convite = convites.criar(argv[2])
+        # "--banca" marca o convite para usar a chave do servidor; o que sobra
+        # depois do nome é o endereço, e a flag não pode ser confundida com ele.
+        banca = "--banca" in argv
+        posicionais = [a for a in argv[3:] if not a.startswith("--")]
+        endereco = posicionais[0] if posicionais else ENDERECO_PADRAO
+        convite = convites.criar(argv[2], banca)
         print(f"\nConvite criado para {convite['nome']}.\n")
         print("Envie este link para a pessoa:\n")
         print(f"  {endereco}/?convite={convite['codigo']}\n")
+        if banca:
+            print("  As gerações desta pessoa saem da chave do servidor, dentro da cota.\n")
         print("Ela abre uma vez; o navegador dela guarda o acesso.\n")
         return 0
 

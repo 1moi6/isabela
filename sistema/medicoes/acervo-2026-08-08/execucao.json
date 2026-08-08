@@ -1,0 +1,8 @@
+{
+  "gerado_em": "2026-08-07T20:31:38-0400",
+  "provedor": "anthropic",
+  "modelo": "claude-sonnet-5",
+  "commit": "996020b",
+  "total_planejado": 90,
+  "semente": 20260808
+}

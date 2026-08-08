@@ -26,6 +26,20 @@ function cartaoConvite(convite) {
   cabeca.append(el("span", "questao__id", convite.nome));
   cabeca.append(el("span", "questao__meta", `banco: ${convite.identificador}`));
 
+  /* Quem paga é a informação que decide se dá para enviar o link a alguém sem
+     chave de API — precisa estar visível na lista, não só na criação. */
+  if (convite.usa_chave_do_servidor) {
+    const usadas = convite.usos_da_chave_do_servidor || 0;
+    const restantes = convite.cota ? Math.max(0, convite.cota - usadas) : null;
+    cabeca.append(el(
+      "span",
+      `etiqueta etiqueta--${restantes === 0 ? "erro" : "ok"}`,
+      restantes === null
+        ? "servidor banca"
+        : `servidor banca · ${restantes} de ${convite.cota} restantes`,
+    ));
+  }
+
   const revogar = el("button", "botao botao--discreto", "Revogar");
   revogar.style.marginLeft = "auto";
   revogar.addEventListener("click", async () => {
@@ -132,7 +146,11 @@ async function iniciar() {
     const campo = document.getElementById("campo-nome");
     try {
       const novo = await (await api("/api/convites", {
-        method: "POST", body: JSON.stringify({ nome: campo.value }),
+        method: "POST",
+        body: JSON.stringify({
+          nome: campo.value,
+          usa_chave_do_servidor: document.getElementById("campo-banca").checked,
+        }),
       })).json();
       campo.value = "";
       avisar(`Convite criado para ${novo.nome}.`, "ok");

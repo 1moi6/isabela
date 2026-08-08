@@ -117,7 +117,8 @@ def identificar(
     Sem convites cadastrados o sistema roda em modo local, sem autenticação.
     """
     if not _convites.modo_compartilhado:
-        quem = {"dono": DONO_LOCAL, "nome": "", "codigo": None, "compartilhado": False}
+        quem = {"dono": DONO_LOCAL, "nome": "", "codigo": None,
+                "usa_chave_do_servidor": False, "compartilhado": False}
     else:
         convite = _convites.identificar(x_convite)
         if convite is None:
@@ -129,6 +130,7 @@ def identificar(
             "dono": convite["identificador"],
             "nome": convite["nome"],
             "codigo": convite["codigo"],
+            "usa_chave_do_servidor": bool(convite.get("usa_chave_do_servidor")),
             "compartilhado": True,
         }
     return {**quem, "chave": x_chave_api or None, "provedor": x_provedor or None}
@@ -195,9 +197,9 @@ def _autorizar_chave(quem: dict, provedor: str) -> str | None:
     convidado, sem aviso, sem registro e sem teto. A interface avisava que
     faltava chave, mas o aviso era texto: o botão continuava funcionando.
 
-    Agora só há três saídas: a pessoa traz a própria chave; o dono liga
-    explicitamente `chave_do_servidor` e banca dentro de uma cota por convite; ou
-    a geração é recusada com a razão dita.
+    Agora só há três saídas: a pessoa traz a própria chave; o convite foi marcado
+    com `usa_chave_do_servidor` e a geração é bancada dentro de uma cota; ou a
+    geração é recusada com a razão dita.
     """
     if provedor == "ollama":  # roda local, não tem chave nem custo
         return quem["chave"]
@@ -206,13 +208,13 @@ def _autorizar_chave(quem: dict, provedor: str) -> str | None:
     if not quem["compartilhado"]:
         return None  # uso individual: o SDK lê a variável de ambiente da máquina
 
-    cfg = config_app.carregar()
-    if not cfg["chave_do_servidor"]:
+    if not quem["usa_chave_do_servidor"]:
         raise HTTPException(
             status_code=402,
-            detail="Informe a sua chave de API em Configurações. Este servidor não "
-                   "usa a chave de quem o mantém para gerar questões de convidados.",
+            detail="Informe a sua chave de API em Configurações. Este convite não "
+                   "inclui gerações pagas por quem mantém o servidor.",
         )
+    cfg = config_app.carregar()
 
     variavel = VARIAVEL_CHAVE.get(provedor)
     chave_do_dono = os.environ.get(variavel) if variavel else None
@@ -313,9 +315,11 @@ def estado(quem: dict = Depends(identificar)) -> dict:
     # Em modo compartilhado a chave vem do navegador de cada pessoa; a variável
     # de ambiente do servidor só vale para o uso local.
     chave_do_ambiente = bool(variavel and os.environ.get(variavel))
-    # Em modo compartilhado, a chave do ambiente só vale se o dono decidiu bancar
-    # as gerações dos convidados -- e aí dentro da cota de cada convite.
-    servidor_banca = bool(cfg["chave_do_servidor"]) and chave_do_ambiente and quem["compartilhado"]
+    # Em modo compartilhado, a chave do ambiente só vale para os convites que o
+    # dono marcou -- e aí dentro da cota de cada um.
+    servidor_banca = (
+        quem["usa_chave_do_servidor"] and chave_do_ambiente and quem["compartilhado"]
+    )
     cota = int(cfg["cota_por_convite"] or 0)
     restantes = None
     if servidor_banca and cota and quem.get("codigo"):
@@ -529,6 +533,8 @@ def avaliar(
 # ---------------------------------------------------------------- convites
 class PedidoConvite(BaseModel):
     nome: str
+    # Falso por padrão: bancar as gerações de alguém é ato deliberado.
+    usa_chave_do_servidor: bool = False
 
 
 def _link(codigo: str, cfg: dict, origem: str = "") -> str:
@@ -549,7 +555,12 @@ def listar_convites(request: Request) -> dict:
     origem = str(request.base_url)
     return {
         "convites": [
-            {**c, "link": _link(c["codigo"], cfg, origem)} for c in _convites.listar()
+            {
+                **c,
+                "link": _link(c["codigo"], cfg, origem),
+                "cota": int(cfg["cota_por_convite"] or 0),
+            }
+            for c in _convites.listar()
         ],
         "publicacao_automatica": bool(cfg["repositorio_frontend"]) or bool(cfg["endereco_api"]),
     }
@@ -561,7 +572,7 @@ def criar_convite(pedido: PedidoConvite, request: Request) -> dict:
     nome = pedido.nome.strip()
     if not nome:
         raise HTTPException(status_code=422, detail="Informe o nome da pessoa.")
-    convite = _convites.criar(nome)
+    convite = _convites.criar(nome, pedido.usa_chave_do_servidor)
     return {**convite, "link": _link(convite["codigo"], config_app.carregar(), str(request.base_url))}
 
 

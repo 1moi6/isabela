@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi — suficiente para os testes
-python -m pytest            # 157 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 159 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -57,8 +57,10 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
 - **Em modo compartilhado, requisição sem chave é recusada (402)** — `_autorizar_chave` em
   `api/main.py`. Antes, `criar_provedor(api_key=None)` fazia o SDK cair na variável de ambiente
   e o dono pagava a geração do convidado, em silêncio e sem teto; a interface só avisava, sem
-  travar o botão. Bancar virou decisão explícita (`chave_do_servidor`) com `cota_por_convite`,
-  contada em `convites.json` e só para quem **não** traz a própria chave.
+  travar o botão. Bancar é decisão **por convite** (`usa_chave_do_servidor` em `convites.json`,
+  falso por omissão) com `cota_por_convite`, contada só para quem **não** traz a própria chave.
+  Por convite, e não global, porque quem já usa a própria chave — orientador e aluna — não deve
+  esbarrar numa cota feita para convidados de teste.
 - **Todo acesso ao banco filtra por dono** (`_FILTRO_DONO` em `banco.py`). Método novo que
   consulte `questoes` sem esse filtro vaza o banco de uma pessoa para outra.
 - A **pasta sincronizada** (`sincronizacao.py`) espelha as questões num diretório que o Google

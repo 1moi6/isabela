@@ -183,13 +183,13 @@ def test_convidado_sem_chave_nao_gasta_a_chave_do_dono(ambiente):
 
 
 def test_dono_pode_bancar_dentro_de_uma_cota(ambiente, monkeypatch):
-    """Bancar é decisão explícita, e vem com teto por convite."""
+    """Bancar é decisão por convite, e vem com teto."""
     cliente, convites, _ = ambiente
     monkeypatch.setenv("ANTHROPIC_API_KEY", "chave-do-dono")
     cliente.post("/api/config", json={})  # cria o arquivo de configuração
-    api_main.config_app.salvar({"chave_do_servidor": "1", "cota_por_convite": "2"})
+    api_main.config_app.salvar({"cota_por_convite": "2"})
 
-    codigo = convites.criar("Maria Silva")["codigo"]
+    codigo = convites.criar("Maria Silva", usa_chave_do_servidor=True)["codigo"]
     maria = {"X-Convite": codigo}
 
     assert cliente.get("/api/estado", headers=maria).json()["geracoes_restantes"] == 2
@@ -207,9 +207,9 @@ def test_cota_nao_conta_quem_traz_a_propria_chave(ambiente, monkeypatch):
     cliente, convites, _ = ambiente
     monkeypatch.setenv("ANTHROPIC_API_KEY", "chave-do-dono")
     cliente.post("/api/config", json={})
-    api_main.config_app.salvar({"chave_do_servidor": "1", "cota_por_convite": "1"})
+    api_main.config_app.salvar({"cota_por_convite": "1"})
 
-    codigo = convites.criar("Maria Silva")["codigo"]
+    codigo = convites.criar("Maria Silva", usa_chave_do_servidor=True)["codigo"]
     com_chave = {"X-Convite": codigo, "X-Chave-API": "chave-da-maria"}
     for _ in range(3):
         assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=com_chave).status_code == 200
@@ -221,11 +221,51 @@ def test_geracao_recusada_nao_consome_cota(ambiente, monkeypatch):
     cliente, convites, _ = ambiente
     monkeypatch.setenv("ANTHROPIC_API_KEY", "chave-do-dono")
     cliente.post("/api/config", json={})
-    api_main.config_app.salvar({"chave_do_servidor": "1", "cota_por_convite": "3"})
+    api_main.config_app.salvar({"cota_por_convite": "3"})
 
-    codigo = convites.criar("Maria Silva")["codigo"]
+    codigo = convites.criar("Maria Silva", usa_chave_do_servidor=True)["codigo"]
     maria = {"X-Convite": codigo}
     incoerente = {**ESPECIFICACAO, "habilidade_bncc": "EM13MAT507",
                   "temas": ["progressao_aritmetica"]}
     assert cliente.post("/api/gerar", json=incoerente, headers=maria).status_code == 422
     assert convites.usos(codigo) == 0
+
+
+def test_convite_nao_marcado_nao_gasta_a_chave_do_dono(ambiente, monkeypatch):
+    """A flag é por convite: ter chave no servidor não libera para todo mundo.
+
+    Sem isso, marcar o servidor como pagador liberaria também os convites de quem
+    já usa a própria chave — o orientador e a aluna, no caso — e eles esbarrariam
+    numa cota feita para convidados de teste.
+    """
+    cliente, convites, _ = ambiente
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "chave-do-dono")
+    cliente.post("/api/config", json={})
+    api_main.config_app.salvar({"cota_por_convite": "10"})
+
+    marcado = {"X-Convite": convites.criar("Convidada", usa_chave_do_servidor=True)["codigo"]}
+    comum = {"X-Convite": convites.criar("Orientador")["codigo"]}
+
+    assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=marcado).status_code == 200
+    recusado = cliente.post("/api/gerar", json=ESPECIFICACAO, headers=comum)
+    assert recusado.status_code == 402
+    assert "não inclui gerações pagas" in recusado.json()["detail"]
+
+    assert cliente.get("/api/estado", headers=marcado).json()["servidor_banca"] is True
+    assert cliente.get("/api/estado", headers=comum).json()["servidor_banca"] is False
+
+
+def test_convite_antigo_sem_a_flag_e_tratado_como_nao_marcado(ambiente, monkeypatch):
+    """Convites criados antes da flag não podem passar a gastar do dono."""
+    cliente, convites, tmp = ambiente
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "chave-do-dono")
+    codigo = convites.criar("Antiga")["codigo"]
+
+    import json
+    arquivo = tmp / "convites.json"
+    dados = json.loads(arquivo.read_text(encoding="utf-8"))
+    del dados[codigo]["usa_chave_do_servidor"]  # como eram os convites antigos
+    arquivo.write_text(json.dumps(dados), encoding="utf-8")
+
+    resposta = cliente.post("/api/gerar", json=ESPECIFICACAO, headers={"X-Convite": codigo})
+    assert resposta.status_code == 402

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Convites · Gerador de questões</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2317337a'/><text x='16' y='23' font-size='20' font-family='Georgia,serif' fill='white' text-anchor='middle'>ƒ</text></svg>">
-  <link rel="stylesheet" href="../app.css?v=20260807a">
+  <link rel="stylesheet" href="../app.css?v=20260808b">
 </head>
 <body>
 
@@ -45,8 +45,18 @@
         <span class="campo__rotulo">Nome da pessoa</span>
         <input class="campo__controle" id="campo-nome" placeholder="Maria Silva" required>
       </label>
+      <label class="alternar" style="align-self: center">
+        <input type="checkbox" id="campo-banca">
+        <span>Gerações por conta do servidor</span>
+      </label>
       <button class="botao botao--principal" type="submit">Gerar convite</button>
     </form>
+
+    <p class="campo__ajuda" style="margin: -8px 0 18px">
+      Marque <strong>gerações por conta do servidor</strong> para quem você não quer
+      obrigar a criar uma chave de API — os convidados de um teste, tipicamente. Cada
+      convite marcado tem uma cota; os demais informam a própria chave no navegador.
+    </p>
 
     <p class="campo__ajuda" style="margin: -8px 0 18px">
       O banco de questões é derivado do <strong>nome</strong>, não do código. Reemitir um
@@ -60,7 +70,7 @@
 
 <div class="avisos" id="avisos" aria-live="polite"></div>
 
-<script src="../comum.js?v=20260807a"></script>
-<script src="convites.js?v=20260807a"></script>
+<script src="../comum.js?v=20260808b"></script>
+<script src="convites.js?v=20260808b"></script>
 </body>
 </html>

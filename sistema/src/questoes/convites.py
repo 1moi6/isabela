@@ -75,7 +75,15 @@ class Convites:
         convite = self._ler().get(codigo)
         return dict(convite, codigo=codigo) if convite else None
 
-    def criar(self, nome: str) -> dict:
+    def criar(self, nome: str, usa_chave_do_servidor: bool = False) -> dict:
+        """Cria um convite. `usa_chave_do_servidor` decide quem paga as gerações.
+
+        Falso por padrão, e é o padrão certo: um convite que gasta a chave de
+        quem mantém o servidor tem de ser um ato deliberado, nunca o que acontece
+        por omissão. Marcados são para quem se quer poupar de criar conta de API
+        --- os convidados de um teste, tipicamente; os demais informam a própria
+        chave no navegador, como sempre.
+        """
         with _TRAVA:
             convites = self._ler()
             codigo = secrets.token_urlsafe(8)
@@ -83,6 +91,7 @@ class Convites:
                 "nome": nome,
                 "identificador": identificador_de(nome),
                 "criado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "usa_chave_do_servidor": bool(usa_chave_do_servidor),
                 "usos_da_chave_do_servidor": 0,
             }
             self._gravar(convites)

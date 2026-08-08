@@ -43,14 +43,9 @@ PADRAO: dict[str, str] = {
     # Senha de administração: libera a página de convites. Fica só aqui, num
     # arquivo fora do controle de versão, e nunca é devolvida por nenhuma rota.
     "chave_admin": "",
-    # Em modo compartilhado, a chave de API de cada pessoa viaja na requisição
-    # dela. Quando ninguém manda chave, o SDK caía na variável de ambiente do
-    # servidor -- e o dono pagava pelas gerações dos convidados, em silêncio e
-    # sem limite. Agora isso só acontece se o dono ligar aqui, deliberadamente,
-    # e vale a cota abaixo. "1" liga; vazio desliga.
-    "chave_do_servidor": "",
-    # Quantas gerações cada convite pode pagar com a chave do servidor.
-    # "0" = sem limite (só faz sentido com chave_do_servidor ligada).
+    # Quantas gerações um convite marcado com `usa_chave_do_servidor` pode pagar
+    # com a chave do dono. "0" = sem limite. Quem informa a própria chave no
+    # navegador não é contabilizado: a cota limita gasto, não uso.
     "cota_por_convite": "10",
     "repositorio_frontend": "",
     "caminho_backend_json": "docs/backend.json",
