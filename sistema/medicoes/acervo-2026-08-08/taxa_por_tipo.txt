@@ -1,0 +1,17 @@
+89 ciclo(s) analisado(s).
+
+tipo/consulta                 total  ñ-verif.    taxa   reprov.
+----------------------------------------------------------------
+funcao/imagem                    33        12  36.4%         1
+funcao/dominio                   51         6  11.8%         0
+funcao/crescimento               57         4   7.0%         0
+equacao                          58         1   1.7%         7
+propriedade                      80         1   1.2%        10
+funcao/valor                    119         0   0.0%         2
+funcao/vertice                   33         0   0.0%         0
+funcao/maximo                    25         0   0.0%         6
+funcao/zeros                     11         0   0.0%         0
+funcao/periodo                   22         0   0.0%         0
+progressao/termo                  9         0   0.0%         0
+funcao/minimo                    13         0   0.0%         9
+progressao/soma                   2         0   0.0%         0

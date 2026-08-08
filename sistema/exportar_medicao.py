@@ -128,8 +128,10 @@ def _markdown(indice: int, ciclo: dict) -> tuple[str, dict]:
         "iteracoes": len(iteracoes),
         "veredicto": veredicto,
         "garantia": GARANTIA.get(veredicto, veredicto),
+        # `parecer` existe com valor nulo quando o Verificador reprovou e o
+        # Crítico não chegou a avaliar — `.get(..., {})` devolveria None ali.
         "nota_minima_critico": min(
-            (n["nota"] for n in ultima.get("parecer", {}).get("notas", [])), default=""
+            (n["nota"] for n in (ultima.get("parecer") or {}).get("notas", [])), default=""
         ),
         "tipos": "; ".join(_afirmacoes(ultima["verificacao"])),
         "sem_conferencia": "; ".join(sem_conferencia),
