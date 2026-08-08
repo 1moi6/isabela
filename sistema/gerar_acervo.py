@@ -38,6 +38,7 @@ from questoes.agentes import (  # noqa: E402
 )
 from questoes.especificacao import (  # noqa: E402
     Dificuldade, Especificacao, Formato, Natureza, NivelBloom, carregar_habilidades,
+    contextos_para,
 )
 from questoes.llm import criar_provedor  # noqa: E402
 
@@ -61,6 +62,11 @@ def plano() -> list[dict]:
         for j, codigo in enumerate(codigos):
             h = catalogo[codigo]
             temas = h["temas"] if h["relacao_temas"] == "conjuntiva" else h["temas"][:1]
+            # Rodízio de contexto entre as seis células de cada habilidade. Sem
+            # isto, o Gerador volta ao contexto mais provável do tema — e as seis
+            # questões saem sobre cultura de bactérias.
+            disponiveis = contextos_para(temas[0])
+            contexto = disponiveis[i % len(disponiveis)] if disponiveis else None
             especificacoes.append({
                 "habilidade_bncc": codigo,
                 "temas": temas,
@@ -68,6 +74,7 @@ def plano() -> list[dict]:
                 "dificuldade": dificuldade,
                 "natureza": Natureza.APLICADA if (i + j) % 2 == 0 else Natureza.TEORICA,
                 "formato": formato,
+                "contexto": contexto,
             })
     return especificacoes
 

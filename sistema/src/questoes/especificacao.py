@@ -20,6 +20,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 _DADOS = Path(__file__).resolve().parents[2] / "dados" / "bncc_em_matematica.json"
+_CONTEXTOS = Path(__file__).resolve().parents[2] / "dados" / "contextos.json"
 
 
 class Tema(str, Enum):
@@ -102,6 +103,27 @@ def carregar_habilidades() -> dict[str, dict]:
     """Carrega o catálogo de habilidades BNCC do recorte (dados/bncc_em_matematica.json)."""
     with open(_DADOS, encoding="utf-8") as f:
         return {h["codigo"]: h for h in json.load(f)["habilidades"]}
+
+
+def carregar_contextos() -> list[dict]:
+    """Contextos de aplicação sugeridos (dados/contextos.json).
+
+    Existem porque, sem indicação, o Gerador volta sempre ao contexto mais
+    provável de cada tema: no acervo de 8 de agosto, 7 das 9 questões de função
+    afim eram tarifa fixa mais valor por unidade, e todas as de PG eram cultura
+    de bactérias. O Crítico não pega isso --- ele avalia uma questão de cada vez
+    e não tem como enxergar a repetição entre elas.
+    """
+    with open(_CONTEXTOS, encoding="utf-8") as f:
+        return json.load(f)["contextos"]
+
+
+def contextos_para(tema: str) -> list[str]:
+    """Os contextos que se prestam a um tema; `temas` vazio serve a todos."""
+    return [
+        c["nome"] for c in carregar_contextos()
+        if not c["temas"] or tema in c["temas"]
+    ]
 
 
 class Especificacao(BaseModel):

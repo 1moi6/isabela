@@ -213,6 +213,7 @@ function atualizarTemas() {
 /** Desmarcar o último tema deixaria o pedido sem tema nenhum; remarca na hora. */
 function garantirUmTema(evento) {
   if (temasEscolhidos().length === 0) evento.target.checked = true;
+  atualizarSugestoesDeContexto();
 }
 
 function temasEscolhidos() {
@@ -239,11 +240,38 @@ function avisarSobreBloom() {
     "Dá para pedir assim mesmo, mas a questão tende a exigir mais revisões.";
 }
 
+/* Sem indicação, o Gerador volta sempre ao contexto mais provável de cada tema:
+   no acervo de 8 de agosto, 7 das 9 questões de função afim eram tarifa fixa mais
+   valor por unidade, e todas as de PG eram cultura de bactérias. O Crítico não
+   pega isso — avalia uma questão por vez e não enxerga a repetição entre elas.
+   Sugerir contextos é o que sobra para quebrar o padrão. */
+function atualizarSugestoesDeContexto() {
+  const lista = document.getElementById("sugestoes-contexto");
+  const ajuda = document.getElementById("ajuda-contexto");
+  const contextos = estadoApp.opcoes.contextos || [];
+  const escolhidos = temasEscolhidos();
+  lista.replaceChildren();
+  if (!contextos.length) { ajuda.textContent = ""; return; }
+
+  const servem = contextos.filter(
+    (c) => !c.temas.length || c.temas.some((t) => escolhidos.includes(t)),
+  );
+  for (const c of servem) {
+    const opcao = document.createElement("option");
+    opcao.value = c.nome;
+    lista.append(opcao);
+  }
+  ajuda.textContent = servem.length
+    ? `${servem.length} sugestões para este tema. Em branco, o gerador escolhe — e tende a repetir o mesmo contexto.`
+    : "";
+}
+
 function mostrarDescricaoHabilidade() {
   const habilidade = habilidadeEscolhida();
   document.getElementById("descricao-habilidade").textContent = habilidade ? habilidade.descricao : "";
   atualizarTemas();
   avisarSobreBloom();
+  atualizarSugestoesDeContexto();
 }
 
 /* A interface é publicada pelo GitHub Pages a cada push; a API só muda quando

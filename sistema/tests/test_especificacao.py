@@ -196,3 +196,29 @@ def test_comparacao_entre_representacoes_declara_conferencia_parcial():
     for codigo in ("EM13MAT403", "EM13MAT404"):
         assert catalogo[codigo]["verificabilidade_esperada"] == "conferido_em_parte"
         assert catalogo[codigo]["grupo_verificabilidade"] == 3
+
+
+def test_catalogo_de_contextos_cobre_todos_os_temas():
+    """Tema sem contexto sugerido devolveria o professor ao padrão do modelo.
+
+    No acervo de 8 de agosto, 7 das 9 questões de função afim eram tarifa fixa
+    mais valor por unidade e todas as de PG eram cultura de bactérias — o
+    Gerador volta ao contexto mais provável do tema quando ninguém indica outro.
+    """
+    from questoes.especificacao import carregar_contextos, contextos_para
+
+    contextos = carregar_contextos()
+    assert len(contextos) >= 20
+    for tema in Tema:
+        assert len(contextos_para(tema.value)) >= 5, tema
+
+    campos = {c["campo"] for c in contextos}
+    # os campos que faltavam por inteiro no acervo
+    assert {"ecologia", "clima", "demografia"} <= campos
+
+
+def test_contexto_declarado_chega_ao_gerador():
+    from questoes.agentes.gerador import Gerador
+
+    spec = _spec_multi(contexto="Desmatamento e recuperação de área florestal")
+    assert "Desmatamento" in Gerador._montar_pedido(spec, None)

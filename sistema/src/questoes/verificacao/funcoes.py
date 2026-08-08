@@ -47,7 +47,13 @@ def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
         )
 
     if consulta == "zeros":
-        return _comparar_conjunto(sp.solve(f, x), parse_lista(ev.resposta_esperada, ev.incognitas), "zeros da função")
+        esperados = parse_lista(ev.resposta_esperada, ev.incognitas)
+        calculados = sp.solve(f, x)
+        # Zeros complexos não são zeros da função para o Ensino Médio: com
+        # discriminante negativo, "não há raízes reais" é a resposta certa.
+        if not any(e.is_real is False for e in esperados if hasattr(e, "is_real")):
+            calculados = [c for c in calculados if getattr(c, "is_real", None) is not False]
+        return _comparar_conjunto(calculados, esperados, "zeros da função")
 
     if consulta == "vertice":
         xv = sp.solve(sp.diff(f, x), x)[0]
@@ -63,6 +69,15 @@ def verificar(ev: ExpressaoVerificavel) -> ResultadoVerificacao:
         esperado = parse(ev.resposta_esperada, ev.incognitas)
         if sp.simplify(calculado - esperado) == 0:
             return _aprovado(f"f({ponto}) = {calculado}")
+        # O Gerador escreve 1.08 numa questão de juros, e arredonda o resultado.
+        # Diferença de 1e-12 é representação, não erro de matemática.
+        if _apenas_ruido(calculado, esperado):
+            return ResultadoVerificacao(
+                veredicto=Veredicto.APROVADO_RESSALVA_NUMERICA,
+                justificativa=f"f({ponto}) = {calculado} coincide com o gabarito {esperado} "
+                "a menos de arredondamento.",
+                resultado_calculado=str(calculado),
+            )
         return _rejeitado(f"f({ponto}) = {calculado}", f"gabarito {esperado}")
 
     if consulta in ("maximo", "minimo"):
@@ -227,6 +242,17 @@ def _inconclusivo(detalhe: str) -> ResultadoVerificacao:
         veredicto=Veredicto.NAO_VERIFICAVEL,
         justificativa=f"Verificação inconclusiva: {detalhe}. Conferir manualmente.",
     )
+
+
+# Abaixo disso a diferença é ruído de representação, não erro de matemática.
+_TOLERANCIA = 1e-9
+
+
+def _apenas_ruido(a, b) -> bool:
+    try:
+        return abs(complex(sp.N(a - b))) <= _TOLERANCIA
+    except (TypeError, ValueError):
+        return False
 
 
 def _comparar_conjunto(calculados, esperados, rotulo) -> ResultadoVerificacao:

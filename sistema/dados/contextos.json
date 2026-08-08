@@ -1,0 +1,180 @@
+{
+  "nota": "Contextos de aplicação sugeridos para questões de natureza aplicada. Existem porque, sem indicação, o Gerador volta sempre ao contexto mais provável de cada tema — no acervo de 8 de agosto, 7 das 9 questões de função afim eram tarifa fixa mais valor por unidade, e todas as de PG eram cultura de bactérias. O Crítico não pega isso: ele avalia uma questão de cada vez e não enxerga a repetição entre elas. 'temas' lista os tópicos a que o contexto se presta; vazio significa que serve a todos. Esta lista é leitura nossa, não da BNCC, e pode ser ampliada à vontade.",
+  "contextos": [
+    {
+      "nome": "Desmatamento e recuperação de área florestal",
+      "campo": "ecologia",
+      "temas": ["funcao_afim", "funcao_exponencial", "progressao_aritmetica", "progressao_geometrica"]
+    },
+    {
+      "nome": "Emissão e captura de carbono",
+      "campo": "ecologia",
+      "temas": ["funcao_afim", "funcao_exponencial", "funcao_logaritmica"]
+    },
+    {
+      "nome": "Consumo de água e reúso em uma residência",
+      "campo": "ecologia",
+      "temas": ["funcao_afim", "funcao_por_partes"]
+    },
+    {
+      "nome": "Coleta seletiva e volume de recicláveis",
+      "campo": "ecologia",
+      "temas": ["funcao_afim", "progressao_aritmetica"]
+    },
+    {
+      "nome": "Geração de energia por painéis solares",
+      "campo": "ecologia",
+      "temas": ["funcao_afim", "funcao_quadratica", "funcao_trigonometrica"]
+    },
+    {
+      "nome": "Temperatura ao longo do dia",
+      "campo": "clima",
+      "temas": ["funcao_trigonometrica", "funcao_quadratica"]
+    },
+    {
+      "nome": "Volume de chuva e nível de um reservatório",
+      "campo": "clima",
+      "temas": ["funcao_afim", "funcao_quadratica", "funcao_por_partes"]
+    },
+    {
+      "nome": "Altura da maré ao longo do dia",
+      "campo": "clima",
+      "temas": ["funcao_trigonometrica"]
+    },
+    {
+      "nome": "Horas de luz solar ao longo do ano",
+      "campo": "clima",
+      "temas": ["funcao_trigonometrica"]
+    },
+    {
+      "nome": "Crescimento populacional de um município",
+      "campo": "demografia",
+      "temas": ["funcao_exponencial", "funcao_afim", "progressao_geometrica"]
+    },
+    {
+      "nome": "Densidade demográfica e ocupação urbana",
+      "campo": "demografia",
+      "temas": ["funcao_afim", "funcao_quadratica"]
+    },
+    {
+      "nome": "Índice de desenvolvimento e indicadores sociais",
+      "campo": "demografia",
+      "temas": ["funcao_afim", "funcao_logaritmica"]
+    },
+    {
+      "nome": "Matrículas escolares e evasão ao longo dos anos",
+      "campo": "demografia",
+      "temas": ["funcao_afim", "progressao_aritmetica", "funcao_exponencial"]
+    },
+    {
+      "nome": "Cobertura vacinal de uma campanha",
+      "campo": "saude",
+      "temas": ["funcao_exponencial", "funcao_logaritmica", "funcao_afim"]
+    },
+    {
+      "nome": "Concentração de um medicamento no organismo",
+      "campo": "saude",
+      "temas": ["funcao_exponencial", "funcao_logaritmica", "progressao_geometrica"]
+    },
+    {
+      "nome": "Propagação de uma epidemia",
+      "campo": "saude",
+      "temas": ["funcao_exponencial", "progressao_geometrica"]
+    },
+    {
+      "nome": "Produtividade agrícola por hectare",
+      "campo": "agropecuaria",
+      "temas": ["funcao_afim", "funcao_quadratica", "progressao_aritmetica"]
+    },
+    {
+      "nome": "Crescimento de um rebanho",
+      "campo": "agropecuaria",
+      "temas": ["funcao_exponencial", "progressao_geometrica"]
+    },
+    {
+      "nome": "Preço de uma safra ao longo da colheita",
+      "campo": "agropecuaria",
+      "temas": ["funcao_quadratica", "funcao_afim", "progressao_aritmetica"]
+    },
+    {
+      "nome": "Irrigação: área coberta por um pivô",
+      "campo": "agropecuaria",
+      "temas": ["funcao_quadratica", "funcao_trigonometrica"]
+    },
+    {
+      "nome": "Conta de luz cobrada por faixas de consumo",
+      "campo": "economia",
+      "temas": ["funcao_por_partes", "funcao_afim"]
+    },
+    {
+      "nome": "Imposto de renda por faixa de rendimento",
+      "campo": "economia",
+      "temas": ["funcao_por_partes", "funcao_afim"]
+    },
+    {
+      "nome": "Financiamento com parcelas e amortização",
+      "campo": "economia",
+      "temas": ["progressao_aritmetica", "progressao_geometrica", "funcao_exponencial"]
+    },
+    {
+      "nome": "Inflação e perda do poder de compra",
+      "campo": "economia",
+      "temas": ["funcao_exponencial", "funcao_logaritmica", "progressao_geometrica"]
+    },
+    {
+      "nome": "Custo, receita e lucro de um microempreendedor",
+      "campo": "economia",
+      "temas": ["funcao_quadratica", "funcao_afim"]
+    },
+    {
+      "nome": "Intensidade sonora e escala de decibéis",
+      "campo": "fisica",
+      "temas": ["funcao_logaritmica"]
+    },
+    {
+      "nome": "Magnitude de abalos sísmicos",
+      "campo": "fisica",
+      "temas": ["funcao_logaritmica", "funcao_exponencial"]
+    },
+    {
+      "nome": "Resfriamento de um corpo",
+      "campo": "fisica",
+      "temas": ["funcao_exponencial", "funcao_logaritmica"]
+    },
+    {
+      "nome": "Trajetória de uma bola em um esporte",
+      "campo": "esporte",
+      "temas": ["funcao_quadratica"]
+    },
+    {
+      "nome": "Desempenho de um atleta ao longo de uma temporada",
+      "campo": "esporte",
+      "temas": ["funcao_afim", "progressao_aritmetica", "funcao_quadratica"]
+    },
+    {
+      "nome": "Movimento de uma roda-gigante",
+      "campo": "lazer",
+      "temas": ["funcao_trigonometrica"]
+    },
+    {
+      "nome": "Planos de assinatura de um serviço de streaming",
+      "campo": "cotidiano",
+      "temas": ["funcao_afim", "funcao_por_partes"]
+    },
+    {
+      "nome": "Alcance de uma publicação em rede social",
+      "campo": "cotidiano",
+      "temas": ["funcao_exponencial", "progressao_geometrica", "funcao_logaritmica"]
+    },
+    {
+      "nome": "Fila e tempo de atendimento em um serviço público",
+      "campo": "cotidiano",
+      "temas": ["funcao_afim", "progressao_aritmetica"]
+    },
+    {
+      "nome": "Sequência de figuras em um padrão geométrico",
+      "campo": "matematica",
+      "temas": ["progressao_aritmetica", "progressao_geometrica", "funcao_quadratica"]
+    }
+  ]
+}

@@ -37,7 +37,7 @@ from questoes.banco import BancoQuestoes  # noqa: E402
 from questoes.convites import DONO_LOCAL, Convites  # noqa: E402
 from questoes.especificacao import (  # noqa: E402
     Dificuldade, Especificacao, Formato, Garantia, Natureza, NivelBloom, Tema,
-    carregar_habilidades,
+    carregar_contextos, carregar_habilidades,
 )
 from questoes.listas import para_docx, para_latex, para_markdown  # noqa: E402
 from questoes.llm import criar_provedor  # noqa: E402
@@ -268,6 +268,9 @@ def opcoes() -> dict:
         "formatos": [{"valor": f.value, "rotulo": ROTULO_FORMATO[f.value]} for f in Formato],
         "decisoes": [{"valor": v, "rotulo": r} for v, r in ROTULO_DECISAO.items()],
         "garantias": [{"valor": g.value, "rotulo": ROTULO_GARANTIA[g.value]} for g in Garantia],
+        # Sugestões de contexto, filtráveis por tema na interface: sem indicação,
+        # o Gerador volta sempre ao contexto mais provável de cada tema.
+        "contextos": carregar_contextos(),
         # O formulário monta os temas a partir da habilidade escolhida, e não o
         # contrário: por isso cada habilidade carrega seus temas, como eles se
         # combinam, o que a questão precisa cumprir e que níveis de Bloom os
