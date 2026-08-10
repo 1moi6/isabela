@@ -16,6 +16,8 @@ const guardado = {
   set chave(v) { v ? localStorage.setItem("questoes.chave", v) : localStorage.removeItem("questoes.chave"); },
   get provedor() { return localStorage.getItem("questoes.provedor") || ""; },
   set provedor(v) { v ? localStorage.setItem("questoes.provedor", v) : localStorage.removeItem("questoes.provedor"); },
+  get modelo() { return localStorage.getItem("questoes.modelo") || ""; },
+  set modelo(v) { v ? localStorage.setItem("questoes.modelo", v) : localStorage.removeItem("questoes.modelo"); },
   get api() { return localStorage.getItem("questoes.api") || API_PADRAO; },
   set api(v) { v ? localStorage.setItem("questoes.api", v) : localStorage.removeItem("questoes.api"); },
   get admin() { return sessionStorage.getItem("questoes.admin") || ""; },
@@ -89,6 +91,10 @@ async function api(caminho, opcoes = {}) {
   if (guardado.convite) cabecalhos["X-Convite"] = guardado.convite;
   if (guardado.chave) cabecalhos["X-Chave-API"] = guardado.chave;
   if (guardado.provedor) cabecalhos["X-Provedor"] = guardado.provedor;
+  // O modelo acompanha o provedor: os dois são escolha de quem usa. Sem este
+  // par, quem escolhesse outro provedor receberia o modelo configurado no
+  // servidor — um nome da família errada, que o serviço recusa.
+  if (guardado.modelo) cabecalhos["X-Modelo"] = guardado.modelo;
   if (guardado.admin) cabecalhos["X-Chave-Admin"] = guardado.admin;
 
   const resposta = await fetch(guardado.api + caminho, { headers: cabecalhos, ...opcoes });
