@@ -265,7 +265,8 @@ function atualizarSugestoesDeContexto() {
     ? `${servem.length} sugestões para este tema. Em branco, o gerador escolhe — e tende a repetir o mesmo contexto.`
     : "";
   document.getElementById("sortear-contexto").disabled = !servem.length;
-  estadoApp.contextosDoTema = servem;
+  // Só os nomes: o sorteio escreve direto no campo de texto.
+  estadoApp.contextosDoTema = servem.map((c) => c.nome);
 }
 
 /* No aplicativo não há lote: o professor gera uma questão por vez, e não há
