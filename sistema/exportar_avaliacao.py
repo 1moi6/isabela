@@ -13,6 +13,10 @@ veredicto, sem parecer, e sem o `erro_representado` de cada distrator.
 
     python exportar_avaliacao.py <ciclos.jsonl> [pasta] [--avaliadores N]
                                  [--ancora N] [--semente N] [--incluir-descartadas]
+                                 [--sem-pdf]
+
+O material sai em PDF (via `questoes/tex.py` + pdflatex) e em Markdown. Sem
+pdflatex na máquina, o `.tex` fica na pasta e a geração continua.
 
 Produz um documento por avaliador, uma planilha de respostas por avaliador e um
 `_chave.csv` que **não se envia a ninguém** — é ele que liga cada código de item
@@ -49,7 +53,7 @@ SEMENTE = 20260810  # distribuição reprodutível, como em gerar_acervo.py
 MINUTOS_POR_ITEM = 3.5
 LIMITE_RAZOAVEL = 75  # acima disto, participação voluntária começa a decair
 
-COLUNAS_RESPOSTA = ["item", "tem_erro", "onde", "decisao", "por_que"]
+COLUNAS_RESPOSTA = ["item", "tem_erro", "onde", "dificuldade_percebida", "decisao", "por_que"]
 COLUNAS_CHAVE = [
     "item", "avaliadores", "ciclo", "habilidade", "temas", "dificuldade",
     "natureza", "formato", "nivel_bloom", "garantia", "aprovada",
@@ -67,8 +71,13 @@ INSTRUCOES = """\
 ## Como responder
 
 São {n} questões de Matemática do Ensino Médio. Leia cada uma como leria uma
-questão que você pensasse em usar com a sua turma, e responda às três perguntas
-que vêm logo abaixo dela.
+questão que você pensasse em usar com a sua turma, e responda às quatro
+perguntas que vêm logo abaixo dela.
+
+Onde se pergunta pelo **nível de dificuldade**, responda pensando nos seus
+alunos, não num aluno ideal. É essa resposta que permite calibrar o sistema: ele
+classifica cada questão como fácil, média ou difícil por conta própria, e
+precisamos saber o quanto isso corresponde à sala de aula real.
 
 **A amostra tem qualidade variável, e pode conter questões com erro matemático.**
 Se encontrar algum, aponte onde.
@@ -83,9 +92,18 @@ vem com os códigos dos itens nas linhas. O que for mais cômodo.
 Tempo estimado: cerca de {minutos} minutos.
 """
 
+# A dificuldade declarada na especificação NÃO é mostrada, e a pergunta é feita
+# em aberto em vez de "concorda com o nível X?". Mostrar o rótulo ancoraria a
+# resposta, e o que se quer medir é justamente a distância entre o que o sistema
+# chamou de difícil e o que é difícil para a turma de quem responde. A quarta
+# opção separa "puxada mas dá" de "não é viável na minha realidade" — distinção
+# que uma escala de três níveis apaga, e que é o dado que calibra o Gerador.
 ITENS_DE_ANALISE = """\
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -94,6 +112,77 @@ ITENS_DE_ANALISE = """\
 
 >
 """
+
+INSTRUCOES_TEX = r"""\subsection*{Como responder}
+
+São @N@ questões de Matemática do Ensino Médio. Leia cada uma como leria uma
+questão que você pensasse em usar com a sua turma, e responda às quatro
+perguntas que vêm logo abaixo dela.
+
+Onde se pergunta pelo \textbf{nível de dificuldade}, responda pensando nos
+seus alunos, não num aluno ideal. É essa resposta que permite calibrar o
+sistema: ele classifica cada questão como fácil, média ou difícil por conta
+própria, e precisamos saber o quanto isso corresponde à sala de aula real.
+
+\textbf{A amostra tem qualidade variável, e pode conter questões com erro
+matemático.} Se encontrar algum, aponte onde.
+
+Não há resposta certa sobre você: o que está sendo avaliado é o sistema que
+produziu estas questões, não quem as lê. Um ``recusada'' bem justificado vale
+mais para este trabalho do que um ``aceita'' por gentileza.
+
+Você pode responder direto neste documento impresso ou na planilha
+\texttt{@PLANILHA@}, que já vem com os códigos dos itens nas linhas.
+
+Tempo estimado: cerca de @MINUTOS@ minutos."""
+
+# Cada opção dentro de \mbox: sem isso o LaTeX quebra a linha no meio de "não
+# sei dizer" e a alternativa fica partida entre duas linhas, o que num
+# instrumento de marcar quadradinho atrapalha a leitura.
+ITENS_DE_ANALISE_TEX = r"""\textbf{Tem erro matemático?}\quad
+\mbox{$\square$~não} \quad \mbox{$\square$~sim, aqui:} \underline{\hspace{5cm}}
+\quad \mbox{$\square$~não sei dizer}
+
+\textbf{Que nível de dificuldade esta questão tem para os seus alunos?}\quad
+\mbox{$\square$~fácil} \quad \mbox{$\square$~média} \quad
+\mbox{$\square$~difícil} \quad \mbox{$\square$~fora do alcance da turma}
+
+\textbf{Você usaria esta questão?}\quad
+\mbox{$\square$~aceita} \quad \mbox{$\square$~aceita com ajuste} \quad
+\mbox{$\square$~recusada}
+
+\textbf{Por quê?} \emph{(obrigatório quando não for ``aceita'')}
+
+\underline{\hspace{\linewidth}}
+
+\underline{\hspace{\linewidth}}"""
+
+FECHAMENTO_TEX = r"""\newpage
+\subsection*{Para terminar}
+
+\textbf{1. Você usaria um sistema assim no seu planejamento? Por quê?}
+
+\underline{\hspace{\linewidth}}
+
+\underline{\hspace{\linewidth}}
+
+\bigskip
+\textbf{2. O que faltou nas questões que você viu?}
+
+\underline{\hspace{\linewidth}}
+
+\underline{\hspace{\linewidth}}
+
+\bigskip
+\textbf{3. O que atrapalhou --- na questão, no enunciado, no formato deste
+material?}
+
+\underline{\hspace{\linewidth}}
+
+\underline{\hspace{\linewidth}}
+
+\bigskip
+Obrigado. Se quiser saber quais itens tinham erro e qual era, é só pedir."""
 
 FECHAMENTO = """\
 ---
@@ -190,6 +279,62 @@ def distribuir(itens: list[str], avaliadores: int, ancora: int, sorteio: random.
     return comuns, lotes
 
 
+def redigir_item_tex(codigo: str, ciclo: dict, catalogo: dict) -> str:
+    """O mesmo item do documento em Markdown, em LaTeX — e com a mesma omissão."""
+    from questoes.tex import para_tex
+
+    q = _questao(ciclo)
+    spec = q["especificacao"]
+    descricao = (catalogo.get(spec["habilidade_bncc"]) or {}).get("descricao", "")
+
+    partes = [
+        r"\begin{samepage}",
+        rf"\subsection*{{{codigo}}}",
+        para_tex(q["enunciado"].strip()),
+    ]
+    if q.get("alternativas"):
+        partes.append(r"\begin{enumerate}[label=(\alph*),nosep,leftmargin=*]")
+        partes += [rf"\item {para_tex(a['texto'].strip())}" for a in q["alternativas"]]
+        partes.append(r"\end{enumerate}")
+
+    partes += [
+        # A linha em branco é obrigatória: sem ela o LaTeX emenda o gabarito no
+        # último item do enunciado, e "c) Determine a distância" passa a
+        # terminar com a resposta na mesma frase.
+        "",
+        rf"\textbf{{Gabarito proposto:}} {para_tex(q['gabarito'].strip())}",
+        "",
+        rf"\textbf{{Habilidade declarada:}} {spec['habilidade_bncc']} --- "
+        rf"{para_tex(descricao)}",
+        r"\end{samepage}",
+        "",
+        r"\noindent\rule{\linewidth}{0.4pt}",
+        ITENS_DE_ANALISE_TEX,
+        r"\vspace{0.6em}",
+        "",
+    ]
+    return "\n".join(partes)
+
+
+def documento_tex(numero: int, itens: list[str], codigos: dict, catalogo: dict,
+                  planilha: str) -> str:
+    from questoes.tex import PREAMBULO
+
+    minutos = round(len(itens) * MINUTOS_POR_ITEM / 5) * 5
+    corpo = [
+        PREAMBULO,
+        r"\begin{document}",
+        rf"\section*{{Avaliação de questões --- avaliador {numero}}}",
+        INSTRUCOES_TEX.replace("@N@", str(len(itens)))
+                      .replace("@PLANILHA@", planilha.replace("_", r"\_"))
+                      .replace("@MINUTOS@", str(minutos)),
+        r"\bigskip\hrule\bigskip",
+    ]
+    corpo += [redigir_item_tex(c, codigos[c], catalogo) for c in itens]
+    corpo += [FECHAMENTO_TEX, r"\end{document}"]
+    return "\n".join(corpo)
+
+
 def redigir_item(codigo: str, ciclo: dict, catalogo: dict) -> str:
     """Uma questão como o avaliador a vê. Tudo que não está aqui é de propósito."""
     q = _questao(ciclo)
@@ -219,7 +364,7 @@ def redigir_item(codigo: str, ciclo: dict, catalogo: dict) -> str:
 
 
 def main(origem: Path, destino: Path, avaliadores: int, ancora: int, semente: int,
-         incluir_descartadas: bool) -> int:
+         incluir_descartadas: bool, pdf: bool = True) -> int:
     sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
     from questoes.especificacao import carregar_habilidades
 
@@ -248,6 +393,7 @@ def main(origem: Path, destino: Path, avaliadores: int, ancora: int, semente: in
 
     destino.mkdir(parents=True, exist_ok=True)
     quem_recebeu: dict[str, list[int]] = {c: [] for c in codigos}
+    sem_pdf: set[str] = set()
     for n, lote in enumerate(lotes, 1):
         meus = comuns + lote
         sorteio.shuffle(meus)  # a âncora não fica sempre no início
@@ -266,6 +412,15 @@ def main(origem: Path, destino: Path, avaliadores: int, ancora: int, semente: in
         corpo += [redigir_item(c, codigos[c], catalogo) for c in meus]
         corpo.append(FECHAMENTO)
         (destino / f"avaliador-{n}.md").write_text("\n".join(corpo), encoding="utf-8")
+
+        if pdf:
+            from questoes.tex import compilar
+
+            nome = f"avaliador-{n}"
+            if compilar(documento_tex(n, meus, codigos, catalogo, planilha), destino, nome):
+                sem_pdf.discard(nome)
+            else:
+                sem_pdf.add(nome)
 
         with open(destino / planilha, "w", newline="", encoding="utf-8") as f:
             escritor = csv.writer(f)
@@ -305,6 +460,8 @@ def main(origem: Path, destino: Path, avaliadores: int, ancora: int, semente: in
         fora = len(ciclos) - len(codigos)
         if fora:
             print(f"{fora} ciclo(s) descartado(s) ficaram de fora (--incluir-descartadas).")
+    if pdf and sem_pdf:
+        print(f"  AVISO: {len(sem_pdf)} PDF(s) não compilaram; o .tex ficou na pasta.")
     print(f"Material em {destino}/ — NÃO envie o _chave.csv junto.")
     return 0
 
@@ -327,4 +484,5 @@ if __name__ == "__main__":
         ancora=opcao("ancora", 6),
         semente=opcao("semente", SEMENTE),
         incluir_descartadas="--incluir-descartadas" in sys.argv[1:],
+        pdf="--sem-pdf" not in sys.argv[1:],
     ))

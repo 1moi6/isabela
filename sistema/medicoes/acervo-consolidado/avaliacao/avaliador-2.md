@@ -3,8 +3,13 @@
 ## Como responder
 
 São 22 questões de Matemática do Ensino Médio. Leia cada uma como leria uma
-questão que você pensasse em usar com a sua turma, e responda às três perguntas
-que vêm logo abaixo dela.
+questão que você pensasse em usar com a sua turma, e responda às quatro
+perguntas que vêm logo abaixo dela.
+
+Onde se pergunta pelo **nível de dificuldade**, responda pensando nos seus
+alunos, não num aluno ideal. É essa resposta que permite calibrar o sistema: ele
+classifica cada questão como fácil, média ou difícil por conta própria, e
+precisamos saber o quanto isso corresponde à sala de aula real.
 
 **A amostra tem qualidade variável, e pode conter questões com erro matemático.**
 Se encontrar algum, aponte onde.
@@ -36,6 +41,9 @@ Ao girar um ponto sobre o ciclo trigonométrico (circunferência de raio 1 centr
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -64,6 +72,9 @@ Determine a lei que descreve o custo do novo plano em função do tempo de uso $
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -98,6 +109,9 @@ Seja $V(x)$ o valor da conta, em reais, para um consumo de $x$ $m^3$, com $x \ge
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -127,6 +141,9 @@ d) Determine a imagem de h(t), justificando o resultado a partir da comparação
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -159,6 +176,9 @@ Com base na leitura desses pontos e na relação de simetria entre as curvas, as
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -182,6 +202,9 @@ b) Determine todos os horários dentro das primeiras 12 horas do dia (isto é, p
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -209,6 +232,9 @@ Qual é o menor termo dessa PA que é maior do que 100?
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -241,6 +267,9 @@ Um estudante, analisando os pares ordenados $(x,y)$ da tabela, conjectura que es
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -265,6 +294,9 @@ A magnitude $M$ de um terremoto na escala Richter relaciona-se com a energia $E$
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -291,6 +323,9 @@ Duas empresas de aplicativo de transporte, A e B, calculam o valor da corrida em
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -315,6 +350,9 @@ Marina aplicou R$ 8.000,00 em um investimento que rende juros compostos a uma ta
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -342,6 +380,9 @@ c) Determine o valor real de $x$ para o qual $f(x) = 24$. Em seguida, usando o d
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -366,6 +407,9 @@ Uma progressão geométrica $(a_n)$, definida apenas para $n \in \mathbb{N}^*$ (
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -395,6 +439,9 @@ d) Explique por que o domínio de $N(t)$ coincide com a imagem de $t(N)$, e a im
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -418,6 +465,9 @@ b) Usando essa expressão, calcule quanto custará uma corrida de 15 km.
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -445,6 +495,9 @@ Uma grandeza positiva $C$ sofre, em cada uma de $n$ etapas sucessivas, um acrés
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -470,6 +523,9 @@ c) Classifique $f$ e $g$ quanto ao crescimento (crescente ou decrescente) em tod
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -500,6 +556,9 @@ Com base nessa função afim, determine a partir de qual mês o número de passa
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -528,6 +587,9 @@ c) Um terceiro aplicativo, o RotaFácil, acaba de entrar no mercado, cobrando um
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -558,6 +620,9 @@ c) Classifique o tipo de função obtida, justificando sua resposta a partir da 
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -590,6 +655,9 @@ Assinale a alternativa que descreve corretamente esse gráfico.
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -614,6 +682,9 @@ Uma oficina mecânica cobra por seus serviços de revisão um valor fixo de mão
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada

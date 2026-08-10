@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import json
+import shutil
 import random
 import re
 
@@ -72,7 +73,11 @@ def acervo(tmp_path):
 
 def _gerar(acervo, tmp_path, **kwargs):
     destino = tmp_path / "avaliacao"
-    opcoes = {"avaliadores": 5, "ancora": 6, "semente": 1, "incluir_descartadas": False}
+    # Sem PDF por omissão: a suíte chama isto quinze vezes, e compilar cinco
+    # documentos em cada chamada custaria mais de cem execuções do pdflatex.
+    # O caminho do PDF tem teste próprio, uma vez só.
+    opcoes = {"avaliadores": 5, "ancora": 6, "semente": 1,
+              "incluir_descartadas": False, "pdf": False}
     exp.main(acervo, destino, **{**opcoes, **kwargs})
     docs = {p.name: p.read_text(encoding="utf-8") for p in sorted(destino.glob("avaliador-*.md"))}
     return destino, docs
@@ -216,3 +221,20 @@ def test_distribuir_nao_perde_nem_duplica_item():
     assert len(todos) == 84 and len(set(todos)) == 84
     assert set(todos) | set(comuns) == set(itens)
     assert not set(todos) & set(comuns)
+
+
+@pytest.mark.skipif(not shutil.which("pdflatex"), reason="requer pdflatex")
+def test_material_sai_em_pdf(acervo, tmp_path):
+    """O professor recebe PDF; o .md é conveniência nossa."""
+    destino, _ = _gerar(acervo, tmp_path, avaliadores=2, ancora=2, pdf=True)
+    assert len(list(destino.glob("avaliador-*.pdf"))) == 2
+
+
+def test_sem_pdflatex_o_tex_fica_e_a_geracao_continua(acervo, tmp_path, monkeypatch):
+    """No computador do professor não há LaTeX. Entregar a fonte com aviso é
+    melhor do que interromper a geração do material inteiro."""
+    monkeypatch.setattr(shutil, "which", lambda _: None)
+    destino, docs = _gerar(acervo, tmp_path, avaliadores=2, ancora=2, pdf=True)
+    assert not list(destino.glob("*.pdf"))
+    assert len(list(destino.glob("avaliador-*.tex"))) == 2
+    assert len(docs) == 2
