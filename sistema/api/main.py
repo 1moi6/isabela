@@ -77,7 +77,12 @@ ROTULO_DECISAO = {
     "recusada": "Recusada",
 }
 
-VARIAVEL_CHAVE = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY"}
+VARIAVEL_CHAVE = {
+    "anthropic": "ANTHROPIC_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "gemini": "GEMINI_API_KEY",
+    "deepseek": "DEEPSEEK_API_KEY",
+}
 
 app = FastAPI(title="Gerador de questões de Matemática", docs_url=None, redoc_url=None)
 _banco = BancoQuestoes(BANCO_PATH)

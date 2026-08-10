@@ -37,10 +37,25 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
 - **A política de decisão vive só no Orquestrador** (`agentes/orquestrador.py`): rejeição do
   verificador volta ao Gerador sem passar pelo Crítico; `nao_verificavel` segue ao Crítico;
   3 iterações sem aprovação = descarte. Testes de política usam `LLMFake` (test_orquestrador.py).
-- **Provedores de LLM são plugáveis** via `llm/criar_provedor` (`anthropic`/`openai`/`ollama`);
-  dependências de provedor são opcionais no `pyproject.toml` — não as torne obrigatórias.
-  Os modelos atuais da Anthropic **rejeitam `temperature`**: `anthropic_llm.py` só envia o
-  parâmetro para as famílias legadas listadas ali (padrão = não enviar).
+- **Provedores de LLM são plugáveis** via `llm/criar_provedor`
+  (`anthropic`/`openai`/`gemini`/`deepseek`/`ollama`); dependências de provedor são opcionais no
+  `pyproject.toml` — não as torne obrigatórias. Gemini e DeepSeek **não têm módulo próprio**:
+  falam o protocolo de chat da OpenAI e são o mesmo `ProvedorOpenAI` com outro `base_url`, outra
+  variável de chave e outro modelo padrão (`openai_llm.SERVICOS`). Três invariantes desta camada,
+  todas com teste em `test_provedores.py`:
+  - **Cada família recusa um parâmetro diferente.** Os modelos atuais da Anthropic rejeitam
+    `temperature` (`FAMILIAS_COM_TEMPERATURA`, padrão = não enviar); a família de raciocínio da
+    OpenAI rejeita `temperature` e troca `max_tokens` por `max_completion_tokens`
+    (`FAMILIAS_DE_RACIOCINIO`). Em ambos, o padrão é enviar e a lista é a exceção.
+  - **Modo JSON e teto de saída são obrigatórios em todo provedor.** Sem `response_format`/
+    `format: "json"` a disciplina de formato depende só da instrução em prosa — o Sonnet aguenta,
+    um modelo pequeno não. Sem teto, o JSON de ~2.300 tokens sai truncado; o Ollama trunca em
+    **128 tokens** por omissão, e sem `num_predict` o modelo aberto parece incapaz da tarefa
+    quando o problema é de configuração.
+  - **Truncamento e resposta vazia levantam exceção**, nunca devolvem JSON pela metade: o
+    Orquestrador reage a exceção pedindo concisão (`_gerar_com_folga`), a um JSON incompleto não.
+  - Chave ausente num serviço compatível **recusa** em vez de seguir: o SDK da OpenAI não conhece
+    `GEMINI_API_KEY` e cairia calado na `OPENAI_API_KEY` — cobrando a conta errada.
 - **A interface é FastAPI + HTML/CSS/JS sem passo de build** (`api/main.py` + `docs/` na raiz do
   repositório, não dentro de `sistema/`: é a pasta que o GitHub Pages publica, então existe uma
   cópia só, servida pelo processo local e pelo Pages). Um `POST /api/gerar` produz **uma**
@@ -198,3 +213,9 @@ habilidades. Aberta: o resto da Fase 2 (2c a 2g, ~25 habilidades).
 
 Segue fora do alcance do SymPy, por natureza e não por falta de implementação: `401` e `402`
 (conversão de registro é propriedade do enunciado). Elas declaram `conferido_em_parte`.
+
+A comparação entre modelos tem plano próprio em `plano_teste_modelos.md`: cinco braços (Sonnet
+como referência, Haiku 4.5, Gemini 2.5 Flash-Lite, DeepSeek V4 Flash e um aberto local), todos no
+mesmo commit, com as mesmas 90 especificações. **Preparado, não executado.** O que se mede é a
+taxa de `nao_verificavel` por tipo — se um modelo mais fraco converge com mais iterações, é
+evidência a favor da hipótese arquitetural, e é resultado do Cap. 6.

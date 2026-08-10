@@ -8,7 +8,8 @@ avaliação --- inclusive os espécimes de erro, que ficam no log toda vez que o
 Verificador reprova uma primeira tentativa.
 
     python gerar_acervo.py [destino] [--parte i/n] [--apenas COD,COD]
-                           [--provedor anthropic|openai|ollama] [--modelo ID]
+                           [--provedor anthropic|openai|gemini|deepseek|ollama]
+                           [--modelo ID]
 
 `--parte` divide a lista entre processos paralelos, cada um com o seu log. Os
 ciclos são independentes; só o Orquestrador é sequencial dentro de um ciclo.

@@ -26,7 +26,7 @@ Para desenvolvimento:
 
 ```bash
 cd sistema
-pip install -e ".[dev,app,anthropic]"   # troque 'anthropic' por 'openai' ou 'ollama'
+pip install -e ".[dev,app,anthropic]"   # ou 'openai', 'gemini', 'deepseek', 'ollama'
 ```
 
 ## Configuração do LLM
@@ -36,13 +36,22 @@ modelo, chave de API e pasta sincronizada. A chave fica apenas na memória do pr
 o programa estiver aberto; **nunca é gravada em disco**.
 
 **Por variável de ambiente** (usada quando o campo da interface fica vazio; única via para uso
-programático): `ANTHROPIC_API_KEY` ou `OPENAI_API_KEY`.
+programático): uma por serviço — `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY` ou
+`DEEPSEEK_API_KEY`.
 
 As demais preferências (provedor, modelo, pasta sincronizada) ficam em `config_local.json`,
 fora do controle de versão.
 
+**Gemini e DeepSeek** falam o protocolo de chat da OpenAI: mesma biblioteca, outro endereço.
+Basta escolher o provedor pelo nome (`gemini`, `deepseek`) e informar a chave do serviço. Um
+compatível fora dessa lista (Groq, OpenRouter, um vLLM da instituição) entra pelo parâmetro
+`url`, que vira o `base_url` do cliente.
+
 Com **Ollama** (modelos abertos, sem chave): instale o Ollama, `ollama pull qwen2.5:14b` e
 selecione `ollama` nas configurações.
+
+A comparação de custo e de confiabilidade entre esses modelos está em
+`../plano_teste_modelos.md`.
 
 ## Uso
 
