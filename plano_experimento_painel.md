@@ -131,8 +131,19 @@ omissão.
 Por item, nesta ordem:
 
 1. **Tem erro matemático?** não / sim, aqui: ___ / não sei dizer
-2. **Decisão de uso:** aceita / aceita com ajuste / recusada
-3. **Por quê?** — obrigatório quando a decisão não for "aceita"
+2. **Nível de dificuldade para os seus alunos:** fácil / média / difícil / fora do alcance da turma
+3. **Decisão de uso:** aceita / aceita com ajuste / recusada
+4. **Por quê?** — obrigatório quando a decisão não for "aceita"
+
+Sobre o item 2: a dificuldade que a especificação declarou **não é mostrada**, e a pergunta é feita
+em aberto em vez de "concorda com o nível *X*?". Mostrar o rótulo ancoraria a resposta, e o que
+interessa é justamente a distância entre o que o sistema chamou de difícil e o que é difícil na
+sala de aula real — os cinco participantes são professores da rede pública, e essa distância é o
+dado que calibra o Gerador. A comparação se faz depois, contra a coluna `dificuldade` do
+`_chave.csv`.
+
+A quarta opção — *fora do alcance da turma* — separa "puxada mas dá" de "não é viável na minha
+realidade". Uma escala de três níveis apaga essa distinção, que é a mais acionável das duas.
 
 A escala Likert dos seis critérios **fica de fora desta rodada**. Com cinco pessoas, médias por
 critério são ruído; a decisão de uso e a justificativa são sinal, e é delas que sai o que ajustar
@@ -190,8 +201,16 @@ tarefa), a **garantia obtida** (é o que P3 investiga — impressa na página, f
 **parecer do Crítico** (mediria concordância com o Crítico, não julgamento próprio) e o
 `erro_representado` de cada distrator (anotação interna do Gerador).
 
-O `_chave.csv` liga item a ciclo, habilidade, garantia e a quem recebeu. **Não se envia junto** —
-é ele que permite ler as respostas por estrato depois.
+O `_chave.csv` liga item a ciclo, habilidade, garantia, **dificuldade declarada** e a quem recebeu.
+**Não se envia junto** — é ele que permite ler as respostas por estrato depois, inclusive a
+calibração de dificuldade do item 2 do instrumento.
+
+O material sai em **PDF**, com a matemática composta em LaTeX, mais o `.tex` e uma versão em
+Markdown. A conversão vive em `src/questoes/tex.py` e não é trivial: o Gerador escreve Markdown com
+matemática em `$...$`, e o acervo mistura 88 `R$` crus com 28 já escapados — o cru desbalanceia os
+delimitadores e, em 32 dos 360 campos, a separação entre texto e fórmula desanda. Há ainda tabelas
+de tarifa por faixa (348 pipes) e símbolos soltos (`≤`, `∞`, `ℝ`) que o pdflatex recusa fora do modo
+matemático. Sem LaTeX na máquina, o `.tex` fica na pasta e a geração continua.
 
 **Triagem obrigatória:** conferir cada espécime à mão antes de usá-lo. A medição de 2026-08-07
 mostrou que o Verificador produzia falsos negativos (domínio restrito pelo contexto); está

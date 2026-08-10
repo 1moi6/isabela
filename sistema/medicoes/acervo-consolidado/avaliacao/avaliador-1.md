@@ -3,8 +3,13 @@
 ## Como responder
 
 São 22 questões de Matemática do Ensino Médio. Leia cada uma como leria uma
-questão que você pensasse em usar com a sua turma, e responda às três perguntas
-que vêm logo abaixo dela.
+questão que você pensasse em usar com a sua turma, e responda às quatro
+perguntas que vêm logo abaixo dela.
+
+Onde se pergunta pelo **nível de dificuldade**, responda pensando nos seus
+alunos, não num aluno ideal. É essa resposta que permite calibrar o sistema: ele
+classifica cada questão como fácil, média ou difícil por conta própria, e
+precisamos saber o quanto isso corresponde à sala de aula real.
 
 **A amostra tem qualidade variável, e pode conter questões com erro matemático.**
 Se encontrar algum, aponte onde.
@@ -44,6 +49,9 @@ Qual das alternativas a seguir descreve corretamente o gráfico de $C$ e a image
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -69,6 +77,9 @@ c) Determine a distância percorrida por um passageiro que pagou R$ 81,00 pela c
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -107,6 +118,9 @@ c) Assinale a alternativa que apresenta corretamente a lei de formação encontr
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -130,6 +144,9 @@ b) Utilizando a função $f$ obtida no item (a), calcule o vigésimo termo da pr
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -157,6 +174,9 @@ c) Usando a fórmula do termo geral da PG (ou, equivalentemente, a função $f(n
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -181,6 +201,9 @@ Uma academia cobra R$ 70,00 pela mensalidade do primeiro mês de plano. A partir
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -212,6 +235,9 @@ Determine as leis $y = f(x)$ que descrevem R e S e, a partir delas, analise o co
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -237,6 +263,9 @@ Uma oficina mecânica cobra por seus serviços de revisão um valor fixo de mão
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -261,6 +290,9 @@ Uma confecção fabrica um certo modelo de camisa a um custo de produção de R$
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -293,6 +325,9 @@ Esse tipo de fenômeno periódico pode ser representado no plano cartesiano por 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -324,6 +359,9 @@ Sabendo que a distância de frenagem depende apenas da velocidade e que o padrã
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -352,6 +390,9 @@ d) Compare os coeficientes angulares de f, g e h. Existe alguma relação geomé
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -376,6 +417,9 @@ Duas empresas de aplicativo de transporte, A e B, calculam o valor da corrida em
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -415,6 +459,9 @@ e) Determine a imagem de $f$ restrita ao intervalo $0 \le x \le 30$.
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -442,6 +489,9 @@ Qual é o menor termo dessa PA que é maior do que 100?
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -467,6 +517,9 @@ c) Determine o menor número inteiro de meses necessário para que o montante ul
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -498,6 +551,9 @@ Um estudante, analisando os pares ordenados $(x,y)$ da tabela, conjectura que es
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -533,6 +589,9 @@ Investigando os pares de valores dessa tabela, qual expressão algébrica, escri
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -556,6 +615,9 @@ b) Determine todos os horários dentro das primeiras 12 horas do dia (isto é, p
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -585,6 +647,9 @@ d) Explique por que o domínio de $N(t)$ coincide com a imagem de $t(N)$, e a im
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -610,6 +675,9 @@ Um capital $C_0$ é aplicado a juros compostos, com taxa fixa $i$ por período, 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -634,6 +702,9 @@ Uma roda-gigante tem 40 m de diâmetro e seu centro está a 22 m de altura em re
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada

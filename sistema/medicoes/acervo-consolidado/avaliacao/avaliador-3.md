@@ -3,8 +3,13 @@
 ## Como responder
 
 São 22 questões de Matemática do Ensino Médio. Leia cada uma como leria uma
-questão que você pensasse em usar com a sua turma, e responda às três perguntas
-que vêm logo abaixo dela.
+questão que você pensasse em usar com a sua turma, e responda às quatro
+perguntas que vêm logo abaixo dela.
+
+Onde se pergunta pelo **nível de dificuldade**, responda pensando nos seus
+alunos, não num aluno ideal. É essa resposta que permite calibrar o sistema: ele
+classifica cada questão como fácil, média ou difícil por conta própria, e
+precisamos saber o quanto isso corresponde à sala de aula real.
 
 **A amostra tem qualidade variável, e pode conter questões com erro matemático.**
 Se encontrar algum, aponte onde.
@@ -36,6 +41,9 @@ Uma colônia de bactérias cresce segundo a lei $N(t) = 100 \cdot 3^{t/4}$, em q
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -65,6 +73,9 @@ Avalie a afirmação de Ricardo e assinale a alternativa correta.
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -92,6 +103,9 @@ d) Explique por que o domínio de $N(t)$ coincide com a imagem de $t(N)$, e a im
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -135,6 +149,9 @@ c) Apenas uma das duas situações representa uma grandeza **diretamente proporc
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -163,6 +180,9 @@ d) Determine depois de quantas horas a população da colônia atingirá 32000 b
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -188,6 +208,9 @@ c) Determine a altura da maré às 3h da manhã e explique, com base no gráfico
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -219,6 +242,9 @@ c) a imagem de $f$.
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -245,6 +271,9 @@ Analisando os pares de valores, investigue como $y$ varia em função de $x$ e d
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -268,6 +297,9 @@ b) Determine todos os horários dentro das primeiras 12 horas do dia (isto é, p
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -294,6 +326,9 @@ c) Usando a função $f$, determine em que instante t (em horas, com uma casa de
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -326,6 +361,9 @@ Um estudante, analisando os pares ordenados $(x,y)$ da tabela, conjectura que es
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -352,6 +390,9 @@ Qual é o menor termo dessa PA que é maior do que 100?
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -386,6 +427,9 @@ d) Determine algebricamente a distância a partir da qual a corrida pela MoveCar
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -418,6 +462,9 @@ c) Com base na meta estabelecida pela diretoria, verifique se cada filial deve c
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -449,6 +496,9 @@ Assinale a alternativa que descreve corretamente o gráfico de $f$, seu domínio
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -476,6 +526,9 @@ Considerando a correspondência entre o percurso da cabine no ciclo trigonométr
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -500,6 +553,9 @@ Uma função afim $f(x) = ax + b$, com $a, b \in \mathbb{R}$ e $a \neq 0$, satis
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -527,6 +583,9 @@ b) Um morador da cidade afirmou: "Como a diferença de magnitude foi de apenas 2
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -551,6 +610,9 @@ Uma oficina mecânica cobra por seus serviços de revisão um valor fixo de mão
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -577,6 +639,9 @@ Duas empresas de aplicativo de transporte, A e B, calculam o valor da corrida em
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -602,6 +667,9 @@ c) Classifique $g$ quanto à proporcionalidade e explique, em termos geométrico
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -630,6 +698,9 @@ b) Escreva a lei algébrica y = f(x) que generaliza o padrão observado na tabel
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada

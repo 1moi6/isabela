@@ -3,8 +3,13 @@
 ## Como responder
 
 São 22 questões de Matemática do Ensino Médio. Leia cada uma como leria uma
-questão que você pensasse em usar com a sua turma, e responda às três perguntas
-que vêm logo abaixo dela.
+questão que você pensasse em usar com a sua turma, e responda às quatro
+perguntas que vêm logo abaixo dela.
+
+Onde se pergunta pelo **nível de dificuldade**, responda pensando nos seus
+alunos, não num aluno ideal. É essa resposta que permite calibrar o sistema: ele
+classifica cada questão como fácil, média ou difícil por conta própria, e
+precisamos saber o quanto isso corresponde à sala de aula real.
 
 **A amostra tem qualidade variável, e pode conter questões com erro matemático.**
 Se encontrar algum, aponte onde.
@@ -47,6 +52,9 @@ d) A conta de água é uma função crescente, decrescente ou constante no inter
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -82,6 +90,9 @@ Para cada uma delas, determine algebricamente as coordenadas do vértice da par�
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -113,6 +124,9 @@ b) Usando essa lei, determine a distância percorrida pela esfera após 5 segund
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -137,6 +151,9 @@ Um biólogo estuda o crescimento de uma cultura de bactérias em laboratório. O
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -169,6 +186,9 @@ Um estudante, analisando os pares ordenados $(x,y)$ da tabela, conjectura que es
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -197,6 +217,9 @@ d) Explique por que o domínio de $N(t)$ coincide com a imagem de $t(N)$, e a im
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -223,6 +246,9 @@ Comparando a trajetória de P na circunferência (o ciclo trigonométrico desloc
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -255,6 +281,9 @@ Assinale a alternativa que apresenta corretamente o valor de $M$ (aproximado a d
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -280,6 +309,9 @@ Uma agência de viagens vende pacotes turísticos a um preço unitário de $x$ r
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -304,6 +336,9 @@ Uma oficina mecânica cobra por seus serviços de revisão um valor fixo de mão
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -339,6 +374,9 @@ c) Quantos termos comuns às duas progressões existem entre $1$ e $2023$, inclu
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -366,6 +404,9 @@ Qual é o menor termo dessa PA que é maior do que 100?
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -389,6 +430,9 @@ b) Determine todos os horários dentro das primeiras 12 horas do dia (isto é, p
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -414,6 +458,9 @@ Um biólogo estuda o crescimento de uma cultura de bactérias em laboratório. A
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -449,6 +496,9 @@ Assinale a alternativa que identifica corretamente qual das parábolas descritas
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -481,6 +531,9 @@ c) Qual é o valor da tarifa fixa mensal, isto é, a parcela que o cliente paga 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -506,6 +559,9 @@ c) Calcule o total de cadeiras fabricadas do 1º ao 10º mês.
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -536,6 +592,9 @@ e) Suponha agora que o custo de aquisição da jaqueta suba de R\$ 80,00 para um
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -568,6 +627,9 @@ c) Confirme numericamente a afirmação do pesquisador calculando $P_A(30)$ e $P
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -593,6 +655,9 @@ Determine o número de passageiros que a agência deve buscar para cada passeio,
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
@@ -625,6 +690,9 @@ Analisando os dados da tabela, qual expressão algébrica representa corretament
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
 
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
+
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada
 
@@ -649,6 +717,9 @@ Duas empresas de aplicativo de transporte, A e B, calculam o valor da corrida em
 
 **Tem erro matemático?**
 ( ) não   ( ) sim, aqui: ______________________________   ( ) não sei dizer
+
+**Que nível de dificuldade esta questão tem para os seus alunos?**
+( ) fácil   ( ) média   ( ) difícil   ( ) fora do alcance da turma
 
 **Você usaria esta questão?**
 ( ) aceita   ( ) aceita com ajuste   ( ) recusada

@@ -10,15 +10,9 @@ from __future__ import annotations
 from io import BytesIO
 
 from .modelos import Questao
+from .tex import PREAMBULO, para_tex
 
-_CABECALHO_LATEX = r"""\documentclass[12pt,a4paper]{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[brazil]{babel}
-\usepackage{amsmath,amssymb}
-\usepackage{enumitem}
-\begin{document}
-"""
+_CABECALHO_LATEX = PREAMBULO + "\\begin{document}\n"
 
 
 def para_markdown(
@@ -43,22 +37,29 @@ def para_markdown(
 
 
 def para_latex(titulo: str, questoes: list[Questao], com_gabarito: bool = False) -> str:
-    """Lista em LaTeX pronta para pdflatex."""
-    partes = [_CABECALHO_LATEX, rf"\section*{{{titulo}}}", r"\begin{enumerate}[label=\textbf{\arabic*.}]"]
+    """Lista em LaTeX pronta para pdflatex.
+
+    Todo texto vindo do Gerador passa por `para_tex`. Antes ia cru, e não
+    compilava: `R$ 13,00` abre modo matemático, a tabela de tarifa por faixa sai
+    como texto cheio de barras verticais e `50%` come o resto da linha. O botão
+    "LaTeX" da interface entregava um arquivo que o professor não conseguia usar.
+    """
+    partes = [_CABECALHO_LATEX, rf"\section*{{{para_tex(titulo)}}}",
+              r"\begin{enumerate}[label=\textbf{\arabic*.}]"]
     for q in questoes:
-        partes.append(rf"\item {q.enunciado}")
+        partes.append(rf"\item {para_tex(q.enunciado)}")
         if q.alternativas:
             partes.append(r"\begin{enumerate}[label=(\alph*)]")
-            partes += [rf"\item {alt.texto}" for alt in q.alternativas]
+            partes += [rf"\item {para_tex(alt.texto)}" for alt in q.alternativas]
             partes.append(r"\end{enumerate}")
     partes.append(r"\end{enumerate}")
     if com_gabarito:
         partes += [r"\newpage", r"\section*{Gabarito e resoluções}",
                    r"\begin{enumerate}[label=\textbf{\arabic*.}]"]
         for q in questoes:
-            partes.append(rf"\item {q.gabarito}")
+            partes.append(rf"\item {para_tex(q.gabarito)}")
             partes.append("")
-            partes.append(q.resolucao)
+            partes.append(para_tex(q.resolucao))
         partes.append(r"\end{enumerate}")
     partes.append(r"\end{document}")
     return "\n".join(partes)
