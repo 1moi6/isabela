@@ -103,9 +103,14 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   como cálculo válido reprovaria o gabarito correto, mandando o Gerador "corrigir" o que estava
   certo. Idem `is_increasing`, que precisa ser avaliado **no domínio** (`log(x)` sobre R dá
   `False`). Ao escrever um tipo novo, teste as rotinas do SymPy contra casos conhecidos ANTES.
-- **`sistema/analisar_logs.py`** reporta a taxa de `nao_verificavel` por tipo/consulta e
-  `sistema/exportar_medicao.py` transforma o log em `.md` legíveis + índice CSV. Requerem
-  gerações com provedor real; a suíte usa `LLMFake`. Resultados em `sistema/medicoes/`.
+- **Ferramentas de medição** (todas requerem gerações com provedor real; a suíte usa `LLMFake`;
+  resultados em `sistema/medicoes/`): `analisar_logs.py` dá a taxa de `nao_verificavel` por
+  tipo, `exportar_medicao.py` transforma o log em `.md` legíveis + índice CSV,
+  `gerar_acervo.py` gera o acervo estratificado (`--apenas`, `--provedor`, `--modelo`) e
+  `comparar_execucoes.py` põe duas execuções lado a lado.
+- **O plano de `gerar_acervo.py` é determinístico** (semente fixa): duas execuções recebem as
+  mesmas 90 especificações, na mesma ordem, com os mesmos contextos. É o que torna justa a
+  comparação entre modelos — não quebre isso introduzindo aleatoriedade sem semente.
 - **A suíte não alcança os defeitos que importam.** A medição de 2026-08-07 (`medicoes/`)
   achou três, todos dependentes de escolhas do Gerador impossíveis de antecipar: incógnita
   chamada `E` (número de Euler no SymPy) reprovava gabarito certo; domínio restrito pelo

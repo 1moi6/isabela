@@ -8,6 +8,7 @@ avaliação --- inclusive os espécimes de erro, que ficam no log toda vez que o
 Verificador reprova uma primeira tentativa.
 
     python gerar_acervo.py [destino] [--parte i/n] [--apenas COD,COD]
+                           [--provedor anthropic|openai|ollama] [--modelo ID]
 
 `--parte` divide a lista entre processos paralelos, cada um com o seu log. Os
 ciclos são independentes; só o Orquestrador é sequencial dentro de um ciclo.
@@ -15,6 +16,11 @@ ciclos são independentes; só o Orquestrador é sequencial dentro de um ciclo.
 `--apenas` restringe às habilidades listadas. Serve para regerar um recorte
 depois de corrigir o Verificador: uma habilidade inteira de cada vez, para que
 as seis questões dela tenham a mesma procedência.
+
+`--provedor` e `--modelo` trocam quem gera. Como a semente e o plano são fixos,
+duas execuções com modelos diferentes recebem exatamente as mesmas 90
+especificações --- é o que torna a comparação entre modelos justa
+(ver `comparar_execucoes.py`).
 
 O cabeçalho de execução (data, provedor, modelo, SHA do commit) é gravado em
 `execucao.json`: sem isso o acervo não é reproduzível e não serve de material
@@ -112,7 +118,14 @@ def sorteio_de_contexto(codigo, tema, indice, sorteio, embaralhados) -> str | No
     return principal if segundo == principal else f"{principal} + {segundo}"
 
 
-def main(destino: Path, parte: int, de: int, apenas: set[str] | None = None) -> int:
+def main(
+    destino: Path,
+    parte: int,
+    de: int,
+    apenas: set[str] | None = None,
+    provedor_nome: str = "anthropic",
+    modelo: str | None = None,
+) -> int:
     especificacoes = plano()
     if apenas:
         especificacoes = [e for e in especificacoes if e["habilidade_bncc"] in apenas]
@@ -120,15 +133,15 @@ def main(destino: Path, parte: int, de: int, apenas: set[str] | None = None) -> 
     destino.mkdir(parents=True, exist_ok=True)
     log = destino / (f"ciclos-{parte}.jsonl" if de > 1 else "ciclos.jsonl")
 
-    provedor = criar_provedor("anthropic")
-    modelo = getattr(provedor, "_modelo", "?")
+    provedor = criar_provedor(provedor_nome, modelo=modelo)
+    modelo_usado = getattr(provedor, "_modelo", modelo or "?")
     if parte == 1:
         sha = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=RAIZ
         ).stdout.strip()
         (destino / "execucao.json").write_text(json.dumps({
             "gerado_em": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "provedor": "anthropic", "modelo": modelo, "commit": sha,
+            "provedor": provedor_nome, "modelo": modelo_usado, "commit": sha,
             "total_planejado": len(especificacoes), "semente": SEMENTE,
             "apenas": sorted(apenas) if apenas else None,
         }, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -176,5 +189,12 @@ if __name__ == "__main__":
     parte, de = (int(x) for x in fatia.split("=")[1].split("/"))
     recorte = next((a for a in sys.argv[1:] if a.startswith("--apenas")), None)
     apenas = set(recorte.split("=")[1].split(",")) if recorte else None
+
+    def opcao(nome, padrao=None):
+        achado = next((a for a in sys.argv[1:] if a.startswith(f"--{nome}=")), None)
+        return achado.split("=", 1)[1] if achado else padrao
+
     alvo = Path(args[0]) if args else RAIZ / "medicoes" / "acervo"
-    raise SystemExit(main(alvo, parte, de, apenas))
+    raise SystemExit(
+        main(alvo, parte, de, apenas, opcao("provedor", "anthropic"), opcao("modelo"))
+    )
