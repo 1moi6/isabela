@@ -209,3 +209,48 @@ def test_ollama_truncado_levanta_erro(monkeypatch):
     p = _ollama({"message": {"content": "{"}, "done_reason": "length"}, monkeypatch)
     with pytest.raises(RuntimeError, match="limite"):
         p.completar("json", "u")
+
+
+# --- o modelo pertence ao provedor -----------------------------------------
+#
+# Provedor é escolha de quem usa (cabeçalho, por navegador); o modelo era só do
+# servidor. Em modo compartilhado bastava escolher outro provedor para receber
+# um nome de modelo da família errada — e o serviço recusar sem explicar.
+
+
+def _cfg(provedor, modelo):
+    return {"provedor": provedor, "modelo": modelo}
+
+
+def test_modelo_do_servidor_vale_quando_o_provedor_e_o_mesmo():
+    from api.main import _provedor_e_modelo
+
+    quem = {"provedor": None, "modelo": None}
+    assert _provedor_e_modelo(quem, _cfg("anthropic", "claude-haiku-4-5")) == (
+        "anthropic", "claude-haiku-4-5",
+    )
+
+
+def test_modelo_do_servidor_e_ignorado_ao_trocar_de_provedor():
+    from api.main import _provedor_e_modelo
+
+    quem = {"provedor": "gemini", "modelo": None}
+    assert _provedor_e_modelo(quem, _cfg("anthropic", "claude-sonnet-5")) == ("gemini", None)
+
+
+def test_modelo_pedido_vence_o_do_servidor():
+    from api.main import _provedor_e_modelo
+
+    quem = {"provedor": "gemini", "modelo": "gemini-2.5-flash"}
+    assert _provedor_e_modelo(quem, _cfg("anthropic", "claude-sonnet-5")) == (
+        "gemini", "gemini-2.5-flash",
+    )
+
+
+def test_todo_provedor_da_interface_tem_rotulo_e_sugestao():
+    """A lista da interface vem da API: um provedor sem rótulo apareceria vazio."""
+    from api.main import MODELOS_SUGERIDOS, ROTULO_PROVEDOR
+    from questoes.llm import PROVEDORES
+
+    assert set(MODELOS_SUGERIDOS) == set(PROVEDORES) == set(ROTULO_PROVEDOR)
+    assert all(MODELOS_SUGERIDOS[p] for p in PROVEDORES)

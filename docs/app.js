@@ -97,11 +97,15 @@ async function carregarEstado() {
   }
   document.getElementById("botao-gerar").disabled = !podeGerar;
 
-  // Preferências do servidor só são editáveis na máquina onde ele roda.
+  // Preferências do servidor só são editáveis na máquina onde ele roda. Provedor
+  // e modelo NÃO estão entre elas: são de quem usa, viajam por requisição, e
+  // ficam fora deste bloco justamente para continuarem editáveis por convidado.
   document.getElementById("config-servidor").hidden = dados.compartilhado;
   document.getElementById("config-pasta").value = dados.pasta_sincronizada || "";
-  document.getElementById("config-modelo").value = dados.modelo || "";
+  estadoApp.provedorDoServidor = dados.provedor;
   document.getElementById("config-provedor").value = guardado.provedor || dados.provedor;
+  document.getElementById("config-modelo").value = guardado.modelo || dados.modelo || "";
+  atualizarSugestoesDeModelo();
 
   await mostrarIdentificacao();
 
@@ -337,6 +341,36 @@ async function montarFormulario() {
       [{ valor: "", rotulo: "Todas" }, ...o.garantias]
     );
   }
+  if (o.provedores) {
+    preencherSelect(document.getElementById("config-provedor"), o.provedores);
+    document.getElementById("config-provedor").value =
+      guardado.provedor || estadoApp.provedorDoServidor || "anthropic";
+  }
+  atualizarSugestoesDeModelo();
+}
+
+/* O modelo pertence ao provedor: 'claude-sonnet-5' não significa nada para o
+   Gemini. Trocar de provedor sem trocar o modelo era o jeito mais fácil de
+   receber um erro do serviço sem entender por quê — daí a lista mudar junto e o
+   campo se limpar quando o modelo guardado é de outra família. */
+function atualizarSugestoesDeModelo() {
+  const provedor = document.getElementById("config-provedor").value;
+  const lista = document.getElementById("sugestoes-modelo");
+  const ajuda = document.getElementById("ajuda-modelo");
+  const campo = document.getElementById("config-modelo");
+  const dados = (estadoApp.opcoes.provedores || []).find((p) => p.valor === provedor);
+  const modelos = (dados && dados.modelos) || [];
+
+  lista.replaceChildren();
+  for (const nome of modelos) {
+    const opcao = document.createElement("option");
+    opcao.value = nome;
+    lista.append(opcao);
+  }
+  if (campo.value && modelos.length && !modelos.includes(campo.value)) campo.value = "";
+  ajuda.textContent = modelos.length
+    ? `Em branco usa ${modelos[0]}. Qualquer outro nome aceito pelo provedor também serve.`
+    : "Em branco usa o modelo padrão do provedor.";
 }
 
 function lerEspecificacao() {
@@ -837,6 +871,7 @@ async function iniciar() {
     return;
   }
 
+  document.getElementById("config-provedor").addEventListener("change", atualizarSugestoesDeModelo);
   document.getElementById("campo-habilidade").addEventListener("change", mostrarDescricaoHabilidade);
   document.getElementById("campo-bloom").addEventListener("change", avisarSobreBloom);
   document.getElementById("sortear-contexto").addEventListener("click", sortearContexto);
@@ -855,10 +890,13 @@ async function iniciar() {
   const dialogo = document.getElementById("dialogo-config");
   document.getElementById("abrir-config").addEventListener("click", () => dialogo.showModal());
   document.getElementById("salvar-config").addEventListener("click", async () => {
-    // Chave e provedor são de quem usa: ficam no navegador, nunca no servidor.
+    // Chave, provedor e modelo são de quem usa: ficam no navegador, nunca no
+    // servidor. O modelo acompanha o provedor — guardar um sem o outro deixaria
+    // o convidado com um nome de modelo da família errada.
     const campoChave = document.getElementById("config-chave");
     if (campoChave.value) guardado.chave = campoChave.value;
     guardado.provedor = document.getElementById("config-provedor").value;
+    guardado.modelo = document.getElementById("config-modelo").value.trim();
     campoChave.value = "";
     estadoApp.identificacao = null;  // relê do servidor após salvar
 
@@ -867,9 +905,11 @@ async function iniciar() {
         await api("/api/config", {
           method: "POST",
           body: JSON.stringify({
+            // Na máquina onde o servidor roda, a escolha também vira o padrão
+            // dele: é o que vale para uso programático e para a próxima sessão.
             pasta_sincronizada: document.getElementById("config-pasta").value.trim(),
             provedor: guardado.provedor,
-            modelo: document.getElementById("config-modelo").value.trim(),
+            modelo: guardado.modelo,
             responsavel: document.getElementById("config-responsavel").value.trim(),
             instituicao: document.getElementById("config-instituicao").value.trim(),
             contato: document.getElementById("config-contato").value.trim(),

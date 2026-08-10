@@ -83,6 +83,25 @@ VARIAVEL_CHAVE = {
     "gemini": "GEMINI_API_KEY",
     "deepseek": "DEEPSEEK_API_KEY",
 }
+ROTULO_PROVEDOR = {
+    "anthropic": "Anthropic (Claude)",
+    "openai": "OpenAI",
+    "gemini": "Google (Gemini)",
+    "deepseek": "DeepSeek",
+    "ollama": "Ollama (local, sem chave)",
+}
+
+# Sugestões de modelo por provedor, na ordem em que fazem sentido experimentar.
+# Não validam nada: o campo é livre, e é assim que um modelo lançado depois
+# entra sem mexer no código. A primeira linha de cada provedor é o padrão dele.
+# Os quatro primeiros provedores são os braços de `plano_teste_modelos.md`.
+MODELOS_SUGERIDOS = {
+    "anthropic": ["claude-sonnet-5", "claude-haiku-4-5", "claude-opus-5"],
+    "openai": ["gpt-4o-mini", "gpt-4.1-mini", "gpt-5-mini"],
+    "gemini": ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-3.5-flash-lite"],
+    "deepseek": ["deepseek-v4-flash", "deepseek-v4-pro"],
+    "ollama": ["qwen2.5:14b", "phi4", "llama3.1:8b"],
+}
 
 app = FastAPI(title="Gerador de questões de Matemática", docs_url=None, redoc_url=None)
 _banco = BancoQuestoes(BANCO_PATH)
@@ -100,7 +119,10 @@ if _origens:
         CORSMiddleware,
         allow_origins=_origens,
         allow_methods=["GET", "POST", "DELETE"],
-        allow_headers=["Content-Type", "X-Convite", "X-Chave-API", "X-Provedor", "X-Chave-Admin"],
+        allow_headers=[
+            "Content-Type", "X-Convite", "X-Chave-API", "X-Provedor", "X-Modelo",
+            "X-Chave-Admin",
+        ],
         expose_headers=["Content-Disposition"],  # a interface lê o nome do arquivo da lista
     )
 
@@ -110,6 +132,7 @@ def identificar(
     x_convite: str | None = Header(default=None),
     x_chave_api: str | None = Header(default=None),
     x_provedor: str | None = Header(default=None),
+    x_modelo: str | None = Header(default=None),
 ) -> dict:
     """Identifica o chamador e recolhe as credenciais que vieram com a requisição.
 
@@ -138,7 +161,34 @@ def identificar(
             "usa_chave_do_servidor": bool(convite.get("usa_chave_do_servidor")),
             "compartilhado": True,
         }
-    return {**quem, "chave": x_chave_api or None, "provedor": x_provedor or None}
+    return {
+        **quem,
+        "chave": x_chave_api or None,
+        "provedor": x_provedor or None,
+        "modelo": x_modelo or None,
+    }
+
+
+def _provedor_e_modelo(quem: dict, cfg: dict) -> tuple[str, str | None]:
+    """Qual provedor e qual modelo esta requisição usa.
+
+    **O modelo pertence ao provedor.** `claude-sonnet-5` não significa nada para
+    o Gemini, e mandá-lo assim mesmo só produz erro do serviço. Por isso o modelo
+    guardado no servidor só vale quando o provedor pedido é o mesmo que ele
+    configurou; trocando de provedor sem dizer o modelo, vale o padrão do
+    provedor novo.
+
+    Isto passou a importar quando a interface ganhou Gemini e DeepSeek: o
+    provedor é escolha de quem usa (viaja no cabeçalho, por navegador) e o modelo
+    era só do servidor, então em modo compartilhado bastava escolher outro
+    provedor para receber um nome de modelo da família errada.
+    """
+    nome = quem["provedor"] or cfg["provedor"]
+    if quem.get("modelo"):
+        return nome, quem["modelo"]
+    if nome == cfg["provedor"]:
+        return nome, cfg["modelo"] or None
+    return nome, None
 
 
 def exigir_admin(x_chave_admin: str | None = Header(default=None)) -> None:
@@ -246,12 +296,8 @@ def _autorizar_chave(quem: dict, provedor: str) -> str | None:
 def _orquestrador(quem: dict, url: str | None, ao_progredir=None) -> Orquestrador:
     """Monta o ciclo com o provedor e a chave que vieram na requisição."""
     cfg = config_app.carregar()
-    provedor = criar_provedor(
-        quem["provedor"] or cfg["provedor"],
-        modelo=cfg["modelo"] or None,
-        api_key=quem["chave"],
-        url=url or None,
-    )
+    nome, modelo = _provedor_e_modelo(quem, cfg)
+    provedor = criar_provedor(nome, modelo=modelo, api_key=quem["chave"], url=url or None)
     return Orquestrador(
         Gerador(provedor), VerificadorSimbolico(), CriticoDidatico(provedor),
         log_dir=LOG_DIR, ao_progredir=ao_progredir,
@@ -293,6 +339,18 @@ def opcoes() -> dict:
             }
             for c, h in sorted(habilidades.items())
         ],
+        # Provedor e modelo são escolha de quem usa, não do servidor: viajam por
+        # requisição. A lista de modelos é sugestão, não validação --- qualquer
+        # nome pode ser digitado, e é assim que um modelo novo entra sem release.
+        "provedores": [
+            {
+                "valor": nome,
+                "rotulo": ROTULO_PROVEDOR[nome],
+                "modelos": modelos,
+                "variavel_chave": VARIAVEL_CHAVE.get(nome),
+            }
+            for nome, modelos in MODELOS_SUGERIDOS.items()
+        ],
     }
 
 
@@ -317,7 +375,7 @@ def identificacao() -> dict:
 def estado(quem: dict = Depends(identificar)) -> dict:
     """Situação do aplicativo: banco, credencial e pasta sincronizada."""
     cfg = config_app.carregar()
-    provedor = quem["provedor"] or cfg["provedor"]
+    provedor, modelo = _provedor_e_modelo(quem, cfg)
     variavel = VARIAVEL_CHAVE.get(provedor)
     pasta = _pasta(quem["dono"])
     # Em modo compartilhado a chave vem do navegador de cada pessoa; a variável
@@ -335,7 +393,10 @@ def estado(quem: dict = Depends(identificar)) -> dict:
     return {
         "total_no_banco": _banco.total(dono=quem["dono"]),
         "provedor": provedor,
-        "modelo": cfg["modelo"],
+        # O modelo que esta requisição vai usar de fato, não o do servidor: em
+        # modo compartilhado são coisas diferentes. Vazio = padrão do provedor.
+        "modelo": modelo or "",
+        "modelo_do_servidor": cfg["modelo"],
         "chave_presente": bool(quem["chave"])
         or (not quem["compartilhado"] and chave_do_ambiente)
         or (servidor_banca and restantes != 0),
