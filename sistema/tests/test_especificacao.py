@@ -222,3 +222,41 @@ def test_contexto_declarado_chega_ao_gerador():
 
     spec = _spec_multi(contexto="Desmatamento e recuperação de área florestal")
     assert "Desmatamento" in Gerador._montar_pedido(spec, None)
+
+
+def test_sorteio_de_contexto_nao_repete_dentro_da_habilidade():
+    """Sorteio COM reposição pareceria natural e seria pior.
+
+    Com 5 a 9 contextos por tema, a chance de repetir dentro das seis questões
+    de uma habilidade iria de 89% a 100% — justamente o que o catálogo veio
+    resolver. Embaralhar dá ordem imprevisível e nenhuma repetição.
+    """
+    import random
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from gerar_acervo import sorteio_de_contexto
+
+    sorteio, filas = random.Random(1), {}
+    escolhidos = [
+        sorteio_de_contexto("EM13MAT304", "funcao_exponencial", i, sorteio, filas)
+        for i in range(6)
+    ]
+    principais = [c.split(" + ")[0] for c in escolhidos]
+    assert len(set(principais)) == 6, principais
+
+
+def test_habilidades_do_mesmo_tema_nao_compartilham_a_fila():
+    """302, 401 e 501 são todas de função afim: fila comum daria a mesma sequência."""
+    import random
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from gerar_acervo import sorteio_de_contexto
+
+    sorteio, filas = random.Random(1), {}
+    a = [sorteio_de_contexto("EM13MAT302", "funcao_afim", i, sorteio, filas) for i in range(6)]
+    b = [sorteio_de_contexto("EM13MAT401", "funcao_afim", i, sorteio, filas) for i in range(6)]
+    assert a != b

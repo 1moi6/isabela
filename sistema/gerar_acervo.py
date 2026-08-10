@@ -57,16 +57,18 @@ def plano() -> list[dict]:
     celulas = [(f, d) for f in Formato for d in Dificuldade]
 
     sorteio = random.Random(SEMENTE)
+    # Um embaralhamento por tema, consumido em ordem pelas seis células. Sorteio
+    # COM reposição pareceria mais natural e seria pior: com 5 a 9 contextos por
+    # tema, a chance de repetir dentro das seis questões vai de 89% a 100% —
+    # exatamente o problema que o catálogo veio resolver. Embaralhar dá as duas
+    # coisas: ordem imprevisível e nenhuma repetição.
+    embaralhados: dict[str, list[str]] = {}
     especificacoes = []
     for i, (formato, dificuldade) in enumerate(celulas):
         for j, codigo in enumerate(codigos):
             h = catalogo[codigo]
             temas = h["temas"] if h["relacao_temas"] == "conjuntiva" else h["temas"][:1]
-            # Rodízio de contexto entre as seis células de cada habilidade. Sem
-            # isto, o Gerador volta ao contexto mais provável do tema — e as seis
-            # questões saem sobre cultura de bactérias.
-            disponiveis = contextos_para(temas[0])
-            contexto = disponiveis[i % len(disponiveis)] if disponiveis else None
+            contexto = sorteio_de_contexto(codigo, temas[0], i, sorteio, embaralhados)
             especificacoes.append({
                 "habilidade_bncc": codigo,
                 "temas": temas,
@@ -77,6 +79,37 @@ def plano() -> list[dict]:
                 "contexto": contexto,
             })
     return especificacoes
+
+
+# Em quantas células o contexto vem em par. Um terço: o par amplia muito o
+# espaço (35 contextos dão 595 pares), mas nem toda combinação fecha, e questão
+# de contexto forçado é pior que questão de contexto comum --- a rubrica penaliza
+# justamente o cenário artificial. O Gerador recebe permissão explícita de usar
+# só o primeiro quando o par não colar.
+_PROPORCAO_EM_PAR = 3
+
+
+def sorteio_de_contexto(codigo, tema, indice, sorteio, embaralhados) -> str | None:
+    """Um contexto por célula, sem repetir dentro do tema; a cada três, um par.
+
+    Quando o tema tem menos contextos que células, a lista dá a volta --- e aí a
+    repetição é inevitável, não descuido.
+    """
+    # A fila é por HABILIDADE, não por tema: 302, 401 e 501 são todas de função
+    # afim e, com fila compartilhada, sairiam com os mesmos contextos na mesma
+    # ordem — repetição de outro tipo, e igualmente visível para quem folheia.
+    if codigo not in embaralhados:
+        disponiveis = list(contextos_para(tema))
+        sorteio.shuffle(disponiveis)
+        embaralhados[codigo] = disponiveis
+    fila = embaralhados[codigo]
+    if not fila:
+        return None
+    principal = fila[indice % len(fila)]
+    if indice % _PROPORCAO_EM_PAR != 2 or len(fila) < 2:
+        return principal
+    segundo = fila[(indice + len(fila) // 2) % len(fila)]
+    return principal if segundo == principal else f"{principal} + {segundo}"
 
 
 def main(destino: Path, parte: int, de: int, apenas: set[str] | None = None) -> int:

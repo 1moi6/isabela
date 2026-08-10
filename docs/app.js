@@ -264,6 +264,26 @@ function atualizarSugestoesDeContexto() {
   ajuda.textContent = servem.length
     ? `${servem.length} sugestões para este tema. Em branco, o gerador escolhe — e tende a repetir o mesmo contexto.`
     : "";
+  document.getElementById("sortear-contexto").disabled = !servem.length;
+  estadoApp.contextosDoTema = servem;
+}
+
+/* No aplicativo não há lote: o professor gera uma questão por vez, e não há
+   como distribuir contextos sem repetir ao longo da sessão. O que dá para
+   oferecer é o sorteio — e, de vez em quando, um par, que amplia bastante o
+   espaço quando as duas coisas conversam. */
+function sortearContexto() {
+  const servem = estadoApp.contextosDoTema || [];
+  if (!servem.length) return;
+  const campo = document.getElementById("form-gerar").contexto;
+  const primeiro = servem[Math.floor(Math.random() * servem.length)];
+
+  // Um terço em par: contexto forçado é pior que contexto comum, e o Gerador
+  // tem instrução de usar só o primeiro quando a combinação não fecha.
+  const querPar = servem.length > 1 && Math.random() < 1 / 3;
+  if (!querPar) { campo.value = primeiro; return; }
+  const outros = servem.filter((c) => c !== primeiro);
+  campo.value = `${primeiro} + ${outros[Math.floor(Math.random() * outros.length)]}`;
 }
 
 function mostrarDescricaoHabilidade() {
@@ -818,6 +838,7 @@ async function iniciar() {
 
   document.getElementById("campo-habilidade").addEventListener("change", mostrarDescricaoHabilidade);
   document.getElementById("campo-bloom").addEventListener("change", avisarSobreBloom);
+  document.getElementById("sortear-contexto").addEventListener("click", sortearContexto);
   document.getElementById("form-gerar").addEventListener("submit", gerar);
   document.getElementById("filtro-tema").addEventListener("change", carregarBanco);
   document.getElementById("filtro-dificuldade").addEventListener("change", carregarBanco);

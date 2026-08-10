@@ -95,7 +95,16 @@ class Gerador:
             f"- Formato: {'múltipla escolha (4 alternativas)' if spec.formato == Formato.MULTIPLA_ESCOLHA else 'discursiva'}",
         ]
         if spec.contexto:
-            linhas.append(f"- Contexto temático: {spec.contexto}")
+            partes = [c.strip() for c in spec.contexto.split("+") if c.strip()]
+            if len(partes) > 1:
+                linhas.append(f"- Contextos sugeridos: {' + '.join(partes)}")
+                linhas.append(
+                    "  Combine os dois num único cenário SE a combinação for natural. "
+                    "Se soar forçada, use apenas o primeiro — contexto artificial é pior "
+                    "que contexto comum."
+                )
+            else:
+                linhas.append(f"- Contexto temático: {spec.contexto}")
         if spec.restricoes:
             linhas.append(f"- Restrições: {spec.restricoes}")
         if feedback:

@@ -234,6 +234,9 @@ main { padding: 28px; }
   color: var(--corrigido);
 }
 
+.campo__linha-com-botao { display: flex; gap: 6px; align-items: stretch; }
+.campo__linha-com-botao .campo__controle { flex: 1; }
+
 .opcoes { display: flex; gap: 4px; }
 
 .opcoes__item {

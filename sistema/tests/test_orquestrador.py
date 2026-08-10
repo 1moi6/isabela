@@ -235,3 +235,29 @@ def test_falha_de_geracao_ganha_segunda_tentativa_pedindo_concisao():
 
     assert resultado.aprovada
     assert "mais econômica" in llm.pedidos[1]
+
+
+def test_par_de_contextos_vem_com_permissao_de_usar_so_um():
+    """Contexto forçado é pior que contexto comum — a rubrica penaliza o artificial.
+
+    O par amplia muito o espaço de cenários (35 contextos dão 595 pares), mas
+    nem toda combinação fecha. O Gerador precisa poder recuar para um só.
+    """
+    spec = Especificacao(
+        habilidade_bncc="EM13MAT302", temas=[Tema.FUNCAO_AFIM],
+        nivel_bloom=NivelBloom.APLICAR, dificuldade=Dificuldade.MEDIA,
+        natureza=Natureza.APLICADA, formato=Formato.DISCURSIVA,
+        contexto="Desmatamento e recuperação de área florestal + Densidade demográfica",
+    )
+    pedido = Gerador._montar_pedido(spec, None)
+    assert "Contextos sugeridos" in pedido
+    assert "Se soar forçada, use apenas o primeiro" in pedido
+
+    simples = Especificacao(
+        habilidade_bncc="EM13MAT302", temas=[Tema.FUNCAO_AFIM],
+        nivel_bloom=NivelBloom.APLICAR, dificuldade=Dificuldade.MEDIA,
+        natureza=Natureza.APLICADA, formato=Formato.DISCURSIVA,
+        contexto="Desmatamento e recuperação de área florestal",
+    )
+    assert "Contexto temático" in Gerador._montar_pedido(simples, None)
+    assert "use apenas o primeiro" not in Gerador._montar_pedido(simples, None)
