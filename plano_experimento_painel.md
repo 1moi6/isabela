@@ -131,8 +131,19 @@ omissão.
 Por item, nesta ordem:
 
 1. **Tem erro matemático?** não / sim, aqui: ___ / não sei dizer
-2. **Decisão de uso:** aceita / aceita com ajuste / recusada
-3. **Por quê?** — obrigatório quando a decisão não for "aceita"
+2. **Nível de dificuldade para os seus alunos:** fácil / média / difícil / fora do alcance da turma
+3. **Decisão de uso:** aceita / aceita com ajuste / recusada
+4. **Por quê?** — obrigatório quando a decisão não for "aceita"
+
+Sobre o item 2: a dificuldade que a especificação declarou **não é mostrada**, e a pergunta é feita
+em aberto em vez de "concorda com o nível *X*?". Mostrar o rótulo ancoraria a resposta, e o que
+interessa é justamente a distância entre o que o sistema chamou de difícil e o que é difícil na
+sala de aula real — os cinco participantes são professores da rede pública, e essa distância é o
+dado que calibra o Gerador. A comparação se faz depois, contra a coluna `dificuldade` do
+`_chave.csv`.
+
+A quarta opção — *fora do alcance da turma* — separa "puxada mas dá" de "não é viável na minha
+realidade". Uma escala de três níveis apaga essa distinção, que é a mais acionável das duas.
 
 A escala Likert dos seis critérios **fica de fora desta rodada**. Com cinco pessoas, médias por
 critério são ruído; a decisão de uso e a justificativa são sinal, e é delas que sai o que ajustar
@@ -145,11 +156,61 @@ Ao final, três perguntas curtas: usaria isto no seu planejamento? o que faltou?
 
 12 a 15 itens, dos quais 4 ou 5 com erro matemático confirmado.
 
+> **Corrigido em 2026-08-10, com o acervo pronto na mão.** A estimativa abaixo — "espécimes em
+> cerca de um quarto dos ciclos" — vinha da medição de 2026-08-07, feita quando o Verificador
+> ainda tinha os quatro defeitos de extremo e sequência: boa parte daquelas reprovações era
+> **falsa**. Corrigidos os defeitos, o acervo de 90 questões rendeu **3 espécimes**, não os ~22
+> que a taxa antiga previa. Gerar mais questões não resolve: a taxa caiu porque o Verificador
+> parou de reprovar gabarito certo. Para o Bloco I, ou se produzem espécimes de propósito
+> (desligando a correção do ciclo e guardando a primeira tentativa reprovada), ou se reinspecionam
+> à mão os das medições antigas. **Decidir antes de montar o material.**
+
 O acervo atual não basta: das 17 questões da medição de 2026-08-07, 10 estão limpas mas há apenas
 2 espécimes de erro aproveitáveis. Espécimes aparecem em cerca de um quarto dos ciclos (é a taxa
 observada de reprovação legítima na primeira iteração), então **uma geração enxuta de ~24 questões**
 rende os 5 espécimes necessários e sobra material limpo. Custo estimado: **~2 horas e ~70
 chamadas** — bem abaixo das 7 horas do acervo completo.
+
+### 3.6 Curadoria do acervo — um terceiro trabalho, distinto dos dois momentos
+
+Avaliar as 90 questões e rodar o painel são coisas diferentes, e confundi-las custa caro:
+
+| | **Curadoria do acervo** | **Painel (P1/P2/P3)** |
+|---|---|---|
+| Pergunta | esta questão entra no banco? | as questões servem? o erro passa? |
+| Cobertura | as 90, uma vez cada | os **mesmos** 36 itens para todos |
+| Por que assim | o banco de 60–100 é entregável do produto | concordância entre avaliadores exige itens comuns |
+
+A exigência de itens idênticos vem do Kendall's W da **Rodada 2**. A Rodada 1 é descritiva por
+desenho, então ali dá para cobrir o acervo inteiro **distribuindo**: um bloco-âncora que todos
+veem, mais um lote próprio para cada pessoa.
+
+`exportar_avaliacao.py` monta esse material. Com 85 questões aprovadas e 5 avaliadores, dá 22 itens
+por pessoa e cerca de 77 minutos — acima do limite razoável, e o próprio script avisa. As saídas:
+
+| avaliadores | âncora | itens/pessoa | minutos |
+|---|---|---|---|
+| 5 | 6 | 22 | 77 |
+| 5 | 4 | 21 | 74 |
+| 6 | 6 | 20 | 70 |
+| 7 | 4 | 16 | 56 |
+
+O que o avaliador recebe: enunciado, alternativas, gabarito proposto e a habilidade declarada.
+O que ele **não** recebe, e cada omissão tem uma razão: a **resolução** (denuncia o erro e muda a
+tarefa), a **garantia obtida** (é o que P3 investiga — impressa na página, fica intestável), o
+**parecer do Crítico** (mediria concordância com o Crítico, não julgamento próprio) e o
+`erro_representado` de cada distrator (anotação interna do Gerador).
+
+O `_chave.csv` liga item a ciclo, habilidade, garantia, **dificuldade declarada** e a quem recebeu.
+**Não se envia junto** — é ele que permite ler as respostas por estrato depois, inclusive a
+calibração de dificuldade do item 2 do instrumento.
+
+O material sai em **PDF**, com a matemática composta em LaTeX, mais o `.tex` e uma versão em
+Markdown. A conversão vive em `src/questoes/tex.py` e não é trivial: o Gerador escreve Markdown com
+matemática em `$...$`, e o acervo mistura 88 `R$` crus com 28 já escapados — o cru desbalanceia os
+delimitadores e, em 32 dos 360 campos, a separação entre texto e fórmula desanda. Há ainda tabelas
+de tarifa por faixa (348 pipes) e símbolos soltos (`≤`, `∞`, `ℝ`) que o pdflatex recusa fora do modo
+matemático. Sem LaTeX na máquina, o `.tex` fica na pasta e a geração continua.
 
 **Triagem obrigatória:** conferir cada espécime à mão antes de usá-lo. A medição de 2026-08-07
 mostrou que o Verificador produzia falsos negativos (domínio restrito pelo contexto); está

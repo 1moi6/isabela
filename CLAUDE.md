@@ -123,6 +123,22 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   tipo, `exportar_medicao.py` transforma o log em `.md` legíveis + índice CSV,
   `gerar_acervo.py` gera o acervo estratificado (`--apenas`, `--provedor`, `--modelo`) e
   `comparar_execucoes.py` põe duas execuções lado a lado.
+- **`exportar_avaliacao.py` não é uma variação do `exportar_medicao.py`** — é o material que vai
+  **para o professor**, e o que ele omite é o ponto: resolução (denuncia o erro), garantia obtida
+  (é o que o P3 do `plano_experimento_painel.md` investiga; impressa na página fica intestável),
+  parecer do Crítico (mediria concordância com o Crítico, não julgamento próprio) e
+  `erro_representado` dos distratores. O `_chave.csv` que ele gera **não se envia junto**. Um
+  vazamento ali não levanta exceção nem aparece na tela: só se descobre depois de gastar o tempo
+  dos avaliadores — por isso `test_exportar_avaliacao.py` testa o sigilo campo a campo.
+- **Todo texto vindo do LLM passa por `tex.py:para_tex` antes de entrar num `.tex`** — vale para
+  `exportar_avaliacao.py` e para `listas.py` (o botão "LaTeX" da interface, que entregava arquivo
+  que não compilava). O Gerador escreve Markdown com matemática em `$...$`, e a mistura tem três
+  armadilhas medidas no acervo: `R$` cru desbalanceia os delimitadores (88 crus contra 28
+  escapados, e a moeda também aparece **dentro** da fórmula — por isso moeda e matemática são
+  reconhecidas numa varredura só, não em dois passos); fora da matemática `_ ^ & % # { } \` são
+  especiais e dentro são notação; e tabela de Markdown não existe em LaTeX. Símbolos soltos
+  (`≤ ∞ ℝ π`) derrubam o pdflatex com erro fatal, não advertência. **Há pdflatex nesta máquina** —
+  a nota de que a fonte "não compila aqui" valia para o texto da dissertação, não para isto.
 - **O plano de `gerar_acervo.py` é determinístico** (semente fixa): duas execuções recebem as
   mesmas 90 especificações, na mesma ordem, com os mesmos contextos. É o que torna justa a
   comparação entre modelos — não quebre isso introduzindo aleatoriedade sem semente.
