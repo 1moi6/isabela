@@ -17,12 +17,18 @@ três armadilhas, todas medidas no acervo de 90 questões:
 
 Símbolos fora do modo matemático: com `T1`+`utf8`+`textcomp`, `² ³ · × – —`
 compilam sozinhos. Os de `SIMBOLOS` derrubam o pdflatex ("Unicode character not
-set up for use with LaTeX") e por isso viram matemática.
+set up for use with LaTeX") e por isso viram matemática; o que não estiver em
+nenhuma das duas listas cai em `_sobreviventes`, porque o erro é fatal.
+
+A expressão que separa moeda de fórmula mora em `marcacao.py`, com os outros
+leitores desse mesmo Markdown — aqui ela é só importada.
 """
 
 from __future__ import annotations
 
 import re
+
+from .marcacao import MOEDA_OU_MATEMATICA as _MOEDA_OU_MATEMATICA
 
 # Marcadores que não podem aparecer no texto de origem. Caracteres de controle
 # servem: o JSON do LLM nunca os traz, e o `\x00` sequer é válido em JSON.
@@ -37,7 +43,25 @@ SIMBOLOS = {
     "π": r"\pi", "α": r"\alpha", "β": r"\beta", "γ": r"\gamma", "θ": r"\theta",
     "λ": r"\lambda", "μ": r"\mu", "σ": r"\sigma", "ω": r"\omega",
     "Δ": r"\Delta", "Σ": r"\Sigma", "Ω": r"\Omega", "°": r"^\circ",
+    # A resolução usa ✓ para marcar a conferência de cada passo — 41 ocorrências
+    # no acervo, em 16 questões, e cada uma derrubava o pdflatex. O sinal de
+    # menos tipográfico (U+2212) vem colado no número e engana os olhos: parece
+    # o hífen do teclado e não é.
+    "✓": r"\checkmark", "✗": r"\times", "−": "-", "⇒": r"\Rightarrow",
+    "⇔": r"\Leftrightarrow", "≡": r"\equiv", "≅": r"\cong", "∅": r"\emptyset",
+    "∀": r"\forall", "∃": r"\exists", "∫": r"\int", "∂": r"\partial",
+    "∠": r"\angle", "⊆": r"\subseteq", "⊃": r"\supset", "⊇": r"\supseteq",
+    "∧": r"\wedge", "∨": r"\vee", "∼": r"\sim", "∝": r"\propto",
+    "δ": r"\delta", "ε": r"\varepsilon", "ζ": r"\zeta", "η": r"\eta",
+    "ι": r"\iota", "κ": r"\kappa", "ν": r"\nu", "ξ": r"\xi", "ρ": r"\rho",
+    "τ": r"\tau", "υ": r"\upsilon", "φ": r"\varphi", "χ": r"\chi", "ψ": r"\psi",
+    "Γ": r"\Gamma", "Λ": r"\Lambda", "Ξ": r"\Xi", "Π": r"\Pi", "Φ": r"\Phi",
+    "Ψ": r"\Psi", "Θ": r"\Theta",
 }
+
+# Já compilam sozinhos com T1+utf8+textcomp (ver o cabeçalho do módulo), junto
+# de todo o alfabeto latino acentuado — que é o que a prosa em português usa.
+_TIPOGRAFICOS = "²³·×÷–—°ºª«»“”‘’…§¶€£¢¡¿†‡•‰"
 
 ESPECIAIS = {
     "\\": r"\textbackslash{}",  # antes dos demais: senão escaparia as próprias barras
@@ -46,13 +70,29 @@ ESPECIAIS = {
 }
 
 
+def _sobreviventes(texto: str) -> str:
+    """Descarta o que sobrou fora de `SIMBOLOS` e derrubaria o pdflatex.
+
+    A tabela acima é uma lista, e lista fica para trás: o Gerador escolhe os
+    símbolos, e nenhum prompt garante que ele fique dentro do previsto. Sem esta
+    rede, um glifo novo vira erro **fatal** ("Unicode character not set up for
+    use with LaTeX") e o professor recebe um `.tex` que não abre — foi o que
+    aconteceu com o ✓ em 16 das 85 questões do acervo. Um caractere decorativo a
+    menos é perda pequena; um arquivo que não compila é perda total.
+    """
+    return "".join(
+        c for c in texto
+        if ord(c) < 0x180 or c in _TIPOGRAFICOS  # latino + acentos + tipografia
+    )
+
+
 def _escapar(texto: str) -> str:
     """Escapa o que é especial em LaTeX. Só se aplica a trecho FORA da matemática."""
     for bruto, escapado in ESPECIAIS.items():
         texto = texto.replace(bruto, escapado)
     for simbolo, comando in SIMBOLOS.items():
         texto = texto.replace(simbolo, f"${comando}$")
-    return texto
+    return _sobreviventes(texto)
 
 
 def _tabela(linhas: list[str]) -> str:
@@ -110,28 +150,6 @@ def _blocos(texto: str) -> str:
     return "\n".join(saida)
 
 
-# Moeda e fórmula reconhecidas numa varredura só, e a ordem das alternativas é
-# o que resolve o caso difícil: a moeda aparece **dentro** da matemática
-# (`$M(10) \approx R\$\,8.881$`) e também fora dela (`pagou R$ 13,00`).
-#
-# Separar em dois passos falha nos dois sentidos. Normalizar a moeda antes
-# estraga a fórmula que a contém; extrair a matemática antes tropeça no `R$`
-# cru, que desbalanceia os delimitadores. Varrendo da esquerda para a direita,
-# a fórmula é consumida inteira a partir do `$` que a abre — então o `R\$` de
-# dentro nunca chega a ser testado como moeda — e o `R$` solto do texto casa
-# com a primeira alternativa.
-#
-# `(?:[^$\\]|\\.)` é o que faz a fórmula não terminar num cifrão escapado.
-_MOEDA_OU_MATEMATICA = re.compile(
-    r"R\\?\$\s*(?=\d)"                     # moeda: R$ só antes de número
-    r"|\$\$(?:[^$\\]|\\.)+?\$\$"           # display
-    r"|\\\[(?:[^\\]|\\.)+?\\\]"
-    r"|\$(?:[^$\n\\]|\\.)+?\$"             # inline
-    r"|\\\((?:[^\\]|\\.)+?\\\)",
-    re.S,
-)
-
-
 def para_tex(texto: str) -> str:
     """Markdown com matemática → corpo LaTeX pronto para incluir num documento."""
     if not texto:
@@ -153,9 +171,13 @@ def para_tex(texto: str) -> str:
     texto = _blocos(texto)
     texto = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", texto, flags=re.S)
 
-    # Devolve a matemática intacta e a moeda escapada.
+    # Devolve a matemática — quase intacta: dentro dela o símbolo solto derruba o
+    # pdflatex do mesmo jeito, só que já em modo matemático, e aí vai sem os `$`.
     for n, formula in enumerate(formulas):
-        texto = texto.replace(_MARCA_MATEMATICA.format(n), formula)
+        for simbolo, comando in SIMBOLOS.items():
+            if simbolo in formula:
+                formula = formula.replace(simbolo, f"{comando} ")
+        texto = texto.replace(_MARCA_MATEMATICA.format(n), _sobreviventes(formula))
     # Espaço fino inseparável: o LLM escreve ora "R$ 20,00" ora "R$20,00", e a
     # quebra de linha entre o símbolo e o valor é feia justamente na prova.
     return texto.replace(_MARCA_MOEDA, r"R\$\,")

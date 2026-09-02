@@ -17,8 +17,8 @@ Dois artefatos:
 
 ```
 cd sistema
-pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi — suficiente para os testes
-python -m pytest            # 159 testes; NÃO exigem chave de API (usam LLM fake)
+pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi, python-docx + latex2mathml/mathml2omml
+python -m pytest            # 264 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -130,15 +130,30 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   `erro_representado` dos distratores. O `_chave.csv` que ele gera **não se envia junto**. Um
   vazamento ali não levanta exceção nem aparece na tela: só se descobre depois de gastar o tempo
   dos avaliadores — por isso `test_exportar_avaliacao.py` testa o sigilo campo a campo.
-- **Todo texto vindo do LLM passa por `tex.py:para_tex` antes de entrar num `.tex`** — vale para
-  `exportar_avaliacao.py` e para `listas.py` (o botão "LaTeX" da interface, que entregava arquivo
-  que não compilava). O Gerador escreve Markdown com matemática em `$...$`, e a mistura tem três
-  armadilhas medidas no acervo: `R$` cru desbalanceia os delimitadores (88 crus contra 28
-  escapados, e a moeda também aparece **dentro** da fórmula — por isso moeda e matemática são
-  reconhecidas numa varredura só, não em dois passos); fora da matemática `_ ^ & % # { } \` são
-  especiais e dentro são notação; e tabela de Markdown não existe em LaTeX. Símbolos soltos
-  (`≤ ∞ ℝ π`) derrubam o pdflatex com erro fatal, não advertência. **Há pdflatex nesta máquina** —
-  a nota de que a fonte "não compila aqui" valia para o texto da dissertação, não para isto.
+- **Nenhum destino recebe o texto do LLM cru.** O Gerador escreve Markdown com matemática em
+  `$...$`, e os quatro destinos leem essa mistura por um dono só: `marcacao.py` diz onde termina
+  o parágrafo, o que é tabela, o que é fórmula e o que é moeda; `tex.py` traduz para LaTeX;
+  `word.py` para OOXML; `docs/marcacao.js` para nós da página. A expressão que separa moeda de
+  fórmula mora em `marcacao.py` e é importada por `tex.py` — não faça uma segunda cópia dela.
+  `docs/marcacao.js` é a tradução da mesma leitura para o navegador: ao mexer num, confira o
+  outro. Duas ordens de leitura são regra e não gosto: **moeda e fórmula numa varredura só**
+  (o `R$` cru desbalanceia os delimitadores, e a moeda aparece **dentro** da fórmula), e
+  **negrito antes da matemática** (`**R$ 35,00**` põe os asteriscos em faixas diferentes se a
+  fórmula for lida primeiro; `**` dentro de fórmula não existe em nenhuma das 90 questões).
+- **Símbolo solto derruba o pdflatex — erro fatal, não advertência.** `SIMBOLOS` (`tex.py`) é a
+  tradução conhecida e `_sobreviventes` é a rede: o que não está em nenhuma das duas é
+  descartado, porque `.tex` que não compila é perda total e `compilar()` devolve `False` sem
+  levantar exceção. Foi o `✓` da resolução que ensinou isso — 16 das 85 questões do acervo, e
+  só no caminho "LaTeX **com** gabarito", que é justamente o que os testes não exercitavam.
+  **Há pdflatex nesta máquina** — a nota de que a fonte "não compila aqui" valia para o texto
+  da dissertação, não para isto; ao mexer em `tex.py`, compile o acervo inteiro, não uma amostra.
+- **A página compõe a matemática com o MathJax versionado em `docs/vendor/`** (`tex-svg`, 2 MB,
+  SVG para dispensar arquivos de fonte). Vem junto do repositório e não de um CDN porque a
+  página precisa abrir no servidor local do professor, que pode não ter internet — e porque não
+  há `npm install` que a busque na hora. Duas configurações não são opcionais (`index.html`): os
+  delimitadores são `\(...\)` e **nunca** `$`, senão o MathJax tropeça no "R$ 13,00" da prosa; e
+  a lista de pacotes é fechada, para não entrar o `html` com o seu `\href` — que seria um
+  `javascript:` escrito por um modelo de linguagem.
 - **O plano de `gerar_acervo.py` é determinístico** (semente fixa): duas execuções recebem as
   mesmas 90 especificações, na mesma ordem, com os mesmos contextos. É o que torna justa a
   comparação entre modelos — não quebre isso introduzindo aleatoriedade sem semente.

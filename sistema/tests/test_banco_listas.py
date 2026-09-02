@@ -85,6 +85,14 @@ def test_lista_markdown_aluno_sem_gabarito():
     assert "Gabarito" not in md and "Fatorando" not in md  # sem resolução na versão do aluno
 
 
+def test_lista_markdown_separa_enunciado_das_alternativas():
+    """Sem a linha em branco, o leitor de Markdown engole a lista de letras."""
+    q = _resultado().questao_final
+    md = para_markdown("Lista 1", [q], com_gabarito=False)
+    corpo = md.split("- (a)")[0]
+    assert corpo.endswith("\n\n")
+
+
 def test_lista_markdown_professor_com_resolucao():
     q = _resultado().questao_final
     md = para_markdown("Lista 1", [q], com_gabarito=True)

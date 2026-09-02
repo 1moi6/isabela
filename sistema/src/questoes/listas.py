@@ -11,6 +11,7 @@ from io import BytesIO
 
 from .modelos import Questao
 from .tex import PREAMBULO, para_tex
+from .word import escrever as _escrever_no_word
 
 _CABECALHO_LATEX = PREAMBULO + "\\begin{document}\n"
 
@@ -18,13 +19,23 @@ _CABECALHO_LATEX = PREAMBULO + "\\begin{document}\n"
 def para_markdown(
     titulo: str, questoes: list[Questao], com_gabarito: bool = False
 ) -> str:
-    """Lista em Markdown. `com_gabarito=True` gera a versão do professor."""
+    """Lista em Markdown. `com_gabarito=True` gera a versão do professor.
+
+    Aqui o texto do Gerador vai como veio: ele *é* Markdown, e reescrevê-lo só
+    poderia estragá-lo. As linhas em branco é que não são decorativas — sem a
+    que separa o enunciado das alternativas, o leitor de Markdown absorve a
+    lista dentro do parágrafo anterior e as letras (a)–(d) somem.
+    """
     partes = [f"# {titulo}", ""]
     for i, q in enumerate(questoes, start=1):
         partes.append(f"**Questão {i}.** {q.enunciado}")
         if q.alternativas:
+            partes.append("")
             for letra, alt in zip("abcd", q.alternativas):
-                partes.append(f"- ({letra}) {alt.texto}")
+                # Alternativa em mais de uma linha continua no mesmo item: sem o
+                # recuo, a segunda linha fecha a lista.
+                texto = alt.texto.replace("\n", "\n  ")
+                partes.append(f"- ({letra}) {texto}")
         partes.append("")
     if com_gabarito:
         partes += ["---", "", "## Gabarito e resoluções", ""]
@@ -70,6 +81,12 @@ def para_docx(titulo: str, questoes: list[Questao], com_gabarito: bool = False) 
 
     Devolve os bytes do arquivo — quem chama decide se grava em disco ou envia
     pelo navegador.
+
+    O texto passa por `marcacao.analisar` pelo mesmo motivo que passa por
+    `para_tex` no caminho do LaTeX: antes ia cru, e o professor recebia
+    `$$C(x) = \\begin{cases}…$$`, `**Modelando a situação**` e a tabela de
+    tarifa como uma fila de barras verticais — tudo numa linha só, porque o Word
+    engole a quebra de linha que vem dentro de um run.
     """
     from docx import Document  # dependência opcional: pip install questoes-em[docx]
     from docx.shared import Pt
@@ -78,22 +95,16 @@ def para_docx(titulo: str, questoes: list[Questao], com_gabarito: bool = False) 
     doc.add_heading(titulo, level=1)
 
     for i, q in enumerate(questoes, start=1):
-        p = doc.add_paragraph()
-        p.add_run(f"Questão {i}. ").bold = True
-        p.add_run(q.enunciado)
+        _escrever_no_word(doc, q.enunciado, prefixo=f"Questão {i}. ")
         for letra, alt in zip("abcd", q.alternativas or []):
-            item = doc.add_paragraph(f"({letra}) {alt.texto}")
-            item.paragraph_format.left_indent = Pt(24)
-            item.paragraph_format.space_after = Pt(2)
+            _escrever_no_word(doc, alt.texto, prefixo=f"({letra}) ", recuo=Pt(24))
 
     if com_gabarito:
         doc.add_page_break()
         doc.add_heading("Gabarito e resoluções", level=1)
         for i, q in enumerate(questoes, start=1):
-            p = doc.add_paragraph()
-            p.add_run(f"Questão {i}. ").bold = True
-            p.add_run(q.gabarito)
-            doc.add_paragraph(q.resolucao)
+            _escrever_no_word(doc, q.gabarito, prefixo=f"Questão {i}. ")
+            _escrever_no_word(doc, q.resolucao)
 
     buffer = BytesIO()
     doc.save(buffer)

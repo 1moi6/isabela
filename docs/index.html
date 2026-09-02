@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gerador de questões · Matemática do Ensino Médio</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2317337a'/><text x='16' y='23' font-size='20' font-family='Georgia,serif' fill='white' text-anchor='middle'>ƒ</text></svg>">
-  <link rel="stylesheet" href="app.css?v=20260810a">
+  <link rel="stylesheet" href="app.css?v=20260902a">
 </head>
 <body>
 
@@ -238,7 +238,28 @@
 
 <div class="avisos" id="avisos" aria-live="polite"></div>
 
-<script src="comum.js?v=20260810a"></script>
-<script src="app.js?v=20260810a"></script>
+<script>
+  /* Só `\(...\)` e `\[...\]` disparam a composição — nunca o cifrão. A prosa
+     está cheia de "R$ 13,00", e deixar o MathJax varrer por `$` faria a moeda
+     abrir uma fórmula que engole meia frase: o mesmo erro que o LaTeX cometia.
+     Quem delimita é `marcacao.js`, que já separou moeda de fórmula.
+
+     A lista de pacotes é fechada de propósito. Sem ela viriam `require` e
+     `autoload`, que carregam o pacote `html` e com ele `\href` — um caminho de
+     `javascript:` para dentro da página, escrito por um modelo de linguagem. */
+  window.MathJax = {
+    tex: {
+      inlineMath: [["\\(", "\\)"]],
+      displayMath: [["\\[", "\\]"]],
+      packages: ["base", "ams", "newcommand", "configmacros", "noundefined"],
+    },
+    options: { enableMenu: false, skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] },
+    startup: { typeset: false },
+  };
+</script>
+<script src="vendor/mathjax/tex-svg.js?v=3.2.2" id="MathJax-script" async></script>
+<script src="comum.js?v=20260902a"></script>
+<script src="marcacao.js?v=20260902a"></script>
+<script src="app.js?v=20260902a"></script>
 </body>
 </html>

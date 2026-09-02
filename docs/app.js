@@ -3,7 +3,10 @@
 
    Sem framework e sem passo de compilação: o arquivo roda como está. Todo texto
    vindo do modelo entra na página por textContent, nunca por innerHTML — o
-   enunciado é conteúdo gerado, e conteúdo gerado não vira marcação.
+   enunciado é conteúdo gerado, e conteúdo gerado não vira marcação. Quem lê o
+   Markdown-com-matemática do Gerador e monta os nós é `marcacao.js`, e ele
+   também só cria elementos e preenche textContent: a estrutura vem da leitura
+   do texto, nunca de marcação embutida nele.
    ========================================================================== */
 
 const estadoApp = {
@@ -498,12 +501,18 @@ function detalhe(resumo, preencher) {
   const corpo = el("div", "detalhe__corpo");
   preencher(corpo);
   bloco.append(corpo);
+  // Fórmula composta enquanto o bloco está fechado sai com a caixa medida em
+  // zero — o navegador não mede o que não desenha. Compor de novo ao abrir
+  // custa nada: o que já virou SVG o MathJax não revisita.
+  bloco.addEventListener("toggle", () => { if (bloco.open) renderizarMatematica(corpo); });
   return bloco;
 }
 
 function corpoDaQuestao(questao) {
   const corpo = el("div", "questao__corpo");
-  corpo.append(el("p", "questao__enunciado", questao.enunciado));
+  const enunciado = el("div", "questao__enunciado marcacao");
+  enunciado.append(montarMarcacao(questao.enunciado));
+  corpo.append(enunciado);
   if (questao.alternativas && questao.alternativas.length) {
     const lista = el("ul", "questao__alternativas");
     "abcd".split("").forEach((letra, i) => {
@@ -511,7 +520,9 @@ function corpoDaQuestao(questao) {
       if (!alt) return;
       const item = el("li", "questao__alternativa" + (alt.correta ? " questao__alternativa--correta" : ""));
       item.append(el("span", "questao__letra", `(${letra})`));
-      item.append(el("span", null, alt.texto));
+      const texto = el("div", "marcacao");
+      texto.append(montarMarcacao(alt.texto));
+      item.append(texto);
       lista.append(item);
     });
     corpo.append(lista);
@@ -537,10 +548,12 @@ function cabecaDaQuestao(questao, identificacao) {
 
 function blocosDeApoio(cartao, questao, iteracao) {
   cartao.append(detalhe("Resolução e gabarito", (corpo) => {
-    corpo.append(el("p", null, questao.resolucao));
-    const gab = el("p", null, "");
+    const resolucao = el("div", "marcacao");
+    resolucao.append(montarMarcacao(questao.resolucao));
+    corpo.append(resolucao);
+    const gab = el("p", "marcacao__paragrafo");
     gab.append(el("strong", null, "Gabarito: "));
-    gab.append(document.createTextNode(questao.gabarito));
+    gab.append(...nosDaLinha(questao.gabarito));
     gab.style.marginTop = "12px";
     corpo.append(gab);
   }));
@@ -640,6 +653,7 @@ function renderizarGerados() {
     return;
   }
   estadoApp.gerados.forEach((entrada, i) => area.append(cartaoGerado(entrada, i)));
+  renderizarMatematica(area);
 }
 
 /* ------------------------------------------------------------------ geração */
@@ -808,6 +822,7 @@ async function carregarBanco() {
     return;
   }
   for (const registro of estadoApp.banco) area.append(cartaoDoBanco(registro));
+  renderizarMatematica(area);
 }
 
 /* ---------------------------------------------------------- montagem da lista */
