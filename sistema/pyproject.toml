@@ -21,8 +21,14 @@ openai = ["openai>=1.40"]
 gemini = ["openai>=1.40"]
 deepseek = ["openai>=1.40"]
 ollama = ["httpx>=0.27"]
-app = ["fastapi>=0.110", "uvicorn[standard]>=0.27", "python-docx>=1.1"]
-dev = ["pytest>=8.0", "fastapi>=0.110", "python-docx>=1.1"]
+# A dupla latex2mathml+mathml2omml é o que transforma `$\\frac{a}{b}$` em equação
+# de verdade no Word. É pip puro (sem Pandoc, sem Node) e opcional: sem ela a
+# lista continua saindo, com a fórmula em texto.
+docx = ["python-docx>=1.1", "latex2mathml>=3.77", "mathml2omml>=0.0.2"]
+app = ["fastapi>=0.110", "uvicorn[standard]>=0.27", "python-docx>=1.1",
+       "latex2mathml>=3.77", "mathml2omml>=0.0.2"]
+dev = ["pytest>=8.0", "fastapi>=0.110", "python-docx>=1.1",
+       "latex2mathml>=3.77", "mathml2omml>=0.0.2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
