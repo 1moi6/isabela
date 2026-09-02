@@ -243,6 +243,38 @@ def _sincronizar(dono: str, questao_id: int | None = None) -> str | None:
         return str(exc)
 
 
+def _verificar_limite_de_geracoes(quem: dict) -> None:
+    """Recusa a geração quando o convite já usou o teto de questões dele.
+
+    Distinto da cota da chave do dono, e por isso vem antes dela: este teto vale
+    **com qualquer chave**, inclusive a que a pessoa traz no navegador. É o
+    combinado de quantas questões cada participante gera na pesquisa, não uma
+    trava de gasto.
+
+    Só verifica — quem conta é `_registrar_geracao`, depois de a chave estar
+    resolvida. Contar aqui gastaria uma questão do teto numa geração que a
+    autorização de chave ainda pode recusar com 402.
+    """
+    codigo = quem.get("codigo")
+    if not codigo:
+        return
+    restantes = _convites.restantes(codigo)
+    if restantes == 0:
+        limite = _convites.limite(codigo)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Este convite já gerou as {limite} questões combinadas. "
+                   "Peça mais a quem administra o sistema.",
+        )
+
+
+def _registrar_geracao(quem: dict) -> None:
+    """Conta a questão no convite, depois de a geração estar autorizada."""
+    codigo = quem.get("codigo")
+    if codigo and _convites.limite(codigo):
+        _convites.registrar_geracao(codigo)
+
+
 def _autorizar_chave(quem: dict, provedor: str) -> str | None:
     """Decide **com que chave** esta geração vai ser paga, ou recusa a geração.
 
@@ -390,8 +422,13 @@ def estado(quem: dict = Depends(identificar)) -> dict:
     restantes = None
     if servidor_banca and cota and quem.get("codigo"):
         restantes = max(0, cota - _convites.usos(quem["codigo"]))
+    codigo = quem.get("codigo")
+    questoes_restantes = _convites.restantes(codigo) if codigo else None
     return {
         "total_no_banco": _banco.total(dono=quem["dono"]),
+        # Teto de questões deste convite (com qualquer chave). `None` = sem teto.
+        "questoes_restantes": questoes_restantes,
+        "limite_de_geracoes": _convites.limite(codigo) if codigo else 0,
         "provedor": provedor,
         # O modelo que esta requisição vai usar de fato, não o do servidor: em
         # modo compartilhado são coisas diferentes. Vazio = padrão do provedor.
@@ -508,7 +545,9 @@ def gerar(pedido: PedidoGeracao, quem: dict = Depends(identificar)) -> dict:
     # Resolvido aqui, e não dentro da thread: lá o 402 viraria "tarefa com erro"
     # e a cota seria contada mesmo quando a geração fosse recusada.
     provedor = quem["provedor"] or config_app.carregar()["provedor"]
+    _verificar_limite_de_geracoes(quem)
     quem = {**quem, "chave": _autorizar_chave(quem, provedor)}
+    _registrar_geracao(quem)
 
     tarefa_id = uuid4().hex
     with _trava_tarefas:

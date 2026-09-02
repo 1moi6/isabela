@@ -269,3 +269,92 @@ def test_convite_antigo_sem_a_flag_e_tratado_como_nao_marcado(ambiente, monkeypa
 
     resposta = cliente.post("/api/gerar", json=ESPECIFICACAO, headers={"X-Convite": codigo})
     assert resposta.status_code == 402
+
+
+# --- teto de questões por convite -------------------------------------------
+#
+# Conta diferente da cota da chave do dono: esta sobe com QUALQUER chave,
+# inclusive a que a pessoa traz no navegador. Confundir as duas foi o que fez
+# "libere mais cinco" virar "libere quinze".
+
+
+def test_convite_novo_nasce_sem_teto(tmp_path):
+    c = Convites(tmp_path / "convites.json")
+    convite = c.criar("Maria Silva")
+    assert c.limite(convite["codigo"]) == 0
+    assert c.restantes(convite["codigo"]) is None
+
+
+def test_teto_conta_e_esgota(tmp_path):
+    c = Convites(tmp_path / "convites.json")
+    codigo = c.criar("Maria Silva")["codigo"]
+    c.definir_limite(codigo, 2)
+    assert c.restantes(codigo) == 2
+    c.registrar_geracao(codigo)
+    assert c.restantes(codigo) == 1
+    c.registrar_geracao(codigo)
+    assert c.restantes(codigo) == 0
+    c.registrar_geracao(codigo)  # além do teto continua contando, sem estourar
+    assert c.restantes(codigo) == 0
+
+
+def test_teto_pode_comecar_do_ponto_certo(tmp_path):
+    """Quem já gerou 10 antes de haver teto precisa de 15 valendo 5, não 15."""
+    c = Convites(tmp_path / "convites.json")
+    codigo = c.criar("Isabela")["codigo"]
+    c.definir_limite(codigo, 15, geracoes=10)
+    assert c.restantes(codigo) == 5
+
+
+def test_teto_nao_se_confunde_com_a_cota_da_chave_do_dono(tmp_path):
+    c = Convites(tmp_path / "convites.json")
+    codigo = c.criar("Maria Silva", usa_chave_do_servidor=True)["codigo"]
+    c.definir_limite(codigo, 3)
+    c.registrar_geracao(codigo)          # gerou com a chave dela
+    assert c.geracoes(codigo) == 1 and c.usos(codigo) == 0
+    c.registrar_uso(codigo)              # esta o dono pagou
+    assert c.geracoes(codigo) == 1 and c.usos(codigo) == 1
+
+
+def test_definir_limite_em_convite_inexistente(tmp_path):
+    c = Convites(tmp_path / "convites.json")
+    c.criar("Maria Silva")
+    assert c.definir_limite("nao-existe", 5) is None
+
+
+def test_teto_do_convite_recusa_a_geracao_mesmo_com_chave_propria(ambiente):
+    """Com a chave dela no cabeçalho: o teto não é sobre gasto, é sobre questões."""
+    cliente, convites, _ = ambiente
+    codigo = convites.criar("Isabela")["codigo"]
+    convites.definir_limite(codigo, 15, geracoes=14)
+    cabecalhos = {"X-Convite": codigo, "X-Chave-API": "chave-dela"}
+
+    estado = cliente.get("/api/estado", headers=cabecalhos).json()
+    assert estado["questoes_restantes"] == 1 and estado["limite_de_geracoes"] == 15
+
+    assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=cabecalhos).status_code == 200
+    assert convites.restantes(codigo) == 0
+
+    recusa = cliente.post("/api/gerar", json=ESPECIFICACAO, headers=cabecalhos)
+    assert recusa.status_code == 429
+    assert "15 questões" in recusa.json()["detail"]
+    assert cliente.get("/api/estado", headers=cabecalhos).json()["questoes_restantes"] == 0
+
+
+def test_convite_sem_teto_gera_a_vontade(ambiente):
+    cliente, convites, _ = ambiente
+    cabecalhos = {"X-Convite": convites.criar("Maria Silva")["codigo"], "X-Chave-API": "k"}
+    assert cliente.get("/api/estado", headers=cabecalhos).json()["questoes_restantes"] is None
+    for _ in range(3):
+        assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=cabecalhos).status_code == 200
+
+
+def test_geracao_recusada_por_falta_de_chave_nao_gasta_o_teto(ambiente):
+    """O 402 vem depois da verificação do teto — e antes da contagem."""
+    cliente, convites, _ = ambiente
+    codigo = convites.criar("Maria Silva")["codigo"]   # sem banca do servidor
+    convites.definir_limite(codigo, 5)
+
+    recusa = cliente.post("/api/gerar", json=ESPECIFICACAO, headers={"X-Convite": codigo})
+    assert recusa.status_code == 402
+    assert convites.restantes(codigo) == 5

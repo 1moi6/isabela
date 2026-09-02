@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi, python-docx + latex2mathml/mathml2omml
-python -m pytest            # 264 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 272 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -76,6 +76,18 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   falso por omissão) com `cota_por_convite`, contada só para quem **não** traz a própria chave.
   Por convite, e não global, porque quem já usa a própria chave — orientador e aluna — não deve
   esbarrar numa cota feita para convidados de teste.
+- **Duas contas por convite, e confundi-las é o erro fácil.** `usos_da_chave_do_servidor` mede
+  **gasto do dono** e só sobe quando é a chave dele que paga; `limite_de_geracoes`/`geracoes`
+  (`convites.py`) medem **quantas questões a pessoa gerou**, com a chave de quem for — é o
+  combinado da pesquisa, não uma trava de gasto. Quem traz a própria chave não aparece na
+  primeira conta e aparece na segunda. Foi essa confusão que fez "libere mais cinco" quase
+  virar "libere quinze": a aluna gerara 10 questões com a chave dela, então o contador da
+  chave do dono estava em 0 e a cota nova valeria inteira. Teto novo em quem já gerou vem com
+  `--geradas` (`gerenciar_convites.py limite CODIGO 15 --geradas 10`), senão o teto vale do
+  zero. A verificação vem **antes** da autorização de chave e a contagem **depois** dela: um
+  402 por falta de chave não pode gastar questão do teto.
+  `gerenciar_convites.py listar` mostra o uso de cada convite (`questões: 10/15`) — é por onde
+  se confere o combinado sem abrir o JSON.
 - **Todo acesso ao banco filtra por dono** (`_FILTRO_DONO` em `banco.py`). Método novo que
   consulte `questoes` sem esse filtro vaza o banco de uma pessoa para outra.
 - A **pasta sincronizada** (`sincronizacao.py`) espelha as questões num diretório que o Google

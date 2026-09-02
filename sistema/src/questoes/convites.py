@@ -93,6 +93,10 @@ class Convites:
                 "criado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "usa_chave_do_servidor": bool(usa_chave_do_servidor),
                 "usos_da_chave_do_servidor": 0,
+                # Teto de questões deste convite, com qualquer chave. 0 = sem
+                # teto, que é o padrão: limitar é decisão deliberada.
+                "limite_de_geracoes": 0,
+                "geracoes": 0,
             }
             self._gravar(convites)
             return dict(convites[codigo], codigo=codigo)
@@ -109,6 +113,56 @@ class Convites:
     def usos(self, codigo: str) -> int:
         """Quantas gerações este convite já pagou com a chave do servidor."""
         return int(self._ler().get(codigo, {}).get("usos_da_chave_do_servidor", 0))
+
+    # ----------------------------------------------------- limite de gerações
+    #
+    # Duas contas distintas, e confundi-las é o erro fácil: `usos_da_chave_do_
+    # servidor` mede **gasto do dono** e só sobe quando é a chave dele que paga;
+    # `geracoes` mede **quantas questões a pessoa gerou**, com a chave de quem
+    # for. Uma pessoa que traz a própria chave não aparece na primeira conta e
+    # aparece na segunda — que é justamente o caso de quem participa da pesquisa
+    # com cota combinada de questões.
+
+    def limite(self, codigo: str) -> int:
+        """Teto de gerações deste convite. 0 (ou ausente) = sem limite."""
+        return int(self._ler().get(codigo, {}).get("limite_de_geracoes", 0) or 0)
+
+    def geracoes(self, codigo: str) -> int:
+        """Quantas questões este convite já gerou, com qualquer chave."""
+        return int(self._ler().get(codigo, {}).get("geracoes", 0))
+
+    def restantes(self, codigo: str) -> int | None:
+        """Quantas ainda cabem no teto, ou `None` quando não há teto."""
+        limite = self.limite(codigo)
+        return max(0, limite - self.geracoes(codigo)) if limite else None
+
+    def registrar_geracao(self, codigo: str) -> int:
+        """Conta mais uma questão gerada; devolve o total do convite."""
+        with _TRAVA:
+            convites = self._ler()
+            if codigo not in convites:
+                return 0
+            atual = int(convites[codigo].get("geracoes", 0)) + 1
+            convites[codigo]["geracoes"] = atual
+            self._gravar(convites)
+            return atual
+
+    def definir_limite(self, codigo: str, limite: int, geracoes: int | None = None) -> dict | None:
+        """Ajusta o teto e, opcionalmente, o contador.
+
+        O contador é ajustável porque o teto quase sempre chega depois: quem já
+        gerou questões antes de haver limite precisa começar de onde parou, e
+        não do zero. Sem isso, "mais cinco" viraria "quinze".
+        """
+        with _TRAVA:
+            convites = self._ler()
+            if codigo not in convites:
+                return None
+            convites[codigo]["limite_de_geracoes"] = max(0, int(limite))
+            if geracoes is not None:
+                convites[codigo]["geracoes"] = max(0, int(geracoes))
+            self._gravar(convites)
+            return dict(convites[codigo], codigo=codigo)
 
     def registrar_uso(self, codigo: str) -> int:
         """Conta mais uma geração paga pelo servidor; devolve o total.

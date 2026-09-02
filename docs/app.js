@@ -84,11 +84,23 @@ async function carregarEstado() {
      em texto: quem clicasse mesmo assim tinha a geração paga pela chave de quem
      mantém o servidor, em silêncio. */
   const aviso = document.getElementById("aviso-chave");
-  const podeGerar = dados.chave_presente || dados.provedor === "ollama";
-  if (!podeGerar) {
+  // O teto de questões do convite vale com qualquer chave, então trava o botão
+  // antes da conversa sobre chave: quem esgotou não resolve trazendo a própria.
+  const semQuestoes = dados.questoes_restantes === 0;
+  const podeGerar = !semQuestoes && (dados.chave_presente || dados.provedor === "ollama");
+  if (semQuestoes) {
+    aviso.textContent =
+      `Este convite já gerou as ${dados.limite_de_geracoes} questões combinadas. ` +
+      "Peça mais a quem administra o sistema.";
+    aviso.hidden = false;
+  } else if (!podeGerar) {
     aviso.textContent = dados.compartilhado
       ? "Informe a sua chave de API em Configurações para gerar questões."
       : `Sem chave de API. Informe em Configurações ou defina ${dados.variavel_chave} no ambiente.`;
+    aviso.hidden = false;
+  } else if (dados.questoes_restantes !== null && dados.questoes_restantes !== undefined) {
+    const n = dados.questoes_restantes;
+    aviso.textContent = `Restam ${n} questão(ões) neste convite, de ${dados.limite_de_geracoes} combinadas.`;
     aviso.hidden = false;
   } else if (dados.servidor_banca && dados.geracoes_restantes !== null) {
     aviso.textContent =
@@ -708,6 +720,9 @@ async function gerar(evento) {
   }
   botao.disabled = false;
   botao.textContent = "Gerar";
+  // Reler o estado atualiza quantas questões ainda cabem no convite — e é o que
+  // trava o botão na última, em vez de deixar o 429 aparecer como falha.
+  carregarEstado().catch(() => {});
 }
 
 /* -------------------------------------------------------------------- banco */

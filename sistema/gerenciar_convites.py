@@ -3,6 +3,8 @@
     python gerenciar_convites.py listar
     python gerenciar_convites.py criar "Maria Silva"
     python gerenciar_convites.py criar "Maria Silva" --banca   # gerações por conta do servidor
+    python gerenciar_convites.py limite k3n8p2xq 15         # teto de questões
+    python gerenciar_convites.py limite k3n8p2xq 15 --geradas 10
     python gerenciar_convites.py remover k3n8p2xq
     python gerenciar_convites.py senha          # libera a página de convites
 
@@ -45,6 +47,27 @@ def main(argv: list[str]) -> int:
         print("Ela abre uma vez; o navegador dela guarda o acesso.\n")
         return 0
 
+    if comando == "limite":
+        # O teto conta questões geradas com QUALQUER chave --- inclusive a que a
+        # pessoa traz no navegador. Não confundir com `cota_por_convite`, que
+        # mede só o que sai da chave de quem mantém o servidor.
+        if len(argv) < 4:
+            print("Uso: python gerenciar_convites.py limite CODIGO N [--geradas M]")
+            print("  N = teto de questões deste convite (0 = sem teto)")
+            print("  M = quantas ela já gerou, para o teto valer do ponto certo")
+            return 2
+        geradas = None
+        if "--geradas" in argv:
+            geradas = int(argv[argv.index("--geradas") + 1])
+        convite = convites.definir_limite(argv[2], int(argv[3]), geradas)
+        if convite is None:
+            print(f"Convite {argv[2]} não encontrado.")
+            return 1
+        restam = convites.restantes(argv[2])
+        print(f"\n{convite['nome']}: teto de {convite['limite_de_geracoes']} questões, "
+              f"{convite['geracoes']} já gerada(s) — restam {restam}.\n")
+        return 0
+
     if comando == "remover":
         if len(argv) < 3:
             print("Uso: python gerenciar_convites.py remover CODIGO")
@@ -79,7 +102,9 @@ def main(argv: list[str]) -> int:
             return 0
         print(f"\n{len(lista)} convite(s):\n")
         for c in lista:
-            print(f"  {c['codigo']:<14} {c['nome']:<28} banco: {c['identificador']}")
+            teto = int(c.get("limite_de_geracoes", 0) or 0)
+            uso = f"{c.get('geracoes', 0)}/{teto}" if teto else "sem teto"
+            print(f"  {c['codigo']:<14} {c['nome']:<28} banco: {c['identificador']:<34} questões: {uso}")
         print()
         return 0
 
