@@ -136,3 +136,37 @@ def test_lista_de_exercicios_compila(tmp_path):
     }
     q = Questao.model_validate(dados)
     assert compilar(para_latex("Lista 1", [q], com_gabarito=True), tmp_path, "lista")
+
+
+# --- símbolos soltos: erro fatal, não advertência ---------------------------
+#
+# 16 das 85 questões do acervo traziam `✓` na resolução, e a 17ª trazia o sinal
+# de menos tipográfico. Cada uma derrubava o pdflatex, e `compilar` devolve
+# `False` sem levantar exceção: o professor só descobria ao abrir o arquivo.
+
+
+def test_simbolo_de_conferencia_da_resolucao():
+    assert para_tex("Confere ✓ com o gabarito") == r"Confere $\checkmark$ com o gabarito"
+
+
+def test_menos_tipografico_vira_sinal_de_menos():
+    """U+2212 parece o hífen do teclado e não é — no papel a diferença aparece."""
+    assert para_tex("a temperatura caiu −5 graus") == "a temperatura caiu $-$5 graus"
+
+
+def test_simbolo_dentro_da_formula_sai_sem_cifrao():
+    """Dentro da matemática o comando vai cru: `$...$` aninhado não compila."""
+    assert para_tex(r"$x ≤ 10$") == r"$x \le  10$"
+
+
+def test_simbolo_desconhecido_e_descartado_em_vez_de_derrubar():
+    """A tabela é uma lista, e lista fica para trás. A rede evita o erro fatal."""
+    assert para_tex("nota 🙂 final") == "nota  final"
+
+
+@pytest.mark.skipif(not shutil.which("pdflatex"), reason="requer pdflatex")
+def test_resolucao_com_conferencia_compila(tmp_path):
+    corpo = para_tex(
+        "Passo 1: $a = 2$ ✓\n\nPasso 2: o saldo caiu −5 e o custo é R$ 50,00 ✓")
+    tex = PREAMBULO + "\\begin{document}\n" + corpo + "\n\\end{document}"
+    assert compilar(tex, tmp_path, "resolucao"), (tmp_path / "resolucao.tex").read_text()

@@ -343,6 +343,52 @@ main { padding: 28px; }
   line-height: 1.62;
 }
 
+/* ------------------------------------------------ marcação vinda do Gerador
+
+   O enunciado chega em Markdown com a matemática em LaTeX. Antes entrava como
+   uma string só, e o parágrafo saía corrido: os itens a), b), c), a fórmula em
+   display e a tabela de faixa colavam numa linha. Quem separa é `marcacao.js`;
+   estas regras dão a cada bloco o espaço que ele já tinha no papel. */
+.marcacao__paragrafo { margin: 0 0 0.85em; }
+.marcacao > :last-child, .marcacao__paragrafo:last-child { margin-bottom: 0; }
+
+.marcacao__lista {
+  margin: 0 0 0.85em;
+  padding-left: 1.4em;
+}
+.marcacao__lista li { margin: 0.2em 0; }
+
+.marcacao__formula {
+  margin: 0.9em 0;
+  text-align: center;
+  overflow-x: auto;   /* `\begin{cases}` largo rola na caixa, não na página */
+  overflow-y: hidden;
+}
+
+/* A tabela de tarifa por faixa é larga e o celular é estreito: ela rola dentro
+   da própria caixa em vez de empurrar o cartão inteiro para o lado. */
+.marcacao__tabela {
+  margin: 0.9em 0;
+  overflow-x: auto;
+}
+.marcacao__tabela table {
+  border-collapse: collapse;
+  font-size: 0.95em;
+  background-color: #fff;
+}
+.marcacao__tabela th,
+.marcacao__tabela td {
+  border: 1px solid var(--linha);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.marcacao__tabela th { background-color: var(--esferografica-fraca); font-weight: 600; }
+
+/* A fórmula em SVG assenta na linha de base do texto que a cerca. */
+.mat mjx-container[jax="SVG"] { display: inline-block; vertical-align: -0.15em; }
+.mat--display mjx-container[jax="SVG"] { display: block; margin: 0 auto; }
+
 .questao__alternativas {
   margin: 16px 0 0;
   padding: 0;
@@ -352,6 +398,7 @@ main { padding: 28px; }
 }
 
 .questao__alternativa { display: flex; gap: 8px; padding: 3px 0; }
+.questao__alternativa .marcacao { flex: 1; min-width: 0; }
 .questao__letra { color: var(--lapis); font-family: var(--sans); font-size: 13px; }
 .questao__alternativa--correta { color: var(--conferido); font-weight: 600; }
 
@@ -445,7 +492,6 @@ main { padding: 28px; }
   font-family: var(--serifada);
   font-size: 14.5px;
   line-height: 1.6;
-  white-space: pre-wrap;
 }
 
 .criterios { margin: 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 13px; }
