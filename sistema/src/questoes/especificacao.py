@@ -82,6 +82,11 @@ class NivelBloom(str, Enum):
 
 
 class Dificuldade(str, Enum):
+    # "Básico" veio do painel docente: quatro dos cinco professores julgaram as
+    # questões mais difíceis do que a especificação declarava, e o "fácil" do
+    # Gerador (o estudante que cumpre a habilidade no ano previsto) ficou acima
+    # do que essas turmas alcançam. É um degrau abaixo, não um "fácil" renomeado.
+    BASICO = "basico"
     FACIL = "facil"
     MEDIA = "media"
     DIFICIL = "dificil"

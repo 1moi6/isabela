@@ -63,7 +63,7 @@ ROTULO_TEMA = {
 }
 ROTULO_NATUREZA = {"teorica": "Teórica", "aplicada": "Aplicada"}
 ROTULO_FORMATO = {"discursiva": "Discursiva", "multipla_escolha": "Múltipla escolha"}
-ROTULO_DIFICULDADE = {"facil": "Fácil", "media": "Média", "dificil": "Difícil"}
+ROTULO_DIFICULDADE = {"basico": "Básico", "facil": "Fácil", "media": "Média", "dificil": "Difícil"}
 # Escrito para quem dá aula, não para quem programa: o terceiro rótulo precisa
 # ler como instrução, senão vira etiqueta decorativa.
 ROTULO_GARANTIA = {

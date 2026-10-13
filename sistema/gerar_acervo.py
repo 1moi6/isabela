@@ -52,6 +52,9 @@ from questoes.llm import criar_provedor  # noqa: E402
 SEMENTE = 20260808  # sorteio do nível cognitivo reprodutível
 
 
+DIFICULDADES_DO_ACERVO = (Dificuldade.FACIL, Dificuldade.MEDIA, Dificuldade.DIFICIL)
+
+
 def plano() -> list[dict]:
     """As 90 especificações, ordenadas para que os primeiros ciclos sejam diversos.
 
@@ -61,7 +64,10 @@ def plano() -> list[dict]:
     """
     catalogo = carregar_habilidades()
     codigos = sorted(catalogo)
-    celulas = [(f, d) for f in Formato for d in Dificuldade]
+    # Os três níveis do desenho, nomeados: percorrer o enum inteiro faria o
+    # "básico", criado depois, entrar no plano e mudar as 90 especificações que
+    # a comparação entre modelos exige idênticas.
+    celulas = [(f, d) for f in Formato for d in DIFICULDADES_DO_ACERVO]
 
     sorteio = random.Random(SEMENTE)
     # Um embaralhamento por tema, consumido em ordem pelas seis células. Sorteio
