@@ -123,11 +123,13 @@ ponto de vista arquitetural, a \textbf{formalização verificável}.
 A formalização verificável é a ponte entre a prosa da questão e o verificador simbólico. Trata-se
 de um objeto com quatro campos --- o \emph{tipo} de verificação, a \emph{expressão} em sintaxe
 SymPy, a \emph{resposta esperada} (o gabarito, na mesma sintaxe) e \emph{parâmetros} auxiliares ---
-que o Gerador preenche no momento da criação da questão. Essa decisão resolve o segundo limite da
-verificação simbólica apontado na Seção~\ref{sub:cas-limites}: o Verificador nunca precisa
+que o Gerador preenche no momento da criação da questão. Essa decisão contorna o segundo limite
+da verificação simbólica apontado na Seção~\ref{sub:cas-limites}: o Verificador nunca precisa
 interpretar o enunciado em linguagem natural, pois quem traduz a prosa para a forma simbólica é o
 próprio agente que a escreveu --- e a tradução é, ela mesma, parte do objeto auditável que o
-professor pode inspecionar.
+professor pode inspecionar. Contornar não é eliminar: o limite muda de lugar, e a fidelidade da
+tradução ao enunciado passa a ser um ponto que nenhum agente confere. A consequência para o que
+a garantia promete é tratada na Seção~\ref{sec:garantia}.
 
 O Gerador produz uma \textbf{lista} dessas formalizações, e não uma só, porque uma questão faz
 com frequência mais de uma afirmação verificável: quando articula dois temas, quando a habilidade
@@ -224,6 +226,16 @@ Verificador, e responde ao que aquela questão de fato recebeu: gabarito conferi
 parte, ou sem conferência automática. É ela que aparece junto da questão na interface e permite
 filtrar o banco curado --- e o terceiro rótulo é redigido como instrução ao professor, não como
 etiqueta, porque é disso que se trata.
+
+Mesmo o rótulo mais forte tem um alcance preciso, e convém dizê-lo com todas as letras.
+\emph{Gabarito conferido} significa que o gabarito é consistente com a formalização declarada
+pelo Gerador --- não que a formalização traduza fielmente o enunciado. Se o Gerador lê mal o
+próprio enunciado e formaliza essa leitura errada, gabarito e formalização concordam entre si, o
+Verificador confirma a concordância, e a questão sai conferida com o erro. O caso não é
+hipotético: a primeira rodada de avaliação docente encontrou uma questão assim no acervo
+(Subseção~\ref{sub:rodada1-erros}), e o Verificador aprova tanto a versão errada quanto a
+corrigida. O rótulo, portanto, elimina uma classe de erro --- o cálculo errado sobre um problema
+bem posto --- e deixa outra à vista do professor: a leitura errada do problema.
 
 Os dois níveis não coincidem, e é justamente a distância entre eles que interessa: uma habilidade
 pode admitir conferência plena e, numa questão particular, o Gerador não conseguir formalizar o
