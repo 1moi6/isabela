@@ -114,6 +114,36 @@ class Convites:
         """Quantas gerações este convite já pagou com a chave do servidor."""
         return int(self._ler().get(codigo, {}).get("usos_da_chave_do_servidor", 0))
 
+    def cota(self, codigo: str | None, padrao: int) -> int:
+        """Quantas gerações a chave do servidor banca neste convite. 0 = sem teto.
+
+        Ausente no convite vale a `cota_por_convite` global, que é o padrão
+        certo para convidados. O campo próprio existe para o dono, que paga a
+        própria conta e não deve esbarrar numa cota feita para eles.
+        """
+        valor = self._ler().get(codigo, {}).get("cota_da_chave_do_servidor")
+        return padrao if valor is None else max(0, int(valor))
+
+    def definir_banca(self, codigo: str, banca: bool, cota: int | None = None,
+                      usos: int | None = None) -> dict | None:
+        """Liga ou desliga a chave do servidor para um convite já emitido.
+
+        `cota` troca a global por uma própria (0 = sem teto); `usos` acerta o
+        contador --- quando a chave do servidor muda, o que a anterior pagou
+        não conta contra a nova.
+        """
+        with _TRAVA:
+            convites = self._ler()
+            if codigo not in convites:
+                return None
+            convites[codigo]["usa_chave_do_servidor"] = bool(banca)
+            if cota is not None:
+                convites[codigo]["cota_da_chave_do_servidor"] = max(0, int(cota))
+            if usos is not None:
+                convites[codigo]["usos_da_chave_do_servidor"] = max(0, int(usos))
+            self._gravar(convites)
+            return dict(convites[codigo], codigo=codigo)
+
     # ----------------------------------------------------- limite de gerações
     #
     # Duas contas distintas, e confundi-las é o erro fácil: `usos_da_chave_do_

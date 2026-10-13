@@ -5,6 +5,9 @@
     python gerenciar_convites.py criar "Maria Silva" --banca   # gerações por conta do servidor
     python gerenciar_convites.py limite k3n8p2xq 15         # teto de questões
     python gerenciar_convites.py limite k3n8p2xq 15 --geradas 10
+    python gerenciar_convites.py banca k3n8p2xq --cota 10 --usos 0   # liga a chave do servidor
+    python gerenciar_convites.py banca k3n8p2xq --cota 0            # ... sem teto
+    python gerenciar_convites.py banca k3n8p2xq --desligar
     python gerenciar_convites.py remover k3n8p2xq
     python gerenciar_convites.py senha          # libera a página de convites
 
@@ -23,6 +26,22 @@ sys.path.insert(0, str(RAIZ / "src"))
 from questoes.convites import Convites  # noqa: E402
 
 ENDERECO_PADRAO = "http://localhost:8000"
+
+
+def _cota_global() -> int:
+    from questoes import config_app
+
+    return int(config_app.carregar()["cota_por_convite"] or 0)
+
+
+def _descrever_banca(convite: dict, cota_global: int) -> str:
+    """'chave do servidor: 4/10' — a conta do gasto do dono, não a das questões."""
+    if not convite.get("usa_chave_do_servidor"):
+        return "chave do servidor: não"
+    proprio = convite.get("cota_da_chave_do_servidor")
+    cota = cota_global if proprio is None else int(proprio)
+    usos = int(convite.get("usos_da_chave_do_servidor", 0))
+    return f"chave do servidor: {usos}/{cota}" if cota else f"chave do servidor: {usos}, sem teto"
 
 
 def main(argv: list[str]) -> int:
@@ -68,6 +87,27 @@ def main(argv: list[str]) -> int:
               f"{convite['geracoes']} já gerada(s) — restam {restam}.\n")
         return 0
 
+    if comando == "banca":
+        # Liga a chave do servidor num convite já emitido. Sem `--cota`, vale a
+        # `cota_por_convite` global; `--cota 0` é sem teto, para o próprio dono.
+        if len(argv) < 3:
+            print("Uso: python gerenciar_convites.py banca CODIGO [--cota N] [--usos M] [--desligar]")
+            print("  N = gerações que a chave do servidor banca (0 = sem teto)")
+            print("  M = quantas já pagou, para a cota valer do ponto certo")
+            return 2
+
+        def opcao(nome: str) -> int | None:
+            return int(argv[argv.index(nome) + 1]) if nome in argv else None
+
+        convite = convites.definir_banca(
+            argv[2], "--desligar" not in argv, opcao("--cota"), opcao("--usos")
+        )
+        if convite is None:
+            print(f"Convite {argv[2]} não encontrado.")
+            return 1
+        print(f"\n{convite['nome']}: {_descrever_banca(convite, _cota_global())}.\n")
+        return 0
+
     if comando == "remover":
         if len(argv) < 3:
             print("Uso: python gerenciar_convites.py remover CODIGO")
@@ -100,11 +140,13 @@ def main(argv: list[str]) -> int:
             print("\nNenhum convite. O sistema está em modo local (sem autenticação).\n")
             print('Para compartilhar:  python gerenciar_convites.py criar "Nome"\n')
             return 0
+        global_ = _cota_global()
         print(f"\n{len(lista)} convite(s):\n")
         for c in lista:
             teto = int(c.get("limite_de_geracoes", 0) or 0)
             uso = f"{c.get('geracoes', 0)}/{teto}" if teto else "sem teto"
-            print(f"  {c['codigo']:<14} {c['nome']:<28} banco: {c['identificador']:<34} questões: {uso}")
+            print(f"  {c['codigo']:<14} {c['nome']:<28} banco: {c['identificador']:<34} "
+                  f"questões: {uso:<10} {_descrever_banca(c, global_)}")
         print()
         return 0
 

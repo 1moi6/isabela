@@ -202,6 +202,49 @@ def test_dono_pode_bancar_dentro_de_uma_cota(ambiente, monkeypatch):
     assert cliente.get("/api/estado", headers=maria).json()["geracoes_restantes"] == 0
 
 
+def test_cota_propria_do_convite_substitui_a_global(ambiente, monkeypatch):
+    """O dono banca a si mesmo sem teto; a convidada segue na cota global."""
+    cliente, convites, _ = ambiente
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "chave-do-dono")
+    cliente.post("/api/config", json={})
+    api_main.config_app.salvar({"cota_por_convite": "1"})
+
+    dono = convites.criar("Orientador")["codigo"]
+    convites.definir_banca(dono, True, cota=0)
+    convidada = convites.criar("Convidada", usa_chave_do_servidor=True)["codigo"]
+
+    for _ in range(3):
+        assert cliente.post("/api/gerar", json=ESPECIFICACAO,
+                            headers={"X-Convite": dono}).status_code == 200
+    assert convites.usos(dono) == 3
+    estado = cliente.get("/api/estado", headers={"X-Convite": dono}).json()
+    assert estado["servidor_banca"] is True and estado["geracoes_restantes"] is None
+
+    para_ela = {"X-Convite": convidada}
+    assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=para_ela).status_code == 200
+    assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=para_ela).status_code == 429
+
+
+def test_definir_banca_acerta_o_contador_e_desliga(ambiente, monkeypatch):
+    """Chave nova no servidor: o que a anterior pagou não conta contra ela."""
+    cliente, convites, _ = ambiente
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "chave-do-dono")
+    cliente.post("/api/config", json={})
+    api_main.config_app.salvar({"cota_por_convite": "2"})
+
+    codigo = convites.criar("Maria Silva", usa_chave_do_servidor=True)["codigo"]
+    maria = {"X-Convite": codigo}
+    for _ in range(2):
+        cliente.post("/api/gerar", json=ESPECIFICACAO, headers=maria)
+    assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=maria).status_code == 429
+
+    convites.definir_banca(codigo, True, usos=0)
+    assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=maria).status_code == 200
+
+    convites.definir_banca(codigo, False)
+    assert cliente.post("/api/gerar", json=ESPECIFICACAO, headers=maria).status_code == 402
+
+
 def test_cota_nao_conta_quem_traz_a_propria_chave(ambiente, monkeypatch):
     """A cota limita gasto do dono, não uso do convidado."""
     cliente, convites, _ = ambiente

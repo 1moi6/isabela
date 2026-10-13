@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi, python-docx + latex2mathml/mathml2omml
-python -m pytest            # 272 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 274 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -75,7 +75,10 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   travar o botão. Bancar é decisão **por convite** (`usa_chave_do_servidor` em `convites.json`,
   falso por omissão) com `cota_por_convite`, contada só para quem **não** traz a própria chave.
   Por convite, e não global, porque quem já usa a própria chave — orientador e aluna — não deve
-  esbarrar numa cota feita para convidados de teste.
+  esbarrar numa cota feita para convidados de teste. A cota também pode ser do convite
+  (`cota_da_chave_do_servidor`, 0 = sem teto; ausente = vale a global): é como o dono banca a si
+  mesmo sem teto. `gerenciar_convites.py banca CODIGO --cota N --usos M` liga num convite já
+  emitido; `--usos 0` ao trocar a chave do servidor, para o gasto da anterior não contar.
 - **Duas contas por convite, e confundi-las é o erro fácil.** `usos_da_chave_do_servidor` mede
   **gasto do dono** e só sobe quando é a chave dele que paga; `limite_de_geracoes`/`geracoes`
   (`convites.py`) medem **quantas questões a pessoa gerou**, com a chave de quem for — é o

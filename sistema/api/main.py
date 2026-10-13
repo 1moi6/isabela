@@ -312,15 +312,15 @@ def _autorizar_chave(quem: dict, provedor: str) -> str | None:
                    f"{variavel} não está definida no ambiente dele.",
         )
 
-    cota = int(cfg["cota_por_convite"] or 0)
     codigo = quem.get("codigo")
-    if cota and codigo:
-        if _convites.usos(codigo) >= cota:
-            raise HTTPException(
-                status_code=429,
-                detail=f"Este convite já usou as {cota} gerações incluídas. "
-                       "Informe a sua própria chave de API em Configurações para continuar.",
-            )
+    cota = _convites.cota(codigo, int(cfg["cota_por_convite"] or 0))
+    if cota and codigo and _convites.usos(codigo) >= cota:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Este convite já usou as {cota} gerações incluídas. "
+                   "Informe a sua própria chave de API em Configurações para continuar.",
+        )
+    if codigo:  # conta mesmo sem teto: é o registro do gasto do dono
         _convites.registrar_uso(codigo)
     return chave_do_dono
 
@@ -418,7 +418,7 @@ def estado(quem: dict = Depends(identificar)) -> dict:
     servidor_banca = (
         quem["usa_chave_do_servidor"] and chave_do_ambiente and quem["compartilhado"]
     )
-    cota = int(cfg["cota_por_convite"] or 0)
+    cota = _convites.cota(quem.get("codigo"), int(cfg["cota_por_convite"] or 0))
     restantes = None
     if servidor_banca and cota and quem.get("codigo"):
         restantes = max(0, cota - _convites.usos(quem["codigo"]))
@@ -666,7 +666,7 @@ def listar_convites(request: Request) -> dict:
             {
                 **c,
                 "link": _link(c["codigo"], cfg, origem),
-                "cota": int(cfg["cota_por_convite"] or 0),
+                "cota": _convites.cota(c["codigo"], int(cfg["cota_por_convite"] or 0)),
             }
             for c in _convites.listar()
         ],
