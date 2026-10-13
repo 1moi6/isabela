@@ -163,7 +163,7 @@ function preencherSelect(elemento, itens, valorDe = (i) => i.valor, textoDe = (i
   }
 }
 
-function grupoOpcoes(container, itens, valorInicial) {
+function grupoOpcoes(container, itens, valorInicial, aoMudar) {
   container.replaceChildren();
   container.dataset.valor = valorInicial;
   for (const item of itens) {
@@ -176,6 +176,7 @@ function grupoOpcoes(container, itens, valorInicial) {
       for (const irmao of container.children) {
         irmao.classList.toggle("opcoes__item--ativo", irmao === botao);
       }
+      if (aoMudar) aoMudar(item.valor);
     });
     container.append(botao);
   }
@@ -259,6 +260,19 @@ function avisarSobreBloom() {
     "Dá para pedir assim mesmo, mas a questão tende a exigir mais revisões.";
 }
 
+/* Algumas combinações de dificuldade e Bloom se contradizem: "básico" pede um
+   passo só, e "criar" pede que o aluno construa algo novo. Medido com provedor
+   real, o par falhou em 2 de 3 casos. Como no aviso de Bloom, não se proíbe —
+   avisa-se. A lista e o texto vêm da API (`especificacao.py`), não daqui. */
+function avisarSobreCombinacao() {
+  const dificuldade = document.getElementById("campo-dificuldade").dataset.valor;
+  const nivel = document.getElementById("campo-bloom").value;
+  const regra = (estadoApp.opcoes.combinacoes_desaconselhadas || []).find(
+    (c) => c.dificuldade === dificuldade && c.bloom === nivel
+  );
+  document.getElementById("aviso-dificuldade").textContent = regra ? regra.aviso : "";
+}
+
 /* Sem indicação, o Gerador volta sempre ao contexto mais provável de cada tema:
    no acervo de 8 de agosto, 7 das 9 questões de função afim eram tarifa fixa mais
    valor por unidade, e todas as de PG eram cultura de bactérias. O Crítico não
@@ -340,7 +354,9 @@ async function montarFormulario() {
   );
   preencherSelect(document.getElementById("campo-bloom"), o.bloom);
   document.getElementById("campo-bloom").value = "aplicar";
-  grupoOpcoes(document.getElementById("campo-dificuldade"), o.dificuldades, "media");
+  grupoOpcoes(
+    document.getElementById("campo-dificuldade"), o.dificuldades, "media", avisarSobreCombinacao
+  );
   grupoOpcoes(document.getElementById("campo-natureza"), o.naturezas, "aplicada");
   grupoOpcoes(document.getElementById("campo-formato"), o.formatos, "discursiva");
   mostrarDescricaoHabilidade();
@@ -904,6 +920,7 @@ async function iniciar() {
   document.getElementById("config-provedor").addEventListener("change", atualizarSugestoesDeModelo);
   document.getElementById("campo-habilidade").addEventListener("change", mostrarDescricaoHabilidade);
   document.getElementById("campo-bloom").addEventListener("change", avisarSobreBloom);
+  document.getElementById("campo-bloom").addEventListener("change", avisarSobreCombinacao);
   document.getElementById("sortear-contexto").addEventListener("click", sortearContexto);
   document.getElementById("form-gerar").addEventListener("submit", gerar);
   document.getElementById("filtro-tema").addEventListener("change", carregarBanco);

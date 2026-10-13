@@ -36,8 +36,8 @@ from questoes.agentes import (  # noqa: E402
 from questoes.banco import BancoQuestoes  # noqa: E402
 from questoes.convites import DONO_LOCAL, Convites  # noqa: E402
 from questoes.especificacao import (  # noqa: E402
-    Dificuldade, Especificacao, Formato, Garantia, Natureza, NivelBloom, Tema,
-    carregar_contextos, carregar_habilidades,
+    COMBINACOES_DESACONSELHADAS, Dificuldade, Especificacao, Formato, Garantia, Natureza,
+    NivelBloom, Tema, carregar_contextos, carregar_habilidades,
 )
 from questoes.listas import para_docx, para_latex, para_markdown  # noqa: E402
 from questoes.llm import criar_provedor  # noqa: E402
@@ -358,6 +358,11 @@ def opcoes() -> dict:
         # contrário: por isso cada habilidade carrega seus temas, como eles se
         # combinam, o que a questão precisa cumprir e que níveis de Bloom os
         # verbos dela sugerem.
+        # Pares dificuldade x Bloom que o formulário avisa (sem impedir).
+        "combinacoes_desaconselhadas": [
+            {"dificuldade": d, "bloom": b, "aviso": aviso}
+            for (d, b), aviso in COMBINACOES_DESACONSELHADAS.items()
+        ],
         "habilidades": [
             {
                 "codigo": c,

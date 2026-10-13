@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi, python-docx + latex2mathml/mathml2omml
-python -m pytest            # 285 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 287 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -182,6 +182,8 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   percorrer faria o nível novo entrar e mudar as 90 especificações. Medido com provedor real
   (`medir_basico.py` + `analisar_basico.py`, `medicoes/basico-2026-10-13/`): mais curto em 13 de
   14 pares, sem perda de alinhamento — **mas não combina com Bloom `criar`** (2 das 3 falharam).
+  O formulário avisa, sem bloquear: a regra e o texto moram em `COMBINACOES_DESACONSELHADAS`
+  (`especificacao.py`) e chegam à página por `/api/opcoes`. Só entra ali o que foi medido.
 - **`gabarito conferido` quer dizer "consistente com a formalização declarada"**, não "com o
   enunciado". A Q061 do acervo saiu conferida com $a_1$ errado (o Gerador formalizou errado e o
   SymPy confirmou a formalização); o Verificador aprova também a versão corrigida. A correção

@@ -92,6 +92,19 @@ class Dificuldade(str, Enum):
     DIFICIL = "dificil"
 
 
+# Pares (dificuldade, Bloom) que o sistema aceita mas desaconselha, com o aviso que
+# o formulário mostra. Não é proibição: o professor decide. Só entra aqui o que foi
+# medido com provedor real --- "avaliar" com básico, por exemplo, não foi.
+COMBINACOES_DESACONSELHADAS: dict[tuple[str, str], str] = {
+    ("basico", "criar"): (
+        "Uma questão básica tem um passo só, e o nível Criar pede que o aluno construa algo "
+        "novo. Nos testes, essa combinação falhou em 2 de 3 casos: uma questão foi descartada "
+        "e outra saiu básica só no nome. Dá para pedir assim mesmo, mas Aplicar ou Entender "
+        "combinam melhor com o nível básico."
+    ),
+}
+
+
 class Natureza(str, Enum):
     """Questão teórica (manipulação/conceito) ou aplicada (contexto real)."""
 

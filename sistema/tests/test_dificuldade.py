@@ -39,3 +39,20 @@ def test_plano_do_acervo_continua_com_as_90_especificacoes_de_tres_niveis():
     assert {e["dificuldade"] for e in plano} == {
         Dificuldade.FACIL, Dificuldade.MEDIA, Dificuldade.DIFICIL,
     }
+
+
+def test_formulario_recebe_o_aviso_de_basico_com_criar(cliente):  # noqa: F811
+    """Medido com provedor real: o par falhou em 2 de 3. Avisa-se, não se proíbe."""
+    regras = cliente.get("/api/opcoes").json()["combinacoes_desaconselhadas"]
+    assert [(r["dificuldade"], r["bloom"]) for r in regras] == [("basico", "criar")]
+    assert "2 de 3" in regras[0]["aviso"]
+
+
+def test_combinacao_desaconselhada_continua_aceita():
+    """O aviso não vira bloqueio: o professor pode ter razões para pedir assim."""
+    spec = Especificacao(
+        tema=Tema.FUNCAO_AFIM, habilidade_bncc="EM13MAT302",
+        nivel_bloom=NivelBloom.CRIAR, dificuldade=Dificuldade.BASICO,
+        natureza=Natureza.APLICADA, formato=Formato.DISCURSIVA,
+    )
+    assert spec.dificuldade == Dificuldade.BASICO
