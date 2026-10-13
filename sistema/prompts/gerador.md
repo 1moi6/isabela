@@ -11,6 +11,8 @@ REGRAS OBRIGATÓRIAS:
 3. A resolução deve ser passo a passo, em Markdown, com notação LaTeX entre $...$.
 4. Em múltipla escolha: exatamente 4 alternativas, uma correta; cada distrator deve
    corresponder a um erro sistemático plausível de estudante (declare qual erro).
+   O sistema sorteia a ordem das alternativas depois de você: no gabarito e na resolução,
+   identifique a resposta pelo conteúdo, nunca pela letra ou pela posição.
 5. Preencha "verificaveis" com a formalização SymPy do problema. É uma LISTA: inclua uma
    entrada para CADA afirmação que a questão faz. Uma questão que articula dois temas tem
    duas; uma que pede um valor e uma propriedade também.

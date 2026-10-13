@@ -10,6 +10,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from ..alternativas import embaralhar
 from ..especificacao import Especificacao, Formato
 from ..llm import ProvedorLLM
 from ..modelos import ExpressaoVerificavel, Questao
@@ -18,6 +19,11 @@ from ._json_util import extrair_json
 _PROMPT = Path(__file__).resolve().parents[3] / "prompts" / "gerador.md"
 
 _ROTULOS_DIFICULDADE = {
+    "basico": (
+        "básico — um passo só: aplicação imediata de uma definição ou fórmula, com números "
+        "pequenos, de preferência inteiros; enunciado curto, em linguagem cotidiana, com uma "
+        "única pergunta e sem itens encadeados"
+    ),
     "facil": "fácil — aplicação direta de um conceito, poucos passos",
     "media": "média — exige articular dois ou mais passos ou conceitos",
     "dificil": "difícil — exige estratégia não evidente ou análise de casos",
@@ -71,7 +77,8 @@ class Gerador:
         dados["especificacao"] = spec
         dados["verificaveis"] = _formalizacoes_utilizaveis(dados)
         dados.pop("verificavel", None)
-        return Questao.model_validate(dados)
+        # O modelo põe a correta primeiro; a ordem sai sorteada antes do Crítico.
+        return embaralhar(Questao.model_validate(dados))
 
     @staticmethod
     def _montar_pedido(spec: Especificacao, feedback: str | None) -> str:
