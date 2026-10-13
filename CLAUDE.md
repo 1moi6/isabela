@@ -137,7 +137,8 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   resultados em `sistema/medicoes/`): `analisar_logs.py` dá a taxa de `nao_verificavel` por
   tipo, `exportar_medicao.py` transforma o log em `.md` legíveis + índice CSV,
   `gerar_acervo.py` gera o acervo estratificado (`--apenas`, `--provedor`, `--modelo`) e
-  `comparar_execucoes.py` põe duas execuções lado a lado.
+  `comparar_execucoes.py` põe duas execuções lado a lado, e `medir_basico.py` gera os 15 pares
+  fácil/básico que `analisar_basico.py` compara.
 - **`exportar_avaliacao.py` não é uma variação do `exportar_medicao.py`** — é o material que vai
   **para o professor**, e o que ele omite é o ponto: resolução (denuncia o erro), garantia obtida
   (é o que o P3 do `plano_experimento_painel.md` investiga; impressa na página fica intestável),
@@ -178,7 +179,9 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
 - **`basico` é um quarto nível de dificuldade, abaixo do fácil**, criado porque quatro dos cinco
   professores do painel julgaram as questões mais difíceis do que o declarado. O plano do
   acervo usa `DIFICULDADES_DO_ACERVO` (os três níveis originais) e **não** percorre o enum:
-  percorrer faria o nível novo entrar e mudar as 90 especificações.
+  percorrer faria o nível novo entrar e mudar as 90 especificações. Medido com provedor real
+  (`medir_basico.py` + `analisar_basico.py`, `medicoes/basico-2026-10-13/`): mais curto em 13 de
+  14 pares, sem perda de alinhamento — **mas não combina com Bloom `criar`** (2 das 3 falharam).
 - **`gabarito conferido` quer dizer "consistente com a formalização declarada"**, não "com o
   enunciado". A Q061 do acervo saiu conferida com $a_1$ errado (o Gerador formalizou errado e o
   SymPy confirmou a formalização); o Verificador aprova também a versão corrigida. A correção

@@ -151,9 +151,42 @@ Em resposta, o sistema ganhou um quarto nível, \emph{básico}, abaixo do fácil
 aplicação imediata de uma definição ou fórmula, números pequenos, enunciado curto em
 linguagem cotidiana, uma só pergunta e nenhum item encadeado. A descrição incorpora também as
 queixas de linguagem e de comandos encadeados registradas na
-Subseção~\ref{sub:rodada1-comentarios}. Se o Gerador consegue de fato descer a esse degrau é
-pergunta empírica, a medir com provedor real; o acervo avaliado aqui não contém questões
-desse nível.
+Subseção~\ref{sub:rodada1-comentarios}.
+
+Antes de ser oferecido ao professor, o nível foi posto à prova com provedor real, num desenho
+pareado: para cada uma das 15 habilidades, a especificação \emph{fácil} do plano do acervo foi
+gerada duas vezes na mesma execução, uma como fácil e outra como básica, com tudo o mais
+igual. A Tabela~\ref{tab:basico} resume o resultado.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Questões fáceis e básicas geradas a partir das mesmas 15 especificações
+  (indicadores de texto; medianas sobre os 14 pares com as duas questões aprovadas)}
+  \label{tab:basico}
+  \begin{tabular}{lrr}
+    \toprule
+    & Fácil & Básico \\
+    \midrule
+    Aprovadas pelo ciclo & 15 de 15 & 14 de 15 \\
+    Palavras no enunciado & 134,5 & 75,5 \\
+    Pares em que o básico é mais curto & \multicolumn{2}{c}{13 de 14} \\
+    Discursivas em que o básico eliminou os itens encadeados & \multicolumn{2}{c}{5 de 7} \\
+    Pares com menos números no enunciado básico & \multicolumn{2}{c}{9 de 14} \\
+    Nota $\le 3$ em alinhamento à BNCC (Crítico) & 3 de 14 & 3 de 14 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+O básico encurta o enunciado quase sempre, desfaz a cadeia de itens na maior parte das
+discursivas e nunca faz o contrário; e a simplificação não custou alinhamento à habilidade
+segundo o Crítico. O limite apareceu onde era de esperar: nas três especificações de nível
+cognitivo \emph{criar}, só uma simplificou --- uma foi descartada, com o Crítico apontando nas
+três tentativas que um item de um passo não exige criação, e outra saiu básica apenas no nome.
+Nos níveis \emph{entender}, \emph{aplicar} e \emph{analisar}, as doze foram aprovadas.
+
+Os indicadores são de texto, não de dificuldade: mostram que a questão básica é mais curta,
+menos encadeada e com menos números, não que a turma a ache fácil. Essa é pergunta para o
+painel formal.
 
 \subsection{O bloco-âncora}
 \label{sub:rodada1-ancora}
@@ -290,13 +323,15 @@ continha espécimes de propósito, e o único erro real foi encontrado depois, n
 respostas.
 
 Ainda assim, a rodada produziu consequências concretas para o sistema, todas verificáveis no
-acervo. Três foram incorporadas: a ordem das alternativas passou a ser sorteada depois da
-geração, com as referências por letra no gabarito e na resolução renumeradas junto; o nível
-\emph{básico} foi acrescentado; e a Q061 foi corrigida no acervo, preservado o registro
-original do erro. Três ficam em aberto: diversificar contextos e dados numéricos entre ciclos;
-esclarecer a referência curricular com que os professores conferem as habilidades; e
-reconhecer na garantia declarada o limite que a Q061 expôs --- a conferência alcança a
-formalização, não a leitura do enunciado.
+acervo. Quatro foram incorporadas. A ordem das alternativas passou a ser sorteada depois da
+geração, com as referências por letra no gabarito e na resolução renumeradas junto; na
+medição da Tabela~\ref{tab:basico}, a correta caiu nas posições a, b, c e d em 5, 5, 3 e 2 das
+15 questões de múltipla escolha, contra 38 de 43 na primeira posição antes da mudança. O nível
+\emph{básico} foi acrescentado e medido. A Q061 foi corrigida no acervo, preservado o registro
+original do erro. E o alcance da garantia \emph{gabarito conferido} passou a ser declarado na
+Seção~\ref{sec:garantia}. Dois pontos ficam em aberto: diversificar contextos e dados
+numéricos entre ciclos, e esclarecer a referência curricular com que os professores conferem
+as habilidades.
 
 \section{O painel formal}
 \label{sec:painel-formal}

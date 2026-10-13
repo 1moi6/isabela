@@ -1,0 +1,19 @@
+30 ciclos
+
+nível   aprov. iter. médias
+facil    15/15          1.3
+basico   14/15          1.4
+
+14 pares com as duas questões aprovadas
+
+indicador      acervo   fácil  básico   básico < fácil   básico > fácil
+palavras        111.0   134.5    75.5       13/14            0/14
+itens             0.0     0.0     0.0        5/14            0/14
+numeros           8.0     8.0     5.0        9/14            2/14
+nao_inteiros      0.0     0.0     0.0        3/14            0/14
+resolucao       178.0   216.0   190.5       11/14            3/14
+(medianas; 'acervo' = a questão fácil de mesma especificação que o painel avaliou)
+
+Ordem das alternativas (múltipla escolha aprovada):
+  posição da correta: {'a': 5, 'b': 5, 'c': 3, 'd': 2} em 15 questões
+  letra citada que não aponta para a correta: 0 []
