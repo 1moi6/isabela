@@ -2,15 +2,309 @@
 \label{cap:avaliacao}
 
 % =====================================================================
-% CAPÍTULO EM ELABORAÇÃO — aguarda a aplicação do painel docente
-% (Ciclo 3 do projeto). Estrutura prevista: 6.1 desenho da avaliação,
-% 6.2 material, 6.3 instrumento, 6.4 procedimento, 6.5 análise,
-% 6.6 resultados, 6.7 discussão. As seções de desenho (6.1-6.5) podem
-% ser redigidas antes da coleta; resultados e discussão, somente após.
+% PAPEL DO CAPÍTULO: avaliação empírica das questões por professores.
+% A Seção 6.1 relata a primeira rodada (curadoria do acervo, cinco
+% professores, sem CEP) como AVALIAÇÃO FORMATIVA PRELIMINAR: descritiva,
+% sem inferência. O painel formal (Rodada 2: itens comuns, desenho cego,
+% concordância entre avaliadores) está em plano_experimento_painel.md e,
+% enquanto não for aplicado, figura na Seção 6.2 como limitação.
+% Dados e script: sistema/medicoes/acervo-consolidado/avaliacao/respostas/.
+% Os critérios de qualidade têm casa em 3.4; a hipótese, em 2.5; o erro
+% silencioso, em 1.x --- aqui só se referenciam.
 % =====================================================================
 
-\emph{[Capítulo em elaboração. Apresentará o desenho da avaliação empírica --- painel de 8 a 15
-professores de Matemática do Ensino Médio avaliando, com a rubrica derivada da
-Seção~\ref{sec:criterios}, um conjunto de questões do banco curado ---, o instrumento de coleta,
-os resultados quantitativos e qualitativos e a discussão crítica à luz da hipótese arquitetural
-(Seção~\ref{sec:hipotese}).]}
+Este capítulo relata o contato das questões geradas com professores de Matemática do Ensino
+Médio. A avaliação aqui apresentada é \emph{formativa e preliminar}: uma primeira rodada, com
+cinco professores, desenhada para revelar o que precisava ser corrigido no sistema antes de um
+painel formal, e não para estimar a qualidade das questões com rigor estatístico. O painel
+formal --- com itens comuns a todos os avaliadores, desenho cego para a detecção de erros e
+medida de concordância, avaliando as questões à luz dos critérios da Seção~\ref{sec:criterios}
+--- é apresentado na Seção~\ref{sec:painel-formal} como etapa seguinte e limitação deste
+trabalho.
+
+\section{Primeira rodada: avaliação formativa do acervo}
+\label{sec:rodada1}
+
+\subsection{Desenho, material e participantes}
+\label{sub:rodada1-desenho}
+
+A primeira rodada submeteu o acervo de 85 questões aprovadas pelo ciclo completo
+(Seção~\ref{sec:produto-banco}) ao julgamento de cinco professores de Matemática da rede pública,
+identificados aqui como avaliadores 1 a 5. A participação foi voluntária e informada, sem
+submissão a comitê de ética, e por isso os dados desta rodada são tratados como avaliação
+formativa: descritivos, sem inferência estatística e sem pretensão de generalização.
+
+O acervo foi distribuído, e não replicado: cada avaliador recebeu um \emph{bloco-âncora} de seis
+questões, comum a todos, e um lote próprio de 15 ou 16 questões, num total de 21 ou 22 itens por
+pessoa. A distribuição respeitou a estratificação por habilidade, formato e dificuldade, e a
+ordem dos itens foi embaralhada para que a âncora não ficasse no início. Foram colhidas 109
+respostas, que cobrem as 85 questões: cada questão do bloco-âncora foi julgada cinco vezes, e
+cada uma das demais, uma vez.
+
+Cada item trazia o enunciado, as alternativas quando houvesse, o gabarito proposto e a
+habilidade da BNCC declarada. Três informações foram omitidas de propósito: a resolução, que
+denunciaria um eventual erro e mudaria a tarefa; a garantia obtida
+(Seção~\ref{sec:garantia}), cuja influência sobre o julgamento só pode ser examinada se ela não
+estiver impressa na página; e o parecer do Crítico, cuja presença mediria concordância com o
+agente, e não julgamento próprio. Também não se informou a dificuldade que a especificação
+declarava, para não ancorar a resposta.
+
+Por item, o avaliador respondia a quatro perguntas: se a questão tinha erro matemático (não;
+sim, com indicação do local; não sei dizer); o nível de dificuldade para os seus alunos (fácil,
+média, difícil ou fora do alcance da turma); a decisão de uso (aceita, aceita com ajuste ou
+recusada); e a justificativa, obrigatória quando a decisão não fosse \emph{aceita}. A instrução
+avisava que a amostra tinha qualidade variável e podia conter erros matemáticos. Ao final, três
+perguntas abertas tratavam do uso do sistema no planejamento, do que faltou e do que atrapalhou.
+
+\subsection{Decisão de uso}
+\label{sub:rodada1-decisao}
+
+Das 109 respostas, 104 trazem decisão de uso. Seis em cada dez aceitam a questão como está, e
+oito em cada dez a aceitam com ou sem ajuste (Tabela~\ref{tab:rodada1-decisao}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Decisão de uso, por avaliador}
+  \label{tab:rodada1-decisao}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Avaliador & Aceita & Com ajuste & Recusada & Em branco & Total \\
+    \midrule
+    1 & 18 & 1 & 0 & 3 & 22 \\
+    2 & 9 & 7 & 6 & 0 & 22 \\
+    3 & 8 & 7 & 6 & 1 & 22 \\
+    4 & 18 & 3 & 1 & 0 & 22 \\
+    5 & 9 & 5 & 6 & 1 & 21 \\
+    \midrule
+    Total & 62 & 23 & 19 & 5 & 109 \\
+    \% das decisões & 59,6 & 22,1 & 18,3 & --- & \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Os avaliadores se dividem em dois perfis. Os avaliadores 1 e 4 aceitaram sem ajuste 36 das 41
+questões que decidiram, e recusaram uma; os avaliadores 2, 3 e 5 aceitaram sem ajuste 26 de 63,
+e recusaram 18. A diferença não parece ser de rigor matemático --- o avaliador~1 resolveu boa
+parte das questões à mão, na própria folha ---, mas de referência de turma, como mostra a
+leitura das justificativas.
+
+As recusas têm um traço comum: todas as 19 recaem sobre questões que o próprio avaliador
+classificou como \emph{difícil} (6) ou \emph{fora do alcance da turma} (13), e todas as
+justificativas invocam o nível de conhecimento dos alunos ou a distância entre a questão e a
+realidade da sala de aula. Nenhuma recusa foi motivada por erro matemático. Das 16 respostas
+\emph{fora do alcance}, 13 terminaram em recusa e 3 em aceitação com ajuste; das 25 respostas
+\emph{fácil}, 23 foram aceitas sem ajuste. Na leitura dos professores, portanto, a decisão de uso
+é sobretudo uma decisão sobre dificuldade.
+
+O formato acompanha essa leitura. As questões discursivas foram recusadas em 13 de 48
+decisões (27\%), contra 6 de 56 nas de múltipla escolha (11\%). As justificativas apontam
+enunciados longos, com vários comandos encadeados, como o que mais pesa: ``os enunciados são
+estruturados para quem tem pleno domínio do conhecimento matemático'' (avaliador~2).
+
+Quanto à garantia obtida, as respostas sobre questões \emph{conferidas em parte} são poucas
+(12, uma por questão) para sustentar comparação: cinco aceitas, cinco aceitas com ajuste, uma
+recusada e uma em branco --- e quatro dos cinco ajustes vêm do mesmo avaliador. O registro fica
+como dado para a segunda rodada, desenhada para examinar essa diferença com estratos
+equilibrados.
+
+\subsection{Dificuldade declarada e dificuldade percebida}
+\label{sub:rodada1-dificuldade}
+
+O sistema classifica cada questão como fácil, média ou difícil a partir da especificação. A
+Tabela~\ref{tab:rodada1-dificuldade} cruza essa classificação com a que os professores deram
+pensando nas suas turmas.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Dificuldade declarada pela especificação $\times$ dificuldade percebida pelos
+  avaliadores (número de respostas)}
+  \label{tab:rodada1-dificuldade}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    & \multicolumn{5}{c}{Percebida} \\
+    \cmidrule(l){2-6}
+    Declarada & Fácil & Média & Difícil & Fora do alcance & Em branco \\
+    \midrule
+    Fácil & 13 & 10 & 6 & 3 & 1 \\
+    Média & 6 & 16 & 9 & 6 & 1 \\
+    Difícil & 6 & 14 & 11 & 7 & 0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Das 107 respostas com dificuldade marcada, 40 (37\%) coincidem com a declarada, 41 (38\%) a
+colocam acima e 26 (24\%) abaixo. O desvio predominante é para cima: quatro dos cinco
+avaliadores julgaram mais questões acima do que abaixo do nível declarado --- os avaliadores 2
+e 5 com folga (13 contra 4 e 13 contra 2), os avaliadores 1 e 3 por margem pequena (4 contra 2
+e 8 contra 7) ---, e só o avaliador~4 deslocou a escala para baixo (3 contra 11). O efeito é
+mais visível no degrau de baixo: das 32 questões declaradas fáceis que receberam resposta, só
+13 foram percebidas assim, e 9 foram julgadas difíceis ou fora do alcance.
+
+As justificativas indicam a origem do desvio: cada professor julga pela própria turma, e as
+turmas estão aquém do que a habilidade supõe --- ``meus alunos não sabem nem trigonometria no
+triângulo retângulo'' (avaliador~2); ``no Ensino Médio, são três aulas de Matemática por
+semana'' (avaliador~5). A escala do Gerador é a de um estudante que cumpre a habilidade da
+BNCC no ano previsto, e o seu degrau mais baixo, \emph{fácil} --- ``aplicação direta de um
+conceito, poucos passos'' ---, ainda pressupõe esse estudante.
+
+Em resposta, o sistema ganhou um quarto nível, \emph{básico}, abaixo do fácil: um único passo,
+aplicação imediata de uma definição ou fórmula, números pequenos, enunciado curto em
+linguagem cotidiana, uma só pergunta e nenhum item encadeado. A descrição incorpora também as
+queixas de linguagem e de comandos encadeados registradas na
+Subseção~\ref{sub:rodada1-comentarios}. Se o Gerador consegue de fato descer a esse degrau é
+pergunta empírica, a medir com provedor real; o acervo avaliado aqui não contém questões
+desse nível.
+
+\subsection{O bloco-âncora}
+\label{sub:rodada1-ancora}
+
+As seis questões vistas por todos são as únicas em que se podem comparar os julgamentos
+(Tabela~\ref{tab:rodada1-ancora}).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Decisões sobre as questões do bloco-âncora (A = aceita, J = aceita com ajuste,
+  R = recusada)}
+  \label{tab:rodada1-ancora}
+  \begin{tabular}{llllccccc}
+    \toprule
+    & & & & \multicolumn{5}{c}{Avaliador} \\
+    \cmidrule(l){5-9}
+    Questão & Habilidade & Formato & Declarada & 1 & 2 & 3 & 4 & 5 \\
+    \midrule
+    Q007 & EM13MAT302 & múltipla escolha & fácil & A & A & A & A & J \\
+    Q015 & EM13MAT403 & discursiva & média & A & R & R & A & J \\
+    Q024 & EM13MAT501 & múltipla escolha & difícil & A & A & A & A & A \\
+    Q034 & EM13MAT401 & múltipla escolha & fácil & A & A & J & A & J \\
+    Q065 & EM13MAT306 & discursiva & difícil & A & R & R & J & R \\
+    Q087 & EM13MAT507 & múltipla escolha & média & A & A & A & A & A \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Os extremos são nítidos. As duas questões unânimes são de múltipla escolha, e a Q024, declarada
+difícil e de nível \emph{criar}, foi percebida como fácil ou média pelos cinco. A Q065, uma
+modelagem de maré por função cosseno com dois itens encadeados, foi recusada por três dos
+cinco, sempre pelo nível da turma; a matemática dela está correta. A Q015, que pede a inversa
+de uma exponencial e o seu domínio, divide o grupo: duas aceitas, uma com ajuste, duas
+recusadas.
+
+\subsection{Apontamentos de erro matemático}
+\label{sub:rodada1-erros}
+
+Em 99 das 109 respostas o avaliador declarou que a questão não tinha erro; em 6 deixou a
+pergunta em branco; em 4 marcou que tinha. Nenhum dos quatro apontamentos se confirmou:
+
+\begin{itemize}
+  \item Na Q074 (PA associada a função afim), o avaliador~2 indicou erro ``no gabarito'' e
+  marcou o mês 215 em vez do 216. O gabarito está certo: com $f(n) = 340 + 45(n-1)$, tem-se
+  $f(215) = 9\,970$ e $f(216) = 10\,015$. O mês 215 é exatamente o distrator previsto para quem
+  resolve $45(n-1) > 9\,660$ e não converte $n-1$ em $n$.
+  \item Nas Q073 e Q084, o avaliador~5 marcou erro sem indicar onde. As duas estão corretas, e
+  nas duas o avaliador anotou ao lado uma redação da habilidade declarada diferente da do
+  catálogo. O apontamento parece referir-se a essa redação, e não à questão.
+  \item Na Q023, o avaliador~4 marcou erro sem indicar onde, e aceitou a questão sem ajuste. A
+  questão está correta; como em todas as outras 21 ele marcou a caixa vizinha (\emph{não}), é
+  possível que a marca tenha caído na caixa errada.
+\end{itemize}
+
+O dado mais importante desta seção é o inverso: uma questão com erro que ninguém apontou. Na
+Q061, uma cultura de bactérias começa com 200 indivíduos e dobra a cada hora; o enunciado
+define $a_n$ como a quantidade \emph{ao final} da $n$-ésima hora. Logo $a_1 = 400$,
+$a_n = 200 \cdot 2^n$ e $a_6 = 12\,800$. O gabarito afirma $a_1 = 200$,
+$f(n) = 200 \cdot 2^{n-1}$ e $a_6 = 6\,400$: está deslocado em um termo. O avaliador~1 sublinhou
+a definição de $a_n$ e escreveu na margem ``$a_1 = 400$, $a_2 = 800$'' e ``$f(0) = 200$'' --- a
+conta certa ---, e mesmo assim marcou \emph{não} na pergunta sobre erro e aceitou a questão.
+
+O caminho desse erro pelo sistema é instrutivo. O Gerador formalizou a progressão como
+$a_1 = 200$ e razão $2$; o Verificador conferiu as quatro afirmações dessa formalização e todas
+estavam consistentes entre si; o Crítico deu nota 5 em clareza. A questão saiu com a garantia
+\emph{gabarito conferido}. O Verificador não errou no que lhe cabia: ele confere a formalização
+declarada, e não o enunciado (Seção~\ref{sec:ag-verificador}). O erro mora na tradução da prosa
+para a formalização, que nenhum dos agentes confere --- e que o professor, mesmo fazendo a conta
+certa, não converteu em apontamento. É um caso de erro silencioso no sentido da
+Seção~\ref{sec:erro-silencioso}, e mostra que a garantia \emph{gabarito conferido} deve ser lida
+como ``o gabarito é consistente com a formalização declarada'', não como ``o gabarito é
+consistente com o enunciado''. A demonstração é direta: com o gabarito corrigido e a
+formalização ajustada a ele ($a_1 = 400$), o Verificador também aprova a questão. As duas
+respostas, incompatíveis entre si, passam pela mesma conferência para o mesmo enunciado.
+
+Com um caso, não há taxa a relatar: a rodada não continha espécimes de erro postos de
+propósito, e o acervo não foi conferido à mão por inteiro. O que o caso estabelece é a
+existência do ponto cego, não a sua frequência.
+
+\subsection{Comentários e questionário final}
+\label{sub:rodada1-comentarios}
+
+Os comentários livres convergem em cinco temas.
+
+\textbf{Distância entre a questão e a turma.} É o tema dominante, presente em todas as recusas e
+nas respostas de três avaliadores ao questionário final: as questões ``estão adequadas; porém,
+não são compatíveis com a realidade e com o nível de conhecimento dos estudantes'' (avaliador~5);
+o sistema seria usado ``com um nivelamento de dificuldade das questões'' (avaliador~3).
+
+\textbf{Linguagem e estrutura do enunciado.} Enunciados longos, técnicos, com comandos
+encadeados: ``faltou uma linguagem menos complexa'' (avaliador~3); ``adequar a linguagem ao
+público'' (avaliador~2, na Q055); ``texto com partes confusas'' (avaliador~4, na Q068).
+
+\textbf{Ausência de figuras e de resolução.} Três dos cinco avaliadores pediram, sem combinar,
+representação visual: ``questões com o esboço do gráfico'' (avaliador~1), ``imagens ou uma
+descrição bem detalhada dessas'' (avaliador~2), ``figuras matemáticas que ilustrassem o
+enunciado'' (avaliador~5). O sistema hoje só produz texto, e o pedido é mais agudo justamente
+nas habilidades que tratam de conversão entre registros algébrico e gráfico. O avaliador~4
+pediu ``uma seção de resolução da questão além do gabarito proposto'' --- que o sistema produz,
+mas que foi retirada deste material por desenho.
+
+\textbf{Correspondência com a BNCC.} Dois avaliadores questionaram as habilidades declaradas.
+O avaliador~4 escreveu que ``alguns códigos de habilidade não [batem] com [os] da BNCC'' e
+destacou três (\texttt{EM13MAT403}, \texttt{EM13MAT404} e \texttt{EM13MAT405}); o avaliador~5
+reescreveu, ao lado de duas questões, uma redação diferente para \texttt{EM13MAT306} e
+\texttt{EM13MAT503}. Os códigos e textos do catálogo conferem palavra por palavra com o
+documento da BNCC que lhe serve de fonte (Seção~\ref{sec:bncc}). A divergência sugere que os
+professores trabalham com outra referência --- outra edição da Base ou um documento curricular
+derivado dela ---, e o ponto merece ser esclarecido com eles antes da segunda rodada, porque a
+habilidade declarada é a âncora do critério de alinhamento curricular.
+
+\textbf{Padrões do próprio gerador.} O avaliador~1 notou que ``a resposta [está] sempre na letra
+A'' e que a Q087 repete a progressão da Q045. Os dois apontamentos se confirmam no acervo: em
+38 das 43 questões de múltipla escolha aprovadas, a alternativa correta é a primeira; e as duas
+questões usam a mesma PA ($a_1 = 7$, $r = 4$). A repetição alcança também os contextos ---
+culturas de bactérias aparecem em 12 das 85 questões, corridas por aplicativo em 7 ---, o que o
+avaliador~2 anotou como sugestão: ``insira no prompt o comando para diversificar e variabilizar
+o contexto''.
+
+Sobre o uso do sistema no planejamento, quatro avaliadores responderam que usariam, com
+ressalvas: ``praticidade na elaboração de atividades e provas'' (avaliador~1); ``usaria, no
+entanto a revisão humana teria que ser criteriosa'' (avaliador~2); ``usaria com um nivelamento
+de dificuldade'' (avaliador~3); ``facilita no planejamento das aulas'' (avaliador~4). O
+avaliador~5 não respondeu à pergunta de forma interpretável.
+
+\subsection{Limitações e consequências}
+\label{sub:rodada1-limitacoes}
+
+Cinco avaliadores, cada um com um lote diferente, não sustentam medida de concordância nem
+comparação entre estratos; os números desta seção descrevem a rodada e não estimam
+propriedades do sistema. O bloco-âncora, único conjunto comum, tem seis questões. O desenho
+também não mede detecção de erro: a instrução avisava que podia haver erros, mas a amostra não
+continha espécimes de propósito, e o único erro real foi encontrado depois, na análise das
+respostas.
+
+Ainda assim, a rodada produziu consequências concretas para o sistema, todas verificáveis no
+acervo. Três foram incorporadas: a ordem das alternativas passou a ser sorteada depois da
+geração, com as referências por letra no gabarito e na resolução renumeradas junto; o nível
+\emph{básico} foi acrescentado; e a Q061 foi corrigida no acervo, preservado o registro
+original do erro. Três ficam em aberto: diversificar contextos e dados numéricos entre ciclos;
+esclarecer a referência curricular com que os professores conferem as habilidades; e
+reconhecer na garantia declarada o limite que a Q061 expôs --- a conferência alcança a
+formalização, não a leitura do enunciado.
+
+\section{O painel formal}
+\label{sec:painel-formal}
+
+\emph{[Seção a redigir. Desenho previsto: 8 a 15 professores avaliando os mesmos 36 itens ---
+12 num bloco cego de detecção de erro, contrastando questões aprovadas pelo ciclo completo com
+questões que o Verificador reprovou, e 24 na rubrica derivada da Seção~\ref{sec:criterios} ---,
+com concordância entre avaliadores e comparação entre estratos de garantia obtida. Enquanto não
+for aplicado, o painel formal fica registrado como limitação: a Seção~\ref{sec:rodada1} não
+cumpre, sozinha, o objetivo de avaliar a qualidade das questões por painel com instrumento
+estruturado, e a hipótese arquitetural (Seção~\ref{sec:hipotese}) não é testada por ela.]}

@@ -1,0 +1,23 @@
+item,tem_erro,onde,dificuldade_percebida,decisao,por_que,anotacoes,confianca
+Q006,nao,"",media,aceita,"","Código ""EM13MAT405"" da habilidade declarada destacado em vermelho (marca-texto).",alta
+Q068,nao,"",media,aceita_com_ajuste,"TEXTO COM PARTES CONFUSAS.","",alta
+Q030,nao,"",facil,aceita,"","",alta
+Q019,nao,"",media,aceita,"","Código ""EM13MAT403"" da habilidade declarada destacado em vermelho (marca-texto).",alta
+Q024,nao,"",facil,aceita,"","",alta
+Q015,nao,"",media,aceita,"","",alta
+Q041,nao,"",dificil,recusada,"QUESTÃO COMPLEXA, SERIA UTILIZADA EM TURMAS COM DOMÍNIO DO CONTEÚDO.","Código ""EM13MAT404"" da habilidade declarada destacado em vermelho (marca-texto).",alta
+Q070,nao,"",media,aceita_com_ajuste,"EXISTE PERGUNTA COM RESPOSTA DISCURSIVA E ALTERNATIVA, QUE PODERIA CONFUNDIR O ALUNO.","",alta
+Q058,nao,"",facil,aceita,"","",alta
+Q007,nao,"",facil,aceita,"","",alta
+Q066,nao,"",media,aceita,"","",alta
+Q087,nao,"",facil,aceita,"","",alta
+Q065,nao,"",dificil,aceita_com_ajuste,"QUESTÃO COMPLEXA, SERIA UTILIZADA EM TURMAS COM DOMÍNIO DO CONTEÚDO.","",alta
+Q023,sim,"",media,aceita,"","[nota do transcritor] Marca nítida na casa ""sim, aqui:"", mas a linha ""onde"" ficou em branco, a decisão é ""aceita"" e o ""Por quê?"" está vazio. Nenhuma anotação sobre o enunciado. Pode ser engano de casa: em todos os outros 21 itens a marca foi em ""não"", logo à esquerda.",baixa
+Q089,nao,"",media,aceita,"","",alta
+Q018,nao,"",media,aceita,"","",alta
+Q079,nao,"",media,aceita,"","",alta
+Q076,nao,"",dificil,aceita,"","",alta
+Q080,nao,"",media,aceita,"","",alta
+Q050,nao,"",media,aceita,"","",alta
+Q036,nao,"",facil,aceita,"","",alta
+Q034,nao,"",facil,aceita,"","",alta

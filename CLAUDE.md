@@ -18,7 +18,7 @@ Dois artefatos:
 ```
 cd sistema
 pip install -e ".[dev]"     # sympy, pydantic, pytest, fastapi, python-docx + latex2mathml/mathml2omml
-python -m pytest            # 274 testes; NÃO exigem chave de API (usam LLM fake)
+python -m pytest            # 285 testes; NÃO exigem chave de API (usam LLM fake)
 python -m pytest tests/test_orquestrador.py -k descarte   # um teste específico
 python executar.py          # sobe a interface (requer .[app] e um provedor configurado)
 ```
@@ -169,6 +169,21 @@ Pontos estruturais que não são óbvios pelos nomes de arquivo:
   delimitadores são `\(...\)` e **nunca** `$`, senão o MathJax tropeça no "R$ 13,00" da prosa; e
   a lista de pacotes é fechada, para não entrar o `html` com o seu `\href` — que seria um
   `javascript:` escrito por um modelo de linguagem.
+- **A ordem das alternativas é sorteada no Gerador** (`alternativas.py`), não pedida ao modelo:
+  ele punha a correta primeiro em 38 das 43 questões, e um professor do painel notou. A semente
+  é o enunciado (mesma questão, mesma ordem). O sorteio **renumera** as letras citadas no
+  gabarito e na resolução ("alternativa A", gabarito "A" ou "D) …") — sem isso o gabarito
+  aponta para um distrator e nada acusa, porque o Verificador não lê letra. Só se renumera o
+  que vem com nome na frente: "Item a)" e "(7-2a)" têm cara de letra e não são.
+- **`basico` é um quarto nível de dificuldade, abaixo do fácil**, criado porque quatro dos cinco
+  professores do painel julgaram as questões mais difíceis do que o declarado. O plano do
+  acervo usa `DIFICULDADES_DO_ACERVO` (os três níveis originais) e **não** percorre o enum:
+  percorrer faria o nível novo entrar e mudar as 90 especificações.
+- **`gabarito conferido` quer dizer "consistente com a formalização declarada"**, não "com o
+  enunciado". A Q061 do acervo saiu conferida com $a_1$ errado (o Gerador formalizou errado e o
+  SymPy confirmou a formalização); o Verificador aprova também a versão corrigida. A correção
+  está em `medicoes/acervo-consolidado/correcoes.json`, e o log fica intacto como registro —
+  quem montar o banco curado precisa aplicá-la.
 - **O plano de `gerar_acervo.py` é determinístico** (semente fixa): duas execuções recebem as
   mesmas 90 especificações, na mesma ordem, com os mesmos contextos. É o que torna justa a
   comparação entre modelos — não quebre isso introduzindo aleatoriedade sem semente.

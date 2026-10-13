@@ -1,0 +1,22 @@
+item,tem_erro,onde,dificuldade_percebida,decisao,por_que,anotacoes,confianca
+Q007,nao,"",dificil,aceita_com_ajuste,"","",alta
+Q024,nao,"",media,aceita,"","",alta
+Q073,sim,"",fora_do_alcance,recusada,"No Ensino Médio, são três aulas de Matemática por semana. Dessa forma, conseguimos trabalhar apenas os conceitos básicos de Trigonometria. Além disso, encontramos muita resistência por parte dos alunos em relação ao conteúdo, seja por não considerarem sua importância, seja pelas dificuldades em compreendê-lo. Dessa maneira, muitos acabam não atribuindo a devida importância ao conteúdo.","Marcou ""sim"" sem preencher o ""aqui"". Na habilidade declarada, as palavras ""ciclos menstruais"" estão em vermelho. Abaixo da habilidade, parágrafo acrescentado em vermelho: ""(EM13MAT306) Resolver e elabora problemas e contextos que envolvem fenômenos periódicos reais (ondas sonoras, fases da lua, movimentos cíclicos, entre outros)e comparar suas representações com as funções seno e cosseno, no plano cartesiano, com ou sem apoio de aplicativos de álgebra e geometria""",alta
+Q065,nao,"",fora_do_alcance,recusada,"Devido ao nível do conhecimento do aluno","",alta
+Q084,sim,"",media,aceita,"","Marcou ""sim"" sem preencher o ""aqui"". Na habilidade declarada, o trecho ""com apoio de tecnologias digitais"" aparece em vermelho no fim (""...entre outros com apoio de tecnologias digitais""), sem ponto final; não consta do formulário original, cuja habilidade termina em ""entre outros."" (acréscimo do avaliador).",alta
+Q017,nao,"",dificil,aceita_com_ajuste,"","",alta
+Q087,nao,"",facil,aceita,"","",alta
+Q054,nao,"",dificil,aceita,"","",alta
+Q026,nao,"",dificil,recusada,"As habilidades que, muitas vezes, não conseguimos desenvolver plenamente em razão do nível de aprendizagem apresentado pelo estudante.","",alta
+Q014,nao,"",facil,aceita,"","",alta
+Q015,nao,"",dificil,aceita_com_ajuste,"","",alta
+Q056,,"",media,aceita,"","Pergunta ""Tem erro matemático?"" sem nenhuma marcação.",alta
+Q075,,"",fora_do_alcance,recusada,"Devido às dificuldades de leitura, interpretação e compreensão das habilidades trabalhadas, os estudantes, muitas vezes, não conseguiram resolver as atividades propostas.","Pergunta ""Tem erro matemático?"" sem nenhuma marcação.",alta
+Q034,nao,"",dificil,aceita_com_ajuste,"","",alta
+Q002,,"",dificil,,"Pelo nível de conhecimento do estudante","Perguntas ""Tem erro matemático?"" e ""Você usaria esta questão?"" sem nenhuma marcação; só a dificuldade e o ""Por quê?"" foram preenchidos.",alta
+Q078,nao,"",fora_do_alcance,recusada,"São habilidades que, muitas vezes, não conseguimos trabalhar de forma adequada.","",alta
+Q047,nao,"",dificil,aceita_com_ajuste,"","",alta
+Q022,nao,"",media,aceita,"","",alta
+Q040,nao,"",dificil,aceita,"","",alta
+Q049,nao,"",fora_do_alcance,recusada,"Não conseguiriam resolver as questões, muitas vezes devido à falta de habilidades que ainda não foram trabalhadas em sala de aula.","",alta
+Q088,nao,"",dificil,aceita,"","",alta

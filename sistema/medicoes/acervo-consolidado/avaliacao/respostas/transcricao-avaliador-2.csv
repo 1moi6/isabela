@@ -1,0 +1,23 @@
+item,tem_erro,onde,dificuldade_percebida,decisao,por_que,anotacoes,confianca
+Q035,nao,"",fora_do_alcance,aceita_com_ajuste,"Devido a complexidade e falta de compreensão dos alunos sobre os conceitos de domínio, período e imagem.","X na alternativa (a). Destaque amarelo em ""Ao girar um ponto sobre o ciclo trigonométrico"" e em ""repetindo os mesmos valores a cada volta completa de 2π"". Texto vermelho acima do enunciado: ""Aparentam estar desconexas as partes, influenciando no Domínio."" (ligado por traços azuis aos dois destaques). Texto azul na margem direita: ""Isso seria sobre o eixo x?"" (ligado por traço vermelho ao destaque ""repetindo os mesmos valores a cada volta completa de 2π"").",alta
+Q009,nao,"",media,aceita,"","X na alternativa (a).",alta
+Q008,nao,"",fora_do_alcance,aceita_com_ajuste,"Em relação a descrição nos itens, por ser longa e complexa para os alunos.","X na alternativa (a).",alta
+Q032,nao,"",fora_do_alcance,recusada,"Totalmente sem condições de ser aplicado a realidade do Ensino Médio público, principalmente por eles não perceberem que as opções na verdade são comandos e não itens de uma questão multiplica escolha.","Ponto de interrogação vermelho grande (""?"") na margem esquerda, ao lado do item b) (""Indique o período dessa função e explique seu significado físico no contexto da roda-gigante."").",alta
+Q021,nao,"",fora_do_alcance,aceita_com_ajuste,"Falta de compreensão dos alunos sobre os conceitos de domínio, período e imagem.","X na alternativa (a).",alta
+Q065,nao,"",fora_do_alcance,recusada,"Meus alunos não sabem nem trigonometria no triângulo retângulo, quem dirá um conteúdo com toda essa complexidade e interpretação.","",alta
+Q087,nao,"",media,aceita,"","X na alternativa (a).",alta
+Q024,nao,"",media,aceita,"","X na alternativa (a).",alta
+Q057,nao,"",fora_do_alcance,recusada,"Como os itens foram formulados não é adequado para o Ensino Médio público.","X na alternativa (a).",alta
+Q034,nao,"",media,aceita,"","X na alternativa (a).",alta
+Q072,nao,"",dificil,aceita_com_ajuste,"Valores muito pequenos para processos sem calculadora.","X na alternativa (a).",alta
+Q048,nao,"",fora_do_alcance,recusada,"Sem base de conhecimento dos alunos para se quer compreender o que se trata o exercício e, devido a complexidade, eles desistiriam.","",alta
+Q090,nao,"",dificil,aceita,"","X na alternativa (b).",alta
+Q015,nao,"",fora_do_alcance,recusada,"Os alunos não possuem capacidade de entender o que se pede no exercício.","",alta
+Q001,nao,"",facil,aceita,"","",alta
+Q064,nao,"",fora_do_alcance,recusada,"A estrutura do exercício é muito complexa para o Ensino Médio público.","",alta
+Q013,nao,"",media,aceita_com_ajuste,"A depender da turma, pois eu ensinei domínio e imagem aos meus alunos do Ensino Fundamental, enquanto meus alunos do Ensino Médio não aprenderam na época certa.","",alta
+Q074,sim,"No gabarito.",media,aceita,"","X na alternativa (b) ""Mês 215"" (o gabarito proposto impresso é ""Mês 216 (alternativa A)""). O bloco de respostas está no topo da página 14, separado do enunciado (página 13).",alta
+Q005,nao,"",media,aceita_com_ajuste,"O item C foge da realidade dos alunos.","Texto verde acima do cabeçalho Q005 (entre o bloco de respostas da Q074 e o enunciado da Q005): ""Sugestão para o contexto dos exercícios. Insira no prompt o comando para diversificar e variabilizar o contexto."" Pela posição e pelo teor, parece comentário geral, não específico da Q005.",alta
+Q016,nao,"",facil,aceita,"","",alta
+Q055,nao,"",dificil,aceita_com_ajuste,"Adequar a linguagem ao público. Muito técnico o enunciado.","X na alternativa (a).",alta
+Q007,nao,"",media,aceita,"","X na alternativa (a).",alta

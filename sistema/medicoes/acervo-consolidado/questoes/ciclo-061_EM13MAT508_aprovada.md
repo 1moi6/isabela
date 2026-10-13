@@ -1,5 +1,10 @@
 # Ciclo 061 — EM13MAT508
 
+> **Gabarito errado — corrigido em `../correcoes.json`.** O enunciado define $a_n$ como a
+> quantidade *ao final* da $n$-ésima hora, partindo de 200: logo $a_1 = 400$ e $a_6 = 12800$.
+> O gabarito abaixo, deslocado em um termo, é o que o sistema produziu e aprovou como
+> *conferido*; fica aqui como registro. Achado da primeira rodada de avaliação docente.
+
 - **Situação:** aprovada
 - **Temas:** progressao_geometrica, funcao_exponencial
 - **Nível cognitivo:** aplicar

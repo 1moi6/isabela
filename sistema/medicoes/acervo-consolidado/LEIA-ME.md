@@ -57,3 +57,22 @@ razão de antes: podem ser questões corretas descartadas por reprovação falsa
 E o saldo das três corridas com provedor real: **onze defeitos encontrados, todos do mesmo lado da
 balança** — o verificador rejeitando o que está certo, nunca aprovando o que está errado. É
 resultado a levar para o Capítulo 6.
+
+## Correção posterior: uma aprovada com gabarito errado (2026-10-13)
+
+A frase acima deixou de valer. A primeira rodada de avaliação docente (Seção 6.1 da dissertação;
+respostas em `avaliacao/respostas/`) encontrou a **Q061** (ciclo 61, EM13MAT508) aprovada como
+*conferido* com o gabarito deslocado em um termo: o enunciado parte de 200 bactérias e define
+$a_n$ como a quantidade ao final da $n$-ésima hora, então $a_1 = 400$ e $a_6 = 12800$; o
+gabarito diz $a_1 = 200$ e $a_6 = 6400$.
+
+O Verificador não errou no que lhe cabe: o Gerador formalizou `a1 = 200`, e a formalização é
+consistente consigo mesma. Rodado sobre a versão corrigida, ele também aprova — as duas respostas,
+incompatíveis entre si, passam para o mesmo enunciado. O erro mora na tradução da prosa para a
+formalização, que nenhum agente confere.
+
+- `ciclos.jsonl` e `questoes/ciclo-061…md` **não** foram alterados: são o registro do que o sistema
+  produziu, e o caso é dado da dissertação. O `.md` ganhou só um aviso no topo.
+- A versão corrigida está em `correcoes.json`. **Quem montar o banco curado a partir deste acervo
+  precisa aplicá-la**; sem isso, a questão errada volta ao banco.
+

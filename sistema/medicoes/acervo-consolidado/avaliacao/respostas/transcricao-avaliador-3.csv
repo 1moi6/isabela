@@ -1,0 +1,23 @@
+item,tem_erro,onde,dificuldade_percebida,decisao,por_que,anotacoes,confianca
+Q067,nao,"",media,aceita_com_ajuste,"","",alta
+Q069,nao,"",dificil,recusada,"Atualmente nas turmas em que ensino, a maioria não consegue resolver.","",alta
+Q015,nao,"",dificil,recusada,"Considero uma questão fora da realidade dos meus alunos, visto que geralmente esse tipo de questão, da forma em que está elaborada, é voltada mais para o ensino superior do que ensino médio.","",alta
+Q081,nao,"",media,aceita_com_ajuste,"","",alta
+Q046,nao,"",facil,aceita,"","",alta
+Q044,nao,"",media,aceita_com_ajuste,"","",alta
+Q029,nao,"",dificil,recusada,"Fora da realidade das turmas em que ensino.","",alta
+Q033,nao,"",facil,aceita,"","Na decisão, o ""x"" foi digitado no lugar da caixa de ""aceita"" (aparece ""x aceita"", sem o quadrado).",alta
+Q065,nao,"",dificil,recusada,"A forma em que a questão está elaborada, deixa um pouco complexa para serem aplicadas nas turmas em que ensino atualmente.","",alta
+Q082,nao,"",dificil,aceita_com_ajuste,"","",alta
+Q024,nao,"",facil,aceita,"","",alta
+Q087,nao,"",,aceita,"","Dificuldade não marcada (conferido em 150 dpi).",alta
+Q028,nao,"",facil,aceita,"","",alta
+Q063,nao,"",media,aceita,"","",alta
+Q010,nao,"",fora_do_alcance,recusada,"Nível muito acima do conhecimento das minhas turmas.","",alta
+Q038,,"",fora_do_alcance,recusada,"Nível muito acima do conhecimento das minhas turmas.","Tem erro matemático não marcado (conferido em 150 dpi).",alta
+Q011,nao,"",media,aceita_com_ajuste,"","",alta
+Q062,nao,"",media,,"","Decisão (usaria esta questão?) não marcada (conferido em 150 dpi).",alta
+Q007,nao,"",facil,aceita,"","",alta
+Q034,nao,"",media,aceita_com_ajuste,"","",alta
+Q031,nao,"",media,aceita_com_ajuste,"","",alta
+Q027,nao,"",facil,aceita,"","",alta

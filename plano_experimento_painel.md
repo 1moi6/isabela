@@ -362,9 +362,10 @@ entre as categorias e os critérios de nota baixa.
 
 ## 8. Decisões pendentes e riscos
 
-- **A que capítulo a Rodada 1 serve.** Assumido aqui: Capítulo 7. Se o Capítulo 6 for depender
-  dela, precisa declarar-se explicitamente como avaliação formativa preliminar, com o painel
-  formal listado como limitação. Decidir antes de redigir, não depois.
+- **A que capítulo a Rodada 1 serve.** *Decidido em 2026-10-13: Capítulo 6* (Seção 6.1), declarada
+  como avaliação formativa preliminar, com o painel formal na Seção 6.2 como limitação enquanto
+  não for aplicado. A rodada aplicada foi a curadoria distribuída da Seção 3.6 (âncora de 6 +
+  lote próprio, 5 professores, 109 respostas), não o conjunto comum da 3.2.
 - **CEP para a Rodada 2.** O projeto deixou em aberto se o PROFMAT/UFMT exige submissão. Vale
   perguntar cedo: análise leva semanas ou meses, e o Ciclo 3 está previsto para os meses 8–10.
   Ao perguntar, mencionar que o instrumento **não revela previamente ao participante que há itens
