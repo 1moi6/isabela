@@ -1,6 +1,14 @@
 # Serviço de usuário systemd: mantém o gerador publicado.
 #
+# Os caminhos abaixo supõem o repositório clonado em ~/isabela -- clone, e não
+# cópia da pasta `sistema/`: é o que faz a atualização ser `git pull` em vez de
+# copiar arquivos de outra máquina. Foi assim que uma instalação copiada à mão
+# divergiu do repositório sem ninguém notar. Clonando em outro lugar, ajuste
+# WorkingDirectory e ExecStart juntos.
+#
 # Instalação (sem root):
+#   git clone https://github.com/1moi6/isabela.git ~/isabela
+#   cd ~/isabela/sistema && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 #   mkdir -p ~/.config/systemd/user ~/.config/questoes
 #   cp questoes.service ~/.config/systemd/user/
 #   grep -m1 QUESTOES_GITHUB_TOKEN ~/.bashrc | sed 's/^export //' > ~/.config/questoes/ambiente
@@ -16,6 +24,10 @@
 # Só faz sentido com a publicação automática do endereço configurada: cada
 # reinício sorteia um endereço novo, e é ela que impede os convites já enviados
 # de morrerem junto.
+#
+# Uma instância por vez. Duas máquinas rodando isto publicam no mesmo
+# `docs/backend.json`, e a última a subir leva o endereço: a outra fica no ar
+# sem que ninguém a alcance, acumulando questões num banco que o resto não vê.
 
 [Unit]
 Description=Gerador de questoes de Matematica (API + tunel Cloudflare)
@@ -29,9 +41,9 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-WorkingDirectory=%h/sistema
+WorkingDirectory=%h/isabela/sistema
 EnvironmentFile=%h/.config/questoes/ambiente
-ExecStart=%h/sistema/.venv/bin/python -u publicar.py
+ExecStart=%h/isabela/sistema/.venv/bin/python -u publicar.py
 
 Restart=always
 RestartSec=30
