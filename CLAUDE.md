@@ -273,8 +273,8 @@ Cada arquivo de capítulo tem um cabeçalho em comentário `% =====` que reafirm
 ## Tarefas abertas
 
 Migração para o template oficial (abntex2/`abntex2cite`), que traz ficha catalográfica e folha de
-aprovação; validação da bibliografia (`% CONFERIR`); agradecimentos (`capitulos/agradecimento.tex` é
-rascunho neutro) e TCLE (Apêndice D é modelo; trocar pelo texto assinado, se diferente) ficam com a
+aprovação; validação da bibliografia (`% CONFERIR`); agradecimentos (`capitulos/agradecimento.tex` fica em
+branco por decisão do orientador; é a aluna quem escreve) e TCLE (Apêndice D é modelo; trocar pelo texto assinado, se diferente) ficam com a
 aluna. Painel formal (Seção 6.7) e comparação entre modelos seguem como limitação declarada.
 
 **Apêndices gerados:** `apendice_prompts_texto.tex`, `apendice_exemplos_texto.tex` e
