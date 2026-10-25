@@ -197,11 +197,45 @@ linguagem natural e aqui chamado de \textbf{erro silencioso} por sua invisibilid
 especializado --- representa um risco específico no contexto educacional, em que o professor ou o
 estudante pode aceitar um gabarito incorreto sem perceber o equívoco.
 
-\subsection{Implicações para esta dissertação}
+Para o trabalho cotidiano do professor a consequência é direta. Uma ferramenta que erra de forma
+visível pode ser usada com a desconfiança adequada, enquanto uma ferramenta que erra em silêncio
+exige que cada questão seja refeita por inteiro antes de chegar à sala de aula. Quando isso
+acontece o ganho de tempo desaparece e, o que é pior, o professor que não dispõe desse tempo passa
+a confiar no texto apenas porque ele parece correto.
 
-O diagnóstico apresentado neste capítulo fundamenta a hipótese central deste trabalho: o uso
-isolado de um LLM para geração de questões matemáticas é insuficiente para garantir correção e
-qualidade didática. A resposta a esse diagnóstico --- combinar o poder expressivo do LLM com uma
-verificação determinística e com uma avaliação pedagógica estruturada --- não é um refinamento
-opcional, mas uma necessidade arquitetural. Os fundamentos técnicos dessa combinação, e o
-argumento completo que a sustenta, são desenvolvidos no Capítulo~\ref{cap:tecnica}.
+\section{O papel mediador do professor}
+\label{sec:papel-mediador}
+
+A discussão sobre tecnologias digitais na escola brasileira tem uma tradição que antecede em
+muito os modelos de linguagem. \citet{valente1999computador} já distinguia o uso do computador
+como máquina de ensinar, que apenas informatiza a transmissão de conteúdos, do seu uso como
+ferramenta com a qual o estudante constrói conhecimento sob a orientação de um professor. Nessa
+segunda perspectiva a tecnologia não ocupa o lugar do docente, pois é a mediação dele que dá
+sentido pedagógico ao que a máquina produz. Discussões mais recentes sobre a inteligência
+artificial na educação retomam o mesmo ponto e insistem que o valor dessas ferramentas depende das
+decisões humanas que as cercam \citep{holmes2019aied}.
+
+Com os modelos de linguagem essa mediação ganha um conteúdo bem preciso. Se o modelo pode produzir
+um gabarito errado com aparência de certo, então a validação conceitual de cada questão não é uma
+etapa opcional de revisão e sim uma atribuição que o professor não pode delegar. Cabe a ele decidir
+se o enunciado está correto, se a questão é adequada à turma que tem diante de si e se ela de fato
+cobra aquilo que pretende cobrar. Nenhum sistema automatizado conhece a turma, e por isso mesmo um
+sistema bem construído deveria facilitar esse julgamento em vez de tentar substituí-lo.
+
+A Base Nacional Comum Curricular reforça essa leitura ao organizar o ensino de Matemática em torno
+de competências e habilidades que o professor precisa traduzir em situações de aprendizagem
+\citep{brasil2018bncc}. A habilidade declarada em uma questão é portanto um compromisso
+curricular, e verificar se a questão o cumpre faz parte do mesmo trabalho de mediação. Uma questão
+correta que não realiza a habilidade anunciada é também uma forma de erro silencioso, desta vez de
+natureza curricular, e a sua detecção exige do professor a mesma atenção dedicada ao cálculo.
+
+É nesse lugar que o sistema proposto nesta dissertação se posiciona. Ele não pretende escrever
+questões no lugar do professor e sim apoiar a autoria docente em duas frentes. Na primeira ele
+reduz o custo de produzir rascunhos alinhados à BNCC e calibrados por nível cognitivo, o que
+preserva o ganho de tempo que motivou o uso dos modelos de linguagem. Na segunda ele torna
+visível ao professor o que foi conferido de forma independente e o que permanece dependendo do seu
+julgamento, de modo que a revisão possa se concentrar onde ela é de fato necessária. O uso isolado
+de um modelo de linguagem não oferece nenhuma dessas garantias, e por isso a combinação de um
+gerador com mecanismos de verificação e de avaliação pedagógica aparece aqui como necessidade e
+não como refinamento. Os fundamentos técnicos dessa combinação e o argumento completo que a
+sustenta são desenvolvidos no Capítulo~\ref{cap:tecnica}.

@@ -1,0 +1,278 @@
+% Gerado a partir de banco_curado/banco_curado.tex. Não editar à mão.
+\begingroup\sloppy\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+\bigskip\noindent\textbf{Q007 · múltipla escolha · fácil · aplicar · teórica · gabarito conferido}\par\nopagebreak
+Uma oficina mecânica cobra por seus serviços de revisão um valor fixo de mão de obra, mais uma taxa que depende do número de horas de trabalho. Uma revisão que durou 2 horas custou R\$\,150,00, e outra revisão, no mesmo padrão de cobrança, durou 5 horas e custou R\$\,300,00. Sabendo que o custo total varia linearmente com o número de horas trabalhadas, qual seria o custo de uma revisão que durasse 8 horas?
+\begin{enumerate}[label=(\alph*)]
+\item R\$\,480,00
+\item R\$\,400,00
+\item R\$\,600,00
+\item R\$\,450,00
+\end{enumerate}
+
+\textbf{Gabarito.} R\$\,450,00
+
+\textbf{Resolução.} Como o custo total $C$ varia linearmente com o número de horas $x$, podemos escrever $C(x) = ax + b$, em que $a$ é a taxa cobrada por hora e $b$ é o valor fixo de mão de obra.
+
+\textbf{Passo 1 — Determinar a taxa por hora ($a$).}
+Usando os dois pares de valores dados, $(2, 150)$ e $(5, 300)$:
+$$a = \frac{300 - 150}{5 - 2} = \frac{150}{3} = 50$$
+
+Ou seja, cada hora de trabalho custa R\$\,50,00.
+
+\textbf{Passo 2 — Determinar o valor fixo ($b$).}
+Substituindo o ponto $(2, 150)$ em $C(x) = 50x + b$:
+$$150 = 50 \cdot 2 + b \;\Rightarrow\; 150 = 100 + b \;\Rightarrow\; b = 50$$
+
+Logo, o modelo do custo é:
+$$C(x) = 50x + 50$$
+
+\textbf{Passo 3 — Calcular o custo para $x = 8$ horas.}
+$$C(8) = 50 \cdot 8 + 50 = 400 + 50 = 450$$
+
+Portanto, a revisão de 8 horas custaria \textbf{R\$\,450,00}.
+
+\bigskip\noindent\textbf{Q015 · discursiva · média · analisar · aplicada · gabarito conferido}\par\nopagebreak
+Uma colônia de bactérias em um experimento de laboratório tem seu número de indivíduos, a partir do início da observação, dado por $N(t) = 100 \cdot 2^{t}$, em que $t$ é o tempo em horas ($t \geq 0$) e $N(t)$ é o número de bactérias. Um pesquisador quer saber, ao contrário, quanto tempo é necessário para que a colônia atinja um determinado número $N$ de bactérias, e por isso utiliza a função inversa de $N(t)$, que ele chama de $t(N)$.
+
+a) Determine o domínio e a imagem de $N(t)$, considerando o contexto do experimento.
+
+b) Encontre a expressão de $t(N)$ (a função inversa de $N(t)$) e determine seu domínio e sua imagem.
+
+c) Compare o crescimento das duas funções: as duas são crescentes, mas uma cresce 'cada vez mais rápido' e a outra cresce 'cada vez mais devagar' à medida que a variável aumenta. Identifique qual é qual e justifique observando como varia o incremento de cada função.
+
+d) Explique por que o domínio de $N(t)$ coincide com a imagem de $t(N)$, e a imagem de $N(t)$ coincide com o domínio de $t(N)$, relacionando esse fato com a posição dos gráficos das duas funções no plano cartesiano.
+
+\textbf{Gabarito.} a) $D_N=[0,+\infty)$, $Im_N=[100,+\infty)$. b) $t(N)=\log_2(N/100)$, com $D_t=[100,+\infty)$, $Im_t=[0,+\infty)$. c) $N(t)$ cresce cada vez mais rápido (convexa); $t(N)$ cresce cada vez mais devagar (côncava). d) Por serem funções inversas, seus gráficos são simétricos em relação à reta $y=x$, o que troca domínio e imagem entre as duas funções.
+
+\textbf{Resolução.} \textbf{a) Domínio e imagem de $N(t) = 100\cdot 2^t$}
+
+Como $t$ representa tempo a partir do início da observação, $t \geq 0$. Logo:
+$$D_N = [0, +\infty)$$
+
+Quando $t=0$, $N(0) = 100 \cdot 2^0 = 100$, o menor valor possível. Como $2^t$ é crescente e ilimitada quando $t \to +\infty$, $N(t)$ também cresce sem limite. Logo:
+$$Im_N = [100, +\infty)$$
+
+\textbf{b) Função inversa $t(N)$}
+
+De $N = 100\cdot 2^t$, isolamos $t$:
+$$\frac{N}{100} = 2^t \implies t = \log_2\left(\frac{N}{100}\right)$$
+
+Como funções inversas trocam domínio e imagem entre si:
+$$D_t = Im_N = [100, +\infty), \qquad Im_t = D_N = [0, +\infty)$$
+
+(De fato, o menor $N$ possível no experimento é 100, e para $N=100$ temos $t=\log_2(1)=0$, consistente.)
+
+\textbf{c) Comparando o crescimento}
+
+Ambas as funções são estritamente crescentes, pois a base $2$ é maior que $1$ tanto na exponencial quanto no logaritmo.
+
+Porém, o \textbf{modo} de crescer é diferente. Observe os incrementos de $N(t)$ a cada hora:
+\begin{itemize}[nosep,leftmargin=*]
+\item de $t=0$ a $t=1$: $N$ vai de $100$ a $200$ (aumenta 100)
+\item de $t=1$ a $t=2$: $N$ vai de $200$ a $400$ (aumenta 200)
+\item de $t=2$ a $t=3$: $N$ vai de $400$ a $800$ (aumenta 400)
+\end{itemize}
+
+Ou seja, o incremento absoluto de $N(t)$ \textbf{aumenta} a cada intervalo — a função exponencial cresce cada vez mais rápido (é convexa, sua taxa de variação aumenta).
+
+Já para $t(N)$: cada vez que $N$ \textbf{dobra}, $t$ aumenta sempre a mesma quantidade fixa, 1 hora (pois $\log_2(2N/100) - \log_2(N/100) = \log_2 2 = 1$). Mas para produzir esse mesmo aumento de 1 unidade em $t$, é preciso um incremento absoluto de $N$ cada vez maior (de $100\to200$, depois $200\to400$, depois $400\to800$...). Isso significa que, para incrementos iguais de $N$, o aumento de $t$ fica cada vez menor — a função logarítmica cresce cada vez mais devagar (é côncava, sua taxa de variação diminui).
+
+\textbf{d) Relação entre domínio e imagem das duas funções}
+
+Como $t(N)$ é a função inversa de $N(t)$, seus gráficos são simétricos em relação à reta $y=x$ no plano cartesiano. Essa simetria troca os eixos: o que era eixo do domínio (horizontal) de uma passa a ser o eixo da imagem (vertical) da outra. Por isso, necessariamente:
+$$D_{N} = Im_{t} = [0,+\infty) \qquad \text{e} \qquad Im_{N} = D_{t} = [100,+\infty)$$
+
+Essa é uma propriedade geral de qualquer par de funções inversas, e em particular da relação entre exponencial e logaritmo de mesma base: uma 'desfaz' a outra, e seus papéis de domínio e imagem se invertem.
+
+\bigskip\noindent\textbf{Q024 · múltipla escolha · difícil · criar · teórica · gabarito conferido}\par\nopagebreak
+A tabela abaixo relaciona valores de $x$ e os correspondentes valores de $y$, obtidos a partir de uma mesma regra de formação (os valores de $x$ não variam em intervalos iguais):
+
+\begin{center}
+\begin{tabular}{|p{0.172\linewidth}|p{0.172\linewidth}|p{0.172\linewidth}|p{0.172\linewidth}|p{0.172\linewidth}|}
+\hline
+\textbf{$x$} & \textbf{$-3$} & \textbf{$1$} & \textbf{$4$} & \textbf{$8$} \\
+\hline
+$y$ & $14$ & $2$ & $-7$ & $-19$ \\
+\hline
+\end{tabular}
+\end{center}
+
+Um estudante, analisando os pares ordenados $(x,y)$ da tabela, conjectura que essa relação pode ser representada por uma função polinomial do 1º grau. Assinale a alternativa que apresenta a lei de formação $f(x)$ que generaliza corretamente o padrão observado na tabela.
+\begin{enumerate}[label=(\alph*)]
+\item $f(x) = -11x + 13$
+\item $f(x) = -12x + 14$
+\item $f(x) = -3x + 5$
+\item $f(x) = 3x - 1$
+\end{enumerate}
+
+\textbf{Gabarito.} f(x) = -3x + 5
+
+\textbf{Resolução.} \textbf{Passo 1 — Verificar se a razão entre as variações é constante (condição para função afim).}
+
+Como os valores de $x$ não estão igualmente espaçados, é preciso calcular a razão $\dfrac{\Delta y}{\Delta x}$ entre pares consecutivos da tabela, e não apenas $\Delta y$.
+
+Entre $x=-3$ e $x=1$: $\Delta x = 1-(-3)=4$, $\Delta y = 2-14=-12$, logo $\dfrac{\Delta y}{\Delta x}=\dfrac{-12}{4}=-3$.
+
+Entre $x=1$ e $x=4$: $\Delta x = 4-1=3$, $\Delta y = -7-2=-9$, logo $\dfrac{\Delta y}{\Delta x}=\dfrac{-9}{3}=-3$.
+
+Entre $x=4$ e $x=8$: $\Delta x = 8-4=4$, $\Delta y = -19-(-7)=-12$, logo $\dfrac{\Delta y}{\Delta x}=\dfrac{-12}{4}=-3$.
+
+\textbf{Passo 2 — Concluir o tipo de função.}
+
+A razão $\dfrac{\Delta y}{\Delta x}$ é constante e igual a $-3$ para todos os pares consecutivos, mesmo com intervalos diferentes de $x$. Isso caracteriza uma \textbf{função polinomial do 1º grau (afim)}, da forma $f(x)=mx+b$, com $m=-3$.
+
+\textbf{Passo 3 — Determinar o coeficiente linear $b$.}
+
+Usando o ponto $(1,2)$: $2 = -3(1)+b \Rightarrow b = 2+3 = 5$.
+
+Logo, $f(x) = -3x+5$.
+
+\textbf{Passo 4 — Verificar com os demais pontos.}
+
+$f(-3) = -3(-3)+5 = 9+5 = 14$ $\checkmark$
+
+$f(4) = -3(4)+5 = -12+5 = -7$ $\checkmark$
+
+$f(8) = -3(8)+5 = -24+5 = -19$ $\checkmark$
+
+Todos os pares confirmam a lei $f(x) = -3x+5$.
+
+\bigskip\noindent\textbf{Q034 · múltipla escolha · fácil · aplicar · aplicada · gabarito conferido}\par\nopagebreak
+Duas empresas de aplicativo de transporte, A e B, calculam o valor da corrida em função da distância percorrida $x$ (em km). A empresa A cobra R\$\,2,50 por quilômetro rodado, sem nenhuma taxa adicional. A empresa B cobra uma taxa fixa de embarque de R\$\,3,00 mais R\$\,2,00 por quilômetro rodado. Sejam $y_A(x)$ e $y_B(x)$, em reais, os custos totais das corridas das empresas A e B, respectivamente, em função de $x$. Se essas duas funções forem representadas por retas em um plano cartesiano (custo $y$ no eixo vertical e distância $x$ no eixo horizontal), assinale a alternativa que descreve corretamente essas retas.
+\begin{enumerate}[label=(\alph*)]
+\item A reta que representa a empresa B passa pela origem (0,0), pois seu coeficiente angular é 2; a reta da empresa A corta o eixo y no ponto (0,3), pois seu coeficiente angular é 2,5.
+\item Ambas as retas passam pela origem (0,0), já que representam custo por quilômetro rodado; a reta de A tem coeficiente angular 2,5 e a de B tem coeficiente angular 2.
+\item A reta que representa a empresa A passa pela origem (0,0) e tem coeficiente angular 2,5, sendo uma função proporcional; a reta da empresa B corta o eixo y no ponto (0,3) e tem coeficiente angular 2, não sendo proporcional.
+\item A reta da empresa A corta o eixo y no ponto (0, 2,5); a reta da empresa B corta o eixo y no ponto (0,2) e tem coeficiente angular 3.
+\end{enumerate}
+
+\textbf{Gabarito.} A reta que representa a empresa A passa pela origem $(0,0)$ e tem coeficiente angular 2,5 (função proporcional); a reta da empresa B corta o eixo y no ponto $(0,3)$ e tem coeficiente angular 2 (função afim, não proporcional).
+
+\textbf{Resolução.} \textbf{Passo 1 — Escrever as leis das funções.}
+
+Empresa A: cobra só por km rodado, sem taxa fixa: $y_A(x) = 2{,}5x$.
+
+Empresa B: cobra taxa fixa de R\$\,3,00 mais R\$\,2,00 por km: $y_B(x) = 2x + 3$.
+
+\textbf{Passo 2 — Analisar a natureza de cada função.}
+
+$y_A(x) = 2{,}5x$ é da forma $y = ax$ (sem termo constante), logo é uma função \textbf{linear/proporcional}. Seu gráfico é uma reta que passa pela origem $(0,0)$, já que $y_A(0) = 2{,}5 \cdot 0 = 0$. O coeficiente angular é $a = 2{,}5$.
+
+$y_B(x) = 2x+3$ é da forma $y = ax+b$ com $b = 3 \neq 0$, logo é uma função \textbf{afim não proporcional}. Seu gráfico é uma reta que \textbf{não} passa pela origem, pois $y_B(0) = 3 \neq 0$. Ela corta o eixo $y$ no ponto $(0,3)$ e tem coeficiente angular $a = 2$.
+
+\textbf{Passo 3 — Conclusão geométrica.}
+
+A reta de A passa pela origem (comportamento proporcional, coeficiente angular 2,5); a reta de B corta o eixo $y$ em $(0,3)$ (comportamento afim, não proporcional, coeficiente angular 2). As duas retas são crescentes, pois ambos os coeficientes angulares são positivos, mas apenas a de A representa proporcionalidade direta entre custo e distância.
+
+\bigskip\noindent\textbf{Q065 · discursiva · difícil · aplicar · aplicada · gabarito conferido}\par\nopagebreak
+Um oceanógrafo registra a altura da maré (em metros) em um pequeno porto ao longo de um dia. Ele observa que a maré varia de forma periódica e simétrica em torno de um nível médio, atingindo seu valor máximo de 1,8 m exatamente à meia-noite ($t=0$, com $t$ em horas) e seu valor mínimo de 0,2 m exatamente às 6h da manhã. Esse padrão se repete a cada 12 horas.
+
+a) Modele a altura da maré, em metros, por uma função do tipo $h(t) = A\cos(Bt) + D$, com $t$ em horas contado a partir da meia-noite. Determine explicitamente os valores de $A$, $B$ e $D$, justificando cada um a partir dos dados do fenômeno (amplitude, período e deslocamento vertical do gráfico em relação ao eixo $t$).
+
+b) Determine todos os horários dentro das primeiras 12 horas do dia (isto é, para $0 \le t < 12$) em que a maré atinge exatamente 1,4 m de altura. Para cada horário encontrado, indique se a maré está subindo ou descendo naquele instante, justificando sua resposta apenas a partir do comportamento gráfico da função cosseno (sem usar derivadas).
+
+\textbf{Gabarito.} h(t) = 0,8·cos($\pi$t/6) + 1,0 (A=0,8 m; B=$\pi$/6 rad/h; D=1,0 m). A maré atinge 1,4 m às 2h (descendo) e às 10h (subindo).
+
+\textbf{Resolução.} \textbf{a) Construção do modelo}
+
+O valor máximo da maré é $1{,}8$ m e o mínimo é $0{,}2$ m. Como $h(t)=A\cos(Bt)+D$ oscila entre $D-A$ e $D+A$:
+
+$$D = \frac{1{,}8+0{,}2}{2} = 1{,}0 \qquad A = \frac{1{,}8-0{,}2}{2} = 0{,}8$$
+
+O fenômeno se repete a cada 12 horas, logo o período é $T=12$. Como $T=\dfrac{2\pi}{B}$:
+
+$$B = \frac{2\pi}{12} = \frac{\pi}{6}$$
+
+Como a maré atinge seu \textbf{máximo} exatamente em $t=0$, e $\cos(0)=1$ é o valor máximo do cosseno, a escolha de cosseno (sem deslocamento horizontal) é coerente com o fenômeno. Assim:
+
+$$h(t) = 0{,}8\cos\!\left(\frac{\pi t}{6}\right) + 1{,}0$$
+
+Verificação: $h(0)=0{,}8(1)+1=1{,}8$ (máximo, ok) e $h(6)=0{,}8\cos(\pi)+1=0{,}8(-1)+1=0{,}2$ (mínimo, ok).
+
+\textbf{b) Horários em que $h(t)=1{,}4$}
+
+$$0{,}8\cos\!\left(\frac{\pi t}{6}\right)+1 = 1{,}4 \;\Rightarrow\; \cos\!\left(\frac{\pi t}{6}\right) = 0{,}5$$
+
+As soluções gerais de $\cos\theta = 0{,}5$ são $\theta = \dfrac{\pi}{3}+2k\pi$ ou $\theta = -\dfrac{\pi}{3}+2k\pi$ (equivalente a $\dfrac{5\pi}{3}+2k\pi$).
+
+Fazendo $\theta = \dfrac{\pi t}{6}$, temos $t = \dfrac{6\theta}{\pi}$:
+
+\begin{itemize}[nosep,leftmargin=*]
+\item Para $\theta=\dfrac{\pi}{3}$: $t = 6\cdot\dfrac{1}{3} = 2$
+\item Para $\theta=\dfrac{5\pi}{3}$: $t = 6\cdot\dfrac{5}{3} = 10$
+\end{itemize}
+
+Dentro de $0\le t<12$, as soluções são $t=2$ e $t=10$.
+
+\textbf{Análise de crescimento/decrescimento}
+
+Como $h(0)=1{,}8$ é máximo e $h(6)=0{,}2$ é mínimo, no intervalo $(0,6)$ a função cosseno está descendo de seu valor máximo ao mínimo — ou seja, $h(t)$ é \textbf{decrescente} nesse trecho. Logo, em $t=2$ (que está entre 0 e 6), a maré está \textbf{descendo}.
+
+No intervalo $(6,12)$, a função retorna do mínimo ($h(6)=0{,}2$) ao próximo máximo ($h(12)=1{,}8$), portanto $h(t)$ é \textbf{crescente} nesse trecho. Logo, em $t=10$ (entre 6 e 12), a maré está \textbf{subindo}.
+
+\textbf{Conclusão:} às 02h00 a maré está a 1,4 m e descendo; às 10h00 a maré está a 1,4 m e subindo.
+
+\bigskip\noindent\textbf{Q087 · múltipla escolha · média · aplicar · teórica · gabarito conferido}\par\nopagebreak
+Considere a progressão aritmética $(a_n)$ com primeiro termo $a_1 = 7$ e razão $r = 4$: $(7, 11, 15, 19, 23, \dots)$. Essa PA pode ser vista como a restrição da função afim $f(x) = 4x + 3$ ao conjunto dos números naturais não nulos, de modo que $a_n = f(n)$ para todo $n \geq 1$ (o gráfico da PA é o conjunto de pontos discretos $(n, a_n)$ sobre a reta que representa $f$).
+
+Qual é o menor termo dessa PA que é maior do que 100?
+\begin{enumerate}[label=(\alph*)]
+\item 100
+\item 99
+\item 103
+\item 107
+\end{enumerate}
+
+\textbf{Gabarito.} 103
+
+\textbf{Resolução.} \textbf{Passo 1 — Associar a PA à função afim.}
+O termo geral da PA é $a_n = a_1 + (n-1)r = 7 + 4(n-1) = 4n + 3$. Logo, a PA corresponde à função afim $f(x) = 4x+3$ restrita aos naturais não nulos, isto é, $a_n = f(n)$, com $n \in \{1, 2, 3, \dots\}$.
+
+\textbf{Passo 2 — Resolver a condição sobre os números reais.}
+Queremos o menor termo maior que 100, ou seja, o menor $n$ tal que $f(n) > 100$. Primeiro resolvemos a inequação como se $x$ fosse real:
+$$4x + 3 > 100 \implies 4x > 97 \implies x > 24{,}25.$$
+
+\textbf{Passo 3 — Voltar ao domínio discreto da PA.}
+Como $n$ representa a posição de um termo, ele precisa ser um número \textbf{natural}. O menor número natural maior que $24{,}25$ é $n = 25$ (e não $24$, que não satisfaz a inequação, nem $24{,}25$, que não é índice de termo algum).
+
+\textbf{Passo 4 — Calcular o termo.}
+$$a_{25} = f(25) = 4(25) + 3 = 103.$$
+
+Como verificação: $a_{24} = 4(24)+3 = 99 < 100$ e $a_{25} = 103 > 100$, confirmando que $a_{25}=103$ é o menor termo da PA maior que 100.
+
+\bigskip\noindent\textbf{Q061 · discursiva · fácil · aplicar · aplicada · gabarito conferido · corrigida após a avaliação docente}\par\nopagebreak
+Um biólogo inicia uma cultura de bactérias com 200 indivíduos. A cada hora que passa, a quantidade de bactérias na cultura dobra em relação à hora anterior. Seja $a_n$ o número de bactérias existentes ao final da $n$-ésima hora de observação, com $n = 1, 2, 3, \dots$ (isto é, $a_1$ é a quantidade ao final da 1ª hora, $a_2$ ao final da 2ª hora, e assim por diante).
+
+a) Mostre que a sequência $(a_n)$ é uma progressão geométrica, indicando o primeiro termo e a razão.
+
+b) Escreva a lei $f(n)$ de uma função exponencial que descreva exatamente essa progressão geométrica, especificando qual é o domínio dessa função e por que ele deve ser desse tipo (e não todos os números reais).
+
+c) Usando a fórmula do termo geral da PG (ou, equivalentemente, a função $f(n)$ obtida no item b), determine quantas bactérias haverá ao final da 6ª hora de observação.
+
+\textbf{Gabarito.} a) PG de razão $q=2$ e $a_1=400$ (as 200 iniciais já dobraram ao final da 1ª hora); b) $f(n)=400\cdot 2^{n-1}=200\cdot 2^{n}$, com domínio $D=\{1,2,3,\dots\}$ (naturais, pois $n$ conta horas); c) $a_6 = f(6) = 12800$ bactérias.
+
+\textbf{Resolução.} \textbf{a) Identificando a PG}
+
+Como a quantidade dobra a cada hora, temos $a_{n+1} = 2\cdot a_n$ para todo $n \geq 1$. Isso significa que a razão entre termos consecutivos é constante e igual a $q = 2$. Logo, $(a_n)$ é uma progressão geométrica de razão $q=2$.
+
+O primeiro termo exige atenção: as 200 bactérias são a quantidade \textbf{no início} da observação, e $a_1$ é a quantidade \textbf{ao final} da 1ª hora, quando ela já dobrou uma vez. Assim, $a_1 = 2 \cdot 200 = 400$.
+
+\textbf{b) Associando a PG a uma função exponencial}
+
+O termo geral da PG é dado por
+$$a_n = a_1 \cdot q^{\,n-1} = 400 \cdot 2^{\,n-1} = 200 \cdot 2^{\,n}.$$
+
+Essa expressão é exatamente a lei de uma função exponencial
+$$f(n) = 200 \cdot 2^{\,n},$$
+em que a base da exponencial ($2$) coincide com a razão da PG e o coeficiente ($200$) é a quantidade inicial — o valor que a curva assumiria em $n = 0$, instante que não pertence à sequência.
+
+Como $n$ representa o número da hora de observação (1ª hora, 2ª hora, etc.), $n$ só pode assumir valores inteiros positivos: $n \in \{1, 2, 3, \dots\}$. Assim, o domínio de $f$ é o conjunto dos números naturais (a partir de 1), $D = \mathbb{N}^* = \{1,2,3,\dots\}$, e \textbf{não} todo o conjunto dos reais — não faz sentido, por exemplo, falar em "1,5 hora de observação" nesse contexto discreto de contagem de termos da sequência. Por isso $f$ é uma função exponencial de domínio discreto que apenas "amostra" a curva exponencial contínua $y = 200\cdot 2^{x}$ nos pontos inteiros.
+
+\textbf{c) Cálculo para a 6ª hora}
+
+Usando $n=6$:
+$$f(6) = a_6 = 200 \cdot 2^{6} = 200 \cdot 64 = 12800.$$
+
+Logo, ao final da 6ª hora haverá \textbf{12800 bactérias}.
+
+\endgroup

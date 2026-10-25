@@ -1,0 +1,237 @@
+% =====================================================================
+% APÊNDICES. Os arquivos apendice_*_texto.tex e apendice_tabela_respostas.tex
+% são GERADOS a partir do repositório (prompts, banco curado e respostas da
+% primeira rodada) e não devem ser editados à mão.
+% =====================================================================
+
+\chapter{Prompts utilizados no sistema}
+\label{ap:prompts}
+
+Este apêndice reproduz os dois \emph{prompts} do sistema na versão usada para gerar o banco curado.
+Eles são artefatos versionados da pesquisa e ficam no repositório em
+\texttt{sistema/prompts/}. O Verificador Simbólico e o Orquestrador não têm \emph{prompt}, porque
+não usam modelo de linguagem. Além do texto fixo reproduzido a seguir, cada pedido ao Gerador inclui
+a especificação do professor, os descritores operacionais de dificuldade e natureza e as exigências
+da habilidade, e cada pedido ao Crítico inclui a questão, a especificação e as mesmas exigências.
+As linhas mais longas foram quebradas para caber na página.
+
+\input{capitulos/apendice_prompts_texto}
+
+\chapter{Exemplos de questões geradas}
+\label{ap:exemplos}
+
+As questões a seguir são as seis do bloco-âncora da primeira rodada de avaliação
+(Seção~\ref{sub:rodada1-decisao}), vistas pelos cinco professores, acompanhadas da Q061 na versão
+corrigida depois da avaliação (Seção~\ref{sub:rodada1-erros}). O texto é o do banco curado e foi
+transcrito sem edição, com gabarito e resolução. A ordem das alternativas é a do banco, que foi
+sorteada depois da avaliação e por isso pode diferir da que os professores viram. O cabeçalho de cada
+questão informa o formato, a dificuldade declarada, o nível cognitivo, a natureza e a garantia
+obtida. As 85 questões do banco estão no repositório, em PDF e em JSON.
+
+\input{capitulos/apendice_exemplos_texto}
+
+\chapter{Instrumento e respostas da primeira rodada de avaliação}
+\label{ap:instrumento}
+
+Cada professor recebeu um caderno impresso com 21 ou 22 questões. Cada item trazia o enunciado, as
+alternativas quando houvesse, o gabarito proposto e a habilidade da BNCC declarada, e era seguido das
+quatro perguntas abaixo.
+
+\begin{enumerate}
+\item \textbf{Esta questão tem erro matemático?} Não. Sim, e o erro está em \underline{\hspace{4cm}}.
+  Não sei dizer.
+\item \textbf{Nível de dificuldade para os seus alunos.} Fácil. Média. Difícil. Fora do alcance da
+  turma.
+\item \textbf{Decisão de uso.} Aceita. Aceita com ajuste. Recusada.
+\item \textbf{Por quê?} Resposta obrigatória quando a decisão não for \emph{aceita}.
+\end{enumerate}
+
+A instrução de abertura informava que a amostra tinha qualidade variável e podia conter erros
+matemáticos, e que não se avaliava o participante e sim o material. Ao final do caderno, três
+perguntas abertas completavam o instrumento.
+
+\begin{enumerate}
+\item Você usaria um sistema como este no seu planejamento? Por quê?
+\item O que faltou nas questões ou no material?
+\item O que atrapalhou?
+\end{enumerate}
+
+A Tabela~\ref{tab:apendice-respostas} reúne as decisões de uso de todos os avaliadores sobre todas
+as questões. As colunas indicam o código da habilidade sem o prefixo \texttt{EM13MAT}, o formato,
+discursiva ou de múltipla escolha, a dificuldade declarada, que pode ser fácil, média ou difícil, e
+a garantia obtida, em que C indica gabarito conferido, P conferido em parte e S sem conferência
+automática. Nas colunas dos avaliadores, A indica aceita, J aceita com ajuste, R recusada e o
+traço uma decisão em branco, enquanto a célula vazia indica que a questão não estava no lote daquele
+avaliador. A marca $e$ assinala as respostas em que o avaliador indicou erro matemático, nenhum deles
+confirmado, e o asterisco assinala a Q061, a única questão com erro, que nenhum avaliador apontou.
+
+\input{capitulos/apendice_tabela_respostas}
+
+\chapter{Termo de Consentimento Livre e Esclarecido}
+\label{ap:tcle}
+
+% CONFERIR: este é o modelo do termo, redigido a partir do que o rascunho
+% da aluna descreve (objetivos, natureza do material, ausência de respostas
+% certas ou erradas, anonimato). Substituir pelo texto efetivamente assinado
+% pelos participantes, se ele for diferente.
+
+\begin{center}
+\textbf{TERMO DE CONSENTIMENTO LIVRE E ESCLARECIDO}
+\end{center}
+
+Você está sendo convidado a participar, como avaliador, da pesquisa \emph{Sistema multiagente para
+geração assistida de questões de Matemática no Ensino Médio}, desenvolvida por Isabella Dias
+Ribeiro dos Santos no Mestrado Profissional em Matemática em Rede Nacional (PROFMAT) da Universidade
+Federal de Mato Grosso, sob orientação do Prof. Dr. Moiseis dos Santos Cecconello.
+
+\textbf{Objetivo.} A pesquisa investiga um sistema computacional que gera questões de Matemática
+do Ensino Médio com o auxílio de inteligência artificial, confere automaticamente os cálculos e
+avalia a qualidade didática das questões. A sua participação consiste em examinar um conjunto de
+questões e registrar, para cada uma, se ela contém erro matemático, qual o seu nível de dificuldade
+para os seus alunos e se você a usaria em sala de aula, respondendo ao final a três perguntas
+abertas.
+
+\textbf{Duração e riscos.} A atividade leva cerca de 75 minutos e pode ser feita no momento que
+lhe for mais conveniente. Os riscos são mínimos e se limitam ao tempo dedicado e a um eventual
+desconforto ao emitir julgamentos sobre o material. Não há respostas certas ou erradas, pois o
+objeto de avaliação são as questões e não o participante.
+
+\textbf{Benefícios.} A participação contribui para o aprimoramento de um produto educacional de
+acesso livre destinado a professores de Matemática. Ao final, você pode solicitar à pesquisadora a
+indicação das questões que continham erro e a explicação de cada um.
+
+\textbf{Sigilo e voluntariedade.} A sua identidade não será divulgada em nenhuma hipótese. Os
+avaliadores são identificados apenas por numeração, sem relação com nenhuma característica pessoal,
+e nenhum dado individual identificável será publicado. A participação é voluntária e não
+remunerada, e você pode desistir a qualquer momento, sem qualquer prejuízo, bastando comunicar a
+pesquisadora.
+
+Declaro que fui informado dos objetivos e procedimentos da pesquisa, que tive a oportunidade de
+esclarecer as minhas dúvidas e que concordo em participar voluntariamente.
+
+\vspace{1.5cm}
+\noindent\rule{8cm}{0.4pt}\\
+Assinatura do participante \hfill Data: \underline{\hspace{3cm}}
+
+\vspace{1cm}
+\noindent\rule{8cm}{0.4pt}\\
+Isabella Dias Ribeiro dos Santos, pesquisadora responsável
+
+\chapter{Repositório e código-fonte}
+\label{ap:repositorio}
+
+O código do sistema, os \emph{prompts}, o catálogo de habilidades, os registros das execuções com
+provedor real, o banco curado e a fonte desta dissertação estão reunidos em um único repositório
+público, disponível em \url{https://github.com/1moi6/isabela}. A organização da pasta
+\texttt{sistema/} foi apresentada na Seção~\ref{sec:repositorio}, e as demais pastas cumprem os
+papéis descritos a seguir.
+
+\begin{itemize}
+\item \texttt{banco\_curado/} contém o banco de 85 questões em JSON e em PDF, gerado a partir do
+  acervo por \texttt{sistema/montar\_banco.py}.
+\item \texttt{sistema/medicoes/} guarda cada execução com provedor real em uma pasta própria, com o
+  registro completo dos ciclos, uma descrição da execução com data, modelo e versão do código e um
+  texto que resume o que ela mostrou. O acervo usado nesta dissertação está em
+  \texttt{acervo-consolidado/}, que inclui também o material entregue aos avaliadores e as
+  transcrições das respostas.
+\item \texttt{docs/} contém a página do professor, que é servida tanto pelo programa local quanto
+  pela publicação do repositório na web.
+\item \texttt{dissertacao/} contém a fonte \LaTeX{} deste texto.
+\end{itemize}
+
+Para obter o sistema basta copiar o repositório. O professor que não programa encontra em
+\texttt{sistema/LEIA-ME.txt} o roteiro de instalação por duplo clique descrito na
+Seção~\ref{sec:produto-sistema}. Quem desejar conferir a implementação pode instalar o pacote com
+as dependências de desenvolvimento e executar a suíte de testes, que não exige chave de API.
+
+\begin{verbatim}
+cd sistema
+pip install -e ".[dev]"
+python -m pytest
+\end{verbatim}
+
+Os planos que orientaram as etapas ainda não executadas, a saber o painel formal e a comparação
+entre modelos, estão na raiz do repositório, em \texttt{plano\_experimento\_painel.md} e
+\texttt{plano\_teste\_modelos.md}.
+
+\chapter{Manual do professor: uso e limitações}
+\label{ap:manual}
+
+Este apêndice reproduz a segunda parte do manual do professor, que complementa o guia de instalação
+distribuído com o programa. Ela foi escrita para ser lida por quem nunca usou uma ferramenta desse
+tipo.
+
+\section*{Como pedir uma questão}
+
+O formulário começa pela \textbf{habilidade da BNCC}, e não pelo assunto, porque é a habilidade que
+diz o que a questão precisa exigir do aluno. Escolhida a habilidade, o sistema mostra apenas os temas
+que ela cobre. Em algumas habilidades a combinação de temas é obrigatória, como na
+\texttt{EM13MAT507}, que associa progressão aritmética e função afim, e nesse caso o sistema não
+aceita pedir só um deles.
+
+O \textbf{nível cognitivo} diz que tipo de pensamento a questão deve pedir, de lembrar e entender até
+analisar, avaliar e criar. O sistema sugere os níveis que combinam com o verbo da habilidade, mas
+você pode escolher outro. A \textbf{dificuldade} tem quatro degraus. Use o nível \emph{básico} para
+turmas que ainda não dominam os pré-requisitos da habilidade, pois ele pede um único passo, números
+pequenos e enunciado curto. Evite combinar o nível básico com o processo \emph{criar}, porque uma
+questão de um só passo raramente exige criação, e o sistema avisa quando isso acontece. A
+\textbf{natureza} define se a questão é teórica ou aplicada a uma situação do cotidiano, e o
+\textbf{formato} se ela é discursiva ou de múltipla escolha. O \textbf{contexto} e as
+\textbf{restrições} são opcionais e servem para aproximar a questão da sua turma, por exemplo pedindo
+um contexto de esportes ou apenas números inteiros.
+
+\section*{Três fluxos de trabalho recomendados}
+
+O primeiro fluxo serve para \textbf{montar uma avaliação}. Gere de três a cinco questões por
+habilidade que pretende avaliar, leia a trilha de cada uma, guarde no banco as que lhe parecerem
+adequadas e registre a sua decisão. Depois selecione as questões na área do banco e exporte a lista
+nas duas versões, a do aluno para imprimir e a do professor para a correção.
+
+O segundo fluxo serve para \textbf{construir um acervo pessoal ao longo do bimestre}. A cada
+conteúdo trabalhado, gere algumas questões em níveis diferentes e registre a sua avaliação. Com o
+tempo o seu banco passa a refletir a sua turma, e os comentários que você deixou mostram o que
+precisou ser ajustado e por quê.
+
+O terceiro fluxo serve para \textbf{diferenciar uma lista por nível}. Peça a mesma habilidade em
+dificuldades diferentes, do básico ao difícil, e monte listas distintas para grupos de alunos em
+momentos diferentes da aprendizagem. Quem não instalou o sistema pode fazer o mesmo a partir do
+banco curado em PDF, que está organizado por habilidade.
+
+\section*{Limitações conhecidas e como contorná-las}
+
+\textbf{O sistema erra, e o seu julgamento continua sendo indispensável.} Toda questão, inclusive
+as aprovadas, deve ser lida e resolvida por você antes de chegar à sala de aula. O sistema reduz o
+trabalho de produzir a questão e mostra o que foi conferido, mas não substitui a sua revisão.
+
+\textbf{O que significa cada garantia.} \emph{Gabarito conferido} quer dizer que o computador
+refez as contas de forma independente e chegou ao mesmo resultado do gabarito. \emph{Conferido em
+parte} quer dizer que só uma parte do que a questão afirma pôde ser refeita, e o restante depende da
+sua leitura. \emph{Sem conferência automática} quer dizer que nada foi refeito, e por isso essas
+questões merecem a sua conferência antes das demais.
+
+\textbf{Mesmo o gabarito conferido pode estar errado.} O computador confere as contas a partir da
+forma como o próprio sistema entendeu o enunciado. Se o sistema entendeu mal o enunciado, a conta
+confere e o gabarito continua errado. Isso aconteceu uma vez no banco, numa questão em que a
+quantidade inicial de bactérias foi tomada como o primeiro termo da progressão quando o enunciado
+dizia outra coisa. Ao revisar, confira sobretudo se o gabarito responde ao que o enunciado de fato
+pergunta.
+
+\textbf{A dificuldade é a de um aluno que cumpre a habilidade no ano previsto.} Na avaliação com
+professores da rede pública, a maior parte das questões foi julgada mais difícil do que o declarado.
+Se a sua turma está aquém da habilidade, comece pelo nível básico e ajuste a partir daí.
+
+\textbf{A qualidade depende do provedor escolhido.} As questões do banco foram geradas com um modelo
+comercial de grande porte. Modelos menores e modelos abertos executados no próprio computador custam
+menos ou nada, mas a qualidade das questões produzidas por eles não foi medida nesta pesquisa, e a
+revisão deve ser ainda mais cuidadosa.
+
+\textbf{O sistema produz apenas texto.} Ainda não há figuras nem gráficos. Nas habilidades que pedem
+passar da forma algébrica para o gráfico, acrescente você mesmo o esboço quando ele for necessário.
+
+\textbf{Contextos podem se repetir.} Ao gerar muitas questões da mesma habilidade, o sistema tende a
+reaproveitar situações, como culturas de bactérias ou corridas por aplicativo. Use o campo de
+contexto para variar as situações.
+
+\textbf{A redação da habilidade segue o texto oficial da BNCC.} Se a sua rede usa um documento
+curricular próprio, a redação pode ser diferente da que aparece no sistema. Na dúvida, confira o
+código no documento da Base.

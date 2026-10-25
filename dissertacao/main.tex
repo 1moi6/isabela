@@ -23,6 +23,10 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{textcomp}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage[a4paper,left=3cm,right=2cm,top=3cm,bottom=2cm]{geometry}
 \usepackage[hidelinks]{hyperref}
 
 % Citação autor-data (troque por abntex2cite quando migrar para o template oficial)
@@ -40,12 +44,22 @@
 \begin{document}
 
 % ---------------------------------------------------------------------
-% Os elementos pré-textuais (folha de rosto, resumo, abstract, listas)
-% serão inseridos depois, conforme o template oficial do PROFMAT/UFMT.
+% Elementos pré-textuais provisórios. Ficha catalográfica, folha de
+% aprovação, dedicatória e epígrafe entram com o template oficial do
+% PROFMAT/UFMT (abntex2), quando houver a migração.
 % ---------------------------------------------------------------------
-
+\pagenumbering{roman}
+\input{capitulos/capa}
+\include{capitulos/agradecimento}
+\include{capitulos/resumo}
+\listoffigures
+\listoftables
+\include{capitulos/siglas}
 \tableofcontents
+\clearpage
+\pagenumbering{arabic}
 
+\include{capitulos/introducao}
 \include{capitulos/cap1_contexto}
 \include{capitulos/cap2_tecnica}
 \include{capitulos/cap3_didatica}
@@ -53,8 +67,16 @@
 \include{capitulos/cap5_implementacao}
 \include{capitulos/cap6_avaliacao}
 \include{capitulos/cap7_produto}
+\include{capitulos/conclusao}
 
 % ---------------------------------------------------------------------
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Referências}
+\renewcommand{\bibname}{Referências}
 \bibliography{referencias}
+
+\appendix
+\include{capitulos/apendices}
 
 \end{document}

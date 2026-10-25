@@ -8,99 +8,129 @@
 %   vão aos apêndices. NÃO re-explica papéis dos agentes (Cap. 4) nem
 %   fundamentos (Caps. 2-3).
 %
-%   PENDENTE: as Seções 5.6 (custo/desempenho) e 5.7 (exemplos com API
-%   real) dependem de execuções com provedor de LLM real e estão
-%   marcadas no texto.
+%   Fontes dos números deste capítulo (todos medidos com provedor real):
+%   sistema/medicoes/acervo-consolidado/ (90 ciclos, claude-sonnet-5),
+%   sistema/medicoes/2026-08-07/, sistema/medicoes/basico-2026-10-13/
+%   e plano_teste_modelos.md (preços conferidos em 9/8/2026).
 % =====================================================================
 
 Este capítulo descreve a implementação concreta da arquitetura apresentada no
-Capítulo~\ref{cap:arquitetura}. Antes das escolhas técnicas, cabe explicitar o método que
-organizou o desenvolvimento. A pesquisa adota a abordagem de \emph{design science research}
-(DSR), apropriada ao mestrado profissional por unir a construção de um artefato à produção de
-conhecimento sobre ele, articulada em ciclos: o \textbf{Ciclo 1} construiu o protótipo mínimo
---- um tópico (função quadrática), apenas Gerador e Verificador Simbólico --- para validar a
-viabilidade técnica da verificação simbólica em malha fechada com um LLM; o \textbf{Ciclo 2}
-completou o sistema com o Crítico Didático, o Orquestrador, o banco curado, a montagem de
-listas e a interface do professor, expandindo o recorte para os cinco temas; o \textbf{Ciclo 3},
-de avaliação por painel docente, é objeto do Capítulo~\ref{cap:avaliacao}; e o \textbf{Ciclo 4}
-corresponde à consolidação do produto educacional e desta dissertação.
+Capítulo~\ref{cap:arquitetura}. Antes das escolhas técnicas cabe explicitar o método que
+organizou o desenvolvimento. A pesquisa adota a abordagem de \emph{design science research},
+apropriada ao mestrado profissional por unir a construção de um artefato à produção de
+conhecimento sobre ele, e se articula em ciclos. O \textbf{Ciclo 1} construiu um protótipo mínimo,
+com um único tema e apenas Gerador e Verificador, para confirmar que a verificação simbólica em
+malha fechada com um modelo de linguagem era viável. O \textbf{Ciclo 2} completou o sistema com o
+Crítico Didático, o Orquestrador, o banco de questões e a interface do professor e ampliou o
+recorte para as quinze habilidades da Seção~\ref{sub:bncc-habilidades}. O \textbf{Ciclo 3}
+corresponde à avaliação por professores relatada no Capítulo~\ref{cap:avaliacao}, e o
+\textbf{Ciclo 4} à consolidação do produto educacional e desta dissertação. Os ciclos não foram
+estanques, pois cada rodada de geração com provedor real revelou defeitos que levaram a correções
+no próprio sistema, e é esse movimento que as últimas seções do capítulo documentam.
 
 \section{Stack técnica}
 \label{sec:stack}
 
-O sistema é implementado em \textbf{Python 3.11+}, com quatro dependências centrais:
-\textbf{SymPy} para a verificação simbólica (Seção~\ref{sub:sympy}); \textbf{Pydantic} para os
-contratos de dados validados por esquema; \textbf{FastAPI} para a interface web do professor;
-e o SDK do provedor de LLM escolhido. As dependências de provedor são \emph{opcionais}: o
-professor instala apenas a do provedor que usará --- Anthropic, OpenAI ou nenhuma, no caso do
-Ollama, que expõe modelos abertos locais por HTTP. Os testes usam \texttt{pytest} e não exigem
-chave de API alguma, ponto retomado na Seção~\ref{sec:reprodutibilidade}.
+O sistema é escrito em \textbf{Python 3.11} ou superior e depende de poucas bibliotecas centrais.
+O \textbf{SymPy} realiza a verificação simbólica (Seção~\ref{sub:sympy}), o \textbf{Pydantic}
+valida os contratos de dados trocados entre os agentes e o \textbf{FastAPI} expõe a interface
+HTTP usada pela página do professor. A página propriamente dita é escrita em HTML, CSS e
+JavaScript sem etapa de compilação, de modo que a instalação continua sendo apenas a de um pacote
+Python, e a matemática é composta no navegador pelo MathJax distribuído junto com o repositório,
+o que permite usar o sistema mesmo em uma máquina sem acesso à internet.
 
-Conforme antecipado na Seção~\ref{sec:decisoes}, não se adota \emph{framework} de agentes: a
-orquestração é código Python direto, decisão que privilegia a legibilidade da política de
-decisão sobre a conveniência de abstrações prontas.
+Os provedores de modelo de linguagem são plugáveis. O sistema conversa com a Anthropic, com a
+OpenAI, com o Gemini e com o DeepSeek, estes dois últimos por meio do mesmo protocolo de chat da
+OpenAI com outro endereço, e também com o Ollama, que executa modelos abertos no próprio
+computador do professor. As dependências de cada provedor são opcionais, e o professor instala
+apenas a daquele que vai usar. Duas exigências valem para todos eles. Toda chamada pede saída em
+modo JSON e impõe um teto explícito de tamanho de resposta, porque sem o modo JSON a disciplina de
+formato depende apenas da instrução em prosa e sem o teto a questão, que tem em torno de dois mil
+e trezentos \emph{tokens}, pode chegar truncada. No caso do Ollama essa segunda exigência é crítica,
+pois o padrão da ferramenta corta a resposta em 128 \emph{tokens} e faria um modelo aberto parecer
+incapaz da tarefa quando o problema é apenas de configuração. Os testes usam o \texttt{pytest} e
+não exigem chave de API alguma, como se discute na Seção~\ref{sec:reprodutibilidade}.
+
+Conforme antecipado na Seção~\ref{sec:decisoes}, não se adota \emph{framework} de agentes. A
+orquestração é código Python direto, decisão que privilegia a legibilidade da política de decisão
+em detrimento da conveniência de abstrações prontas.
 
 \section{Estrutura do repositório}
 \label{sec:repositorio}
 
-O código vive no diretório \texttt{sistema/} do repositório público da dissertação, organizado
-para que cada conceito do Capítulo~\ref{cap:arquitetura} tenha endereço único:
+O código está no repositório público da dissertação e foi organizado para que cada conceito do
+Capítulo~\ref{cap:arquitetura} tenha um endereço único, como resume o esquema a seguir.
 
 \begin{verbatim}
 sistema/
-|- dados/bncc_em_matematica.json    # catalogo de habilidades do recorte
-|- prompts/gerador.md, critico.md   # prompts versionados (Apendice A)
+|- dados/bncc_em_matematica.json   # catalogo das 15 habilidades
+|- prompts/gerador.md, critico.md  # prompts versionados (Apendice A)
 |- src/questoes/
-|  |- especificacao.py              # entrada do professor (Secao 4.2)
-|  |- modelos.py                    # contratos entre agentes (Pydantic)
-|  |- llm/                          # provedores plugaveis
-|  |- agentes/                      # gerador, verificador, critico,
-|  |                                #   orquestrador (Secoes 4.3-4.6)
-|  |- verificacao/                  # estrategias SymPy por tipo
-|  |- banco.py, listas.py           # persistencia e listas (Secao 5.4)
-|  |- sincronizacao.py              # espelho na pasta da nuvem (Cap. 7)
-|- api/main.py                      # API HTTP da interface (Cap. 7)
-|- web/                             # pagina do professor (HTML, CSS, JS)
-|- tests/                           # 56 testes automatizados
+|  |- especificacao.py             # entrada do professor (Secao 4.2)
+|  |- modelos.py                   # contratos entre agentes
+|  |- agentes/                     # gerador, verificador, critico,
+|  |                               #   orquestrador (Secoes 4.3-4.6)
+|  |- verificacao/                 # estrategias SymPy por tipo
+|  |- llm/                         # provedores plugaveis
+|  |- alternativas.py              # sorteio da ordem das alternativas
+|  |- banco.py, listas.py          # persistencia e listas (Secao 5.4)
+|  |- marcacao.py, tex.py, word.py # leitura do texto e exportacao
+|  |- sincronizacao.py, convites.py# pasta na nuvem e uso compartilhado
+|- api/main.py                     # interface HTTP (Cap. 7)
+|- medicoes/                       # execucoes com provedor real
+|- tests/                          # 287 testes automatizados
+docs/                              # pagina do professor
 \end{verbatim}
 
-Dois princípios de organização merecem nota. Primeiro, os \emph{prompts} não são cadeias de
-caracteres embutidas no código, mas arquivos Markdown próprios: são artefatos da pesquisa,
-citáveis e versionáveis independentemente da lógica. Segundo, o pacote \texttt{verificacao/} é
-isolado dos agentes: o núcleo simbólico pode ser testado --- e estendido a novos temas --- sem
-tocar em nenhum componente que envolva LLM.
+Dois princípios de organização merecem nota. Em primeiro lugar, os \emph{prompts} não são cadeias
+de caracteres embutidas no código e sim arquivos próprios, porque são artefatos da pesquisa que
+podem ser citados e versionados independentemente da lógica. Em segundo lugar, o pacote
+\texttt{verificacao/} é isolado dos agentes, de maneira que o núcleo simbólico pode ser testado e
+estendido a novos temas sem tocar em nenhum componente que envolva modelo de linguagem. Cada tipo
+novo de verificação corresponde a um módulo dessa pasta, uma linha no dicionário que roteia os
+tipos, os testes correspondentes e a descrição do tipo no \emph{prompt} do Gerador.
 
 \section{Implementação dos agentes}
 \label{sec:impl-agentes}
 
-\subsection{Contratos de dados}
-
-Toda a comunicação entre agentes usa modelos Pydantic, que validam estrutura e tipos no momento
-da criação. O contrato central é a formalização verificável (Seção~\ref{sec:ag-gerador}):
+Toda a comunicação entre agentes usa modelos Pydantic, que validam a estrutura e os tipos no
+momento em que o objeto é criado. O contrato central é a formalização verificável descrita na
+Seção~\ref{sec:ag-gerador}, e a questão carrega uma lista delas.
 
 \begin{verbatim}
 class ExpressaoVerificavel(BaseModel):
-    tipo: str            # roteia a estrategia: 'equacao',
-                         #   'funcao', 'progressao'
-    expressao: str       # ex.: "Eq(2*x**2 - 5*x + 3, 0)"
+    tipo: str               # 'equacao', 'funcao', 'progressao'
+                            #   ou 'propriedade'
+    expressao: str          # ex.: "Eq(2*x**2 - 5*x + 3, 0)"
     incognitas: list[str]
-    resposta_esperada: str   # gabarito em sintaxe SymPy
+    resposta_esperada: str  # gabarito em sintaxe SymPy
     parametros: dict[str, str]
+
+class Questao(BaseModel):
+    enunciado: str
+    resolucao: str
+    gabarito: str
+    alternativas: list[Alternativa] | None
+    verificaveis: list[ExpressaoVerificavel]
+    especificacao: Especificacao
 \end{verbatim}
 
-\subsection{Gerador}
+\textbf{Gerador.} O Gerador monta o pedido ao modelo a partir da especificação, transformando cada
+parâmetro em uma linha de instrução acompanhada dos descritores operacionais de dificuldade e
+natureza e das exigências da habilidade, e valida a resposta contra o modelo \texttt{Questao}. A
+extração do JSON tolera desvios comuns de formato, como cercas de código e texto ao redor, e
+qualquer resposta inválida gera erro detectável e nunca dado corrompido. Uma formalização
+individual malformada é descartada sem derrubar a questão, porque numa das medições o modelo
+escreveu um objeto onde o contrato pedia texto e a questão inteira, com enunciado e resolução
+corretos, se perdia por causa de um único campo. Depois da validação o sistema sorteia a ordem das
+alternativas, usando o próprio enunciado como semente para que a mesma questão mantenha sempre a
+mesma ordem, e renumera as letras citadas no gabarito e na resolução. Nas iterações de revisão o
+\emph{feedback} do Orquestrador é anexado ao pedido com a instrução de corrigir exatamente o que foi
+apontado e preservar o restante.
 
-O Gerador monta o pedido ao LLM a partir da especificação --- cada parâmetro vira uma linha de
-instrução, com descritores operacionais para dificuldade e natureza --- e valida a resposta
-contra o modelo \texttt{Questao}. A extração do JSON é tolerante a desvios comuns de formato
-(cercas de código, texto circundante), e qualquer resposta inválida gera erro detectável, nunca
-dado corrompido. Nas iterações de revisão, o \emph{feedback} do Orquestrador é anexado ao
-pedido com a instrução de corrigir exatamente o que foi apontado, preservando o restante.
-
-\subsection{Verificador Simbólico}
-
-O coração do Verificador é a comparação simbólica exata. Para equações, o conjunto-solução
-calculado pelo SymPy é confrontado com o gabarito elemento a elemento:
+\textbf{Verificador Simbólico.} O coração do Verificador é a comparação simbólica exata. Para
+equações, o conjunto-solução calculado pelo SymPy é confrontado com o gabarito elemento a elemento,
+e a verificação falha tanto se o gabarito contém solução espúria quanto se omite alguma.
 
 \begin{verbatim}
 def _pertence(valor, colecao) -> bool:
@@ -109,27 +139,27 @@ def _pertence(valor, colecao) -> bool:
                for outro in colecao)
 \end{verbatim}
 
-\noindent A verificação falha tanto se o gabarito contém solução espúria quanto se omite alguma
---- os dois sentidos da divergência são reportados na justificativa. Um cuidado transversal de
-segurança e robustez: as expressões vindas do LLM são interpretadas por \texttt{sympify} com
-espaço de nomes \emph{restrito} (apenas símbolos e funções matemáticas autorizados), e qualquer
-falha de interpretação degrada para o veredicto \emph{não-verificável} em vez de interromper o
-ciclo (Seção~\ref{sec:ag-verificador}).
+\noindent As expressões vindas do modelo são interpretadas com um espaço de nomes
+\emph{restrito}, que contém apenas os símbolos e as funções matemáticas autorizados. Essa
+restrição é ao mesmo tempo uma medida de segurança, pois o texto vem de um modelo de linguagem e não
+deve alcançar nomes arbitrários do ambiente Python, e uma medida de correção. A primeira medição com
+provedor real mostrou por quê, já que o Gerador chamou de \texttt{E} a incógnita de uma questão e
+o SymPy a interpretou como o número de Euler, reprovando um gabarito correto. Qualquer falha de
+interpretação degrada para o veredicto \emph{não verificável} em vez de interromper o ciclo
+(Seção~\ref{sec:ag-verificador}).
 
-\subsection{Crítico Didático}
+\textbf{Crítico Didático.} O Crítico envia ao modelo a questão e a especificação declarada,
+acompanhadas das exigências da habilidade e da rubrica da Seção~\ref{sec:criterios} traduzida em
+instruções. A formalização não é enviada porque é irrelevante para o julgamento didático. A
+resposta é validada contra o modelo \texttt{ParecerDidatico}, que impõe por construção notas
+inteiras de 1 a 5.
 
-O Crítico envia ao LLM a questão (sem a formalização, irrelevante para o julgamento didático) e
-a especificação declarada, sob a rubrica da Seção~\ref{sec:criterios} traduzida em instruções.
-A resposta é validada contra o modelo \texttt{ParecerDidatico}, que impõe notas inteiras de 1 a
-5 por construção.
-
-\subsection{Orquestrador}
-
-A política de decisão inteira (Seção~\ref{sec:ag-orquestrador}) cabe em um laço legível:
+\textbf{Orquestrador.} A política de decisão inteira (Seção~\ref{sec:ag-orquestrador}) cabe em um
+laço que pode ser lido de uma vez.
 
 \begin{verbatim}
 for numero in range(1, self._max + 1):        # max = 3
-    questao = self._gerador.gerar(spec, feedback=feedback)
+    questao = self._gerar_com_folga(spec, feedback)
     verificacao = self._verificador.verificar(questao)
 
     if verificacao.veredicto == Veredicto.REJEITADO:
@@ -145,67 +175,227 @@ for numero in range(1, self._max + 1):        # max = 3
 return ResultadoCiclo(aprovada=False, ...)     # descarte
 \end{verbatim}
 
+\noindent A função \texttt{\_gerar\_com\_folga} trata o único caso em que uma falha do modelo
+poderia derrubar o ciclo. Quando a resposta não pode ser lida por inteiro, em geral porque o
+modelo esgotou o limite de saída antes de fechar o JSON, o Orquestrador pede uma segunda vez a
+mesma questão de forma mais econômica. Esse tratamento nasceu de um ciclo efetivamente perdido
+durante a geração do acervo.
+
 \section{Persistência e banco de questões}
 \label{sec:persistencia}
 
-Questões aprovadas são persistidas em \textbf{SQLite} --- formato de arquivo único, sem
-servidor, adequado ao uso individual pelo professor. Cada registro guarda a questão completa,
-os metadados da especificação como colunas indexáveis (tema, habilidade, nível, dificuldade,
-natureza, formato) e o \textbf{histórico integral de iterações} do ciclo que a produziu. Os
-metadados alimentam a montagem de listas: o professor filtra o banco por tema e dificuldade,
-escolhe a quantidade, e o sistema exporta a lista em Markdown ou LaTeX, em duas versões ---
-aluno (sem gabarito) e professor (com gabarito e resoluções).
+As questões aprovadas que o professor decide guardar são persistidas em \textbf{SQLite}, formato
+de arquivo único e sem servidor adequado ao uso individual. Cada registro guarda a questão
+completa, os metadados da especificação como colunas indexáveis, a garantia obtida e o
+\textbf{histórico integral de iterações} do ciclo que a produziu. No uso compartilhado, descrito
+no Capítulo~\ref{cap:produto}, todo acesso ao banco é filtrado pelo dono da questão, de modo que
+cada professor vê apenas o que ele mesmo gerou.
 
-\section{Reprodutibilidade, logging e testes}
+Os metadados alimentam a montagem de listas. O professor filtra o banco por habilidade, tema e
+dificuldade, escolhe as questões e exporta a lista em Markdown, \LaTeX{} ou Word, sempre em duas
+versões, uma para o aluno sem gabarito e outra para o professor com gabarito e resolução. Essa
+exportação exigiu mais cuidado do que parecia à primeira vista. O Gerador escreve Markdown com
+fórmulas entre cifrões, e a prosa das questões aplicadas está cheia de valores como R\$~35,00, cujo
+cifrão desbalanceia os delimitadores das fórmulas. Por isso um único módulo decide onde termina o
+parágrafo, o que é tabela, o que é fórmula e o que é moeda, e os destinos de exportação apenas
+traduzem essa leitura para \LaTeX, para o formato do Word ou para a página do navegador.
+
+\section{Reprodutibilidade, registro e testes}
 \label{sec:reprodutibilidade}
 
-Três mecanismos respondem ao requisito de reprodutibilidade do projeto. Primeiro, a
-\textbf{temperatura} é fixada em 0,3 --- baixa, conforme a discussão da
-Seção~\ref{sub:inferencia} --- nos provedores que ainda expõem esse parâmetro. A ressalva não é
-detalhe de implementação: as gerações mais recentes de modelos comerciais
-\textbf{removeram os parâmetros de amostragem} da interface pública, substituindo o controle
-explícito de variabilidade por regulagens internas do próprio modelo. Enviá-los passou a ser
-erro de requisição, e o sistema deixa de enviá-los nesses casos. O episódio expõe uma
-fragilidade estrutural da dependência de APIs proprietárias: uma decisão metodológica
-documentada pode ser invalidada por uma mudança unilateral do fornecedor, sem aviso e sem
-recurso --- argumento adicional em favor do caminho com modelos abertos locais, discutido no
-Capítulo~\ref{cap:produto}.
+Três mecanismos respondem ao requisito de reprodutibilidade do projeto. O primeiro é a
+\textbf{temperatura}, fixada em 0,3 conforme a discussão da Seção~\ref{sub:inferencia}, nos
+provedores que ainda expõem esse parâmetro. A ressalva não é um detalhe de implementação, já que
+as gerações mais recentes de modelos comerciais \textbf{removeram os parâmetros de amostragem} da
+interface pública e passaram a tratar o envio deles como erro de requisição. O sistema deixa então
+de enviá-los nesses casos, e o episódio expõe uma fragilidade estrutural da dependência de
+interfaces proprietárias, pois uma decisão metodológica documentada pode ser invalidada por uma
+mudança unilateral do fornecedor. É um argumento adicional em favor do caminho com modelos abertos
+locais discutido no Capítulo~\ref{cap:produto}.
 
-Os outros dois mecanismos são independentes do fornecedor e absorvem essa perda. Todo ciclo é
-registrado em \emph{log} JSONL com os objetos completos de cada iteração, permitindo
-reconstruir qualquer execução --- inclusive quais parâmetros foram efetivamente enviados. E os
-\emph{prompts} são versionados junto ao código: qualquer mudança neles é uma mudança rastreável
-do sistema.
+Os outros dois mecanismos independem do fornecedor e compensam essa perda. Todo ciclo é registrado
+em um arquivo JSONL com os objetos completos de cada iteração, o que permite reconstruir qualquer
+execução. Além disso os \emph{prompts} são versionados junto ao código, de modo que qualquer
+mudança neles é uma mudança rastreável do sistema. As gerações em lote usadas nesta dissertação
+partem ainda de um plano determinístico com semente fixa, e assim duas execuções recebem as mesmas
+especificações na mesma ordem e com os mesmos contextos, o que torna justa a comparação entre
+versões do sistema ou entre modelos diferentes.
 
-A estratégia de testes explora a separação de responsabilidades da arquitetura. O núcleo
-simbólico é testado diretamente, com casos que incluem os erros típicos de LLM (gabarito
-incompleto, troca de sinal) e casos degenerados (PG de razão unitária, extremo de função afim).
-A política do Orquestrador é testada com um \textbf{LLM falso} --- um provedor que devolve
-respostas pré-programadas em sequência --- que permite exercitar deterministicamente os quatro
-caminhos do ciclo: aprovação direta, revisão por rejeição matemática, revisão por reprovação
-didática e descarte. O conjunto, de 36 testes, executa em menos de um segundo e não requer
-chave de API --- qualquer pessoa que clone o repositório pode validar o sistema integralmente
-sem custo.
+A estratégia de testes explora a separação de responsabilidades da arquitetura. O núcleo simbólico
+é testado diretamente, com casos que incluem os erros típicos de modelos de linguagem, como gabarito
+incompleto e troca de sinal, e casos degenerados, como a progressão geométrica de razão unitária. A
+política do Orquestrador é testada com um \textbf{modelo de linguagem falso}, isto é, um provedor
+que devolve respostas pré-programadas em sequência e permite exercitar de forma determinística
+todos os caminhos do ciclo. O conjunto tem 287 testes, executa em poucos segundos e não requer
+chave de API, de modo que qualquer pessoa que obtenha o repositório pode validar o sistema sem
+custo.
+
+A suíte de testes, contudo, não alcança os defeitos que mais importam, e esta é talvez a lição
+metodológica mais relevante do desenvolvimento. As três execuções com provedor real feitas ao longo
+do Ciclo 2 encontraram onze defeitos no Verificador que nenhum teste havia antecipado, porque todos
+dependiam de escolhas do Gerador impossíveis de prever. Entre eles estavam a incógnita chamada
+\texttt{E}, já mencionada, o domínio restrito pelo contexto, como o tempo que não pode ser negativo
+ou o índice que só assume valores naturais, a busca de máximo e mínimo que considerava apenas o
+primeiro ponto crítico de uma função trigonométrica, a indexação de sequências fixada em 1 quando o
+Gerador escrevia legitimamente a partir de 0, as raízes complexas comparadas com um gabarito que
+pedia apenas as reais e o ruído de representação decimal em questões de juros. Os onze defeitos
+estavam todos do mesmo lado da balança, pois em cada um deles o Verificador reprovava um gabarito
+correto e nunca aprovava um errado. Todos foram corrigidos e passaram a ter teste próprio, mas
+nenhum teria sido encontrado sem gerar questões de verdade.
 
 \section{Custo e desempenho}
 \label{sec:custo}
 
-% PENDENTE: esta seção requer execuções com provedores reais.
-% Medir: custo médio por questão aprovada (por provedor), tempo médio por
-% ciclo, distribuição do número de iterações, taxa de descarte.
-\emph{[Seção a completar com dados de execução real: custo médio por questão aprovada em cada
-provedor (API comercial \emph{versus} modelo aberto local), tempo médio por ciclo, distribuição
-do número de iterações até a aprovação e taxa de descarte por tema. As medições serão feitas
-sobre o lote de questões gerado para o banco curado.]}
+Os números desta seção vêm da geração do acervo que deu origem ao banco curado. Foram 90 ciclos,
+correspondentes às quinze habilidades combinadas com dois formatos e três níveis de dificuldade,
+executados com o modelo \texttt{claude-sonnet-5} da Anthropic em agosto de 2026. Das 90
+especificações, 85 terminaram em questão aprovada e 5 foram descartadas depois de três iterações,
+o que dá uma taxa de aprovação de 94\%. A Tabela~\ref{tab:iteracoes} mostra quantas tentativas
+cada questão precisou.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Iterações até a aprovação no acervo de 90 ciclos}
+  \label{tab:iteracoes}
+  \begin{tabular}{lrr}
+    \toprule
+    Desfecho & Ciclos & \% \\
+    \midrule
+    Aprovada na 1ª iteração & 58 & 64,4 \\
+    Aprovada na 2ª iteração & 21 & 23,3 \\
+    Aprovada na 3ª iteração & 6 & 6,7 \\
+    Descartada & 5 & 5,6 \\
+    \midrule
+    Total & 90 & 100,0 \\
+    \bottomrule
+  \end{tabular}
+
+  \smallskip
+  {\footnotesize Fonte: registros do sistema. Elaborado pela autora.}
+\end{table}
+
+As revisões contam uma história que vale registrar. Das 48 vezes em que uma questão voltou ao
+Gerador, 40 foram pedidas pelo Crítico e apenas 8 pelo Verificador. Conferidas uma a uma, estas
+oito ou eram reprovações indevidas dos tipos descritos na seção anterior ou apontavam uma
+inconsistência interna da própria formalização, e nenhuma correspondia a um gabarito errado. Com um modelo da capacidade
+do usado aqui, portanto, o trabalho do ciclo de revisão recaiu sobretudo na qualidade didática e
+não na correção do cálculo. A garantia obtida pelas 85 questões aprovadas foi \emph{gabarito
+conferido} em 72 delas, \emph{conferido em parte} em 12 e \emph{sem conferência automática} em
+uma. A Tabela~\ref{tab:nao-verificavel} mostra onde a conferência não se concluiu, medida por
+afirmação e não por questão.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Afirmações não verificáveis por tipo de consulta no acervo de 90 ciclos}
+  \label{tab:nao-verificavel}
+  \begin{tabular}{lrrr}
+    \toprule
+    Tipo de consulta & Afirmações & Não verificáveis & Taxa (\%) \\
+    \midrule
+    Imagem de função & 34 & 12 & 35,3 \\
+    Domínio de função & 51 & 6 & 11,8 \\
+    Crescimento de função & 57 & 5 & 8,8 \\
+    Máximo de função & 15 & 1 & 6,7 \\
+    Propriedade de expressão & 71 & 1 & 1,4 \\
+    Valor, zeros, vértice, mínimo e período & 160 & 0 & 0,0 \\
+    Equações & 43 & 0 & 0,0 \\
+    Termo e soma de progressões & 13 & 0 & 0,0 \\
+    \bottomrule
+  \end{tabular}
+
+  \smallskip
+  {\footnotesize Fonte: registros do sistema. Elaborado pela autora.}
+\end{table}
+
+A concentração na imagem de funções tem explicação conhecida. As rotinas do SymPy que calculam a
+imagem nem sempre concluem, e em alguns casos devolvem um resultado errado, como o conjunto vazio
+para a imagem de $2^x$. O sistema trata essas situações como \emph{não verificável} e nunca como
+reprovação, porque reprovar um gabarito correto mandaria o Gerador ``corrigir'' o que estava certo.
+
+Quanto ao tempo, cada ciclo levou em média cerca de dois minutos, com mediana entre 1,6 e 1,9
+minuto conforme o lote, e envolveu em média 2,9 chamadas ao modelo. Como os ciclos são
+independentes entre si, a geração pode ser dividida em processos paralelos, e com três processos o
+sistema produziu 48 ciclos em 39 minutos. Para o professor que gera uma questão de cada vez pela
+interface, a espera típica fica portanto entre um e três minutos por questão.
+
+O custo foi estimado a partir de uma amostra real do acervo, contando todas as chamadas de um
+ciclo, inclusive as iterações de revisão e as chamadas ao Crítico. Em média cada questão consumiu
+7.309 \emph{tokens} de entrada e 3.674 de saída, o que, aos preços conferidos em 9 de agosto de
+2026, corresponde a cerca de US\$~0,08 por questão e a US\$~6,93 pelo acervo inteiro. A mesma conta
+feita para modelos menores indica custos muito inferiores. O acervo completo sairia por cerca de
+US\$~1,84 com o \texttt{claude-haiku-4-5}, por cerca de US\$~0,16 com o
+\texttt{gemini-2.5-flash-lite} e por cerca de US\$~0,15 com o \texttt{deepseek-v4-flash}, enquanto
+um modelo aberto executado localmente pelo Ollama não tem custo por uso, mas exige um computador com
+memória suficiente. Esses valores para outros modelos são estimativas e não medições, porque a
+comparação entre modelos foi preparada e não executada no prazo desta dissertação. A pergunta que
+ela responderia é mais interessante do que a do preço, e é retomada nas considerações finais, pois
+se a verificação simbólica cumpre o que a hipótese afirma, um modelo mais fraco e mais barato deveria
+errar mais e ainda assim convergir com mais iterações.
 
 \section{Exemplos completos de execução}
 \label{sec:exemplos}
 
-% PENDENTE: substituir pelos registros JSONL de execuções reais com API,
-% reproduzindo os objetos completos (questão, veredictos, pareceres).
-\emph{[Seção a completar com três execuções reais registradas pelo sistema: (i) questão de
-função quadrática aprovada na primeira iteração; (ii) questão de progressão geométrica rejeitada
-pelo Verificador --- gabarito omitindo o primeiro termo --- revisada e aprovada; (iii) questão
-não-verificável simbolicamente, aprovada com ressalva e marcada para revisão prioritária do
-professor. Os roteiros desses três casos, já validados com o LLM de teste, estão descritos na
-Seção~\ref{sec:fluxo}.]}
+Três ciclos reais, extraídos dos registros do sistema, mostram os caminhos descritos na
+Seção~\ref{sec:fluxo}. Os textos foram transcritos sem edição, e as formalizações aparecem na
+sintaxe em que o Gerador as escreveu.
+
+\textbf{Caso 1, aprovada na primeira iteração.} A especificação pedia uma questão aplicada de
+múltipla escolha, de dificuldade média e nível \emph{aplicar}, para a habilidade
+\texttt{EM13MAT503}, que trata de pontos de máximo e de mínimo de funções quadráticas em
+contextos como os da Matemática Financeira. O Gerador produziu o enunciado a seguir.
+
+\begin{quote}\small
+Uma confecção fabrica um certo modelo de camisa a um custo de produção de R\$~40,00 por unidade.
+Um estudo de mercado mostrou que, se o preço de venda for $p$ reais por unidade, a quantidade
+vendida mensalmente será $q(p) = 300 - 5p$ unidades, válida para $0 < p < 60$. O lucro mensal da
+confecção, em reais, é dado pelo produto entre o lucro obtido em cada unidade vendida (preço de
+venda menos custo de produção) e a quantidade vendida naquele mês. Qual deve ser o preço de venda
+$p$, em reais, para que o lucro mensal da confecção seja máximo?
+\end{quote}
+
+\noindent A alternativa correta era R\$~50,00, e cada distrator veio anotado com o erro que
+representa. R\$~30,00 é a resposta de quem maximiza a receita em vez do lucro, R\$~100,00 é a de
+quem aplica a fórmula do vértice sem dividir por 2 e R\$~60,00 é a de quem toma a maior raiz da
+função lucro como se fosse o ponto de máximo. A questão trouxe duas formalizações, o vértice de
+$L(p) = -5p^2 + 500p - 12000$ com resposta esperada $(50, 500)$ e o domínio $]0, 60[$. O Verificador
+confirmou as duas, e no caso do domínio registrou que se tratava de uma restrição de contexto contida
+no domínio máximo da função. O Crítico atribuiu nota 5 à clareza, 4 à adequação ao nível, 5 ao
+alinhamento à BNCC e 5 aos distratores, mas apenas 3 à originalidade, observando que o modelo de
+custo com demanda linear é recorrente em livros didáticos. Como nenhuma nota ficou abaixo de 3, a
+questão foi aprovada com a garantia \emph{gabarito conferido}.
+
+\textbf{Caso 2, reprovada pelo Crítico e revisada.} Para a mesma habilidade, agora em uma questão
+discursiva e teórica de dificuldade média, a primeira versão pedia o instante e a altura máxima de
+um objeto lançado verticalmente, com $h(t) = -5t^2 + 40t + 3$. O Verificador confirmou o vértice
+$(4, 83)$ e o máximo 83, e a questão estava matematicamente correta. O Crítico, no entanto, deu nota
+2 à originalidade, apontando que o lançamento vertical é um dos exemplos mais reproduzidos para
+introduzir o vértice da parábola, e sugeriu um contexto mais autêntico e uma pergunta que exigisse
+interpretar o resultado. Na segunda iteração o Gerador escreveu uma questão sobre duas filiais de
+uma rede de lanchonetes, com $L_A(p) = -2p^2 + 80p - 600$ e $L_B(p) = -3p^2 + 132p - 1200$, e
+pediu que o estudante determinasse o lucro máximo de cada uma, as comparasse e decidisse, diante de
+uma meta mínima de 240 mil reais, qual filial deveria continuar vendendo o produto. O Verificador
+conferiu as quatro afirmações dessa versão e o Crítico a aprovou, com nota 5 no alinhamento à BNCC
+por articular o cálculo do vértice a uma decisão. É o caminho mais frequente do sistema, já que a
+maior parte das revisões do acervo foi pedida pelo Crítico.
+
+\textbf{Caso 3, reprovada pelo Verificador.} O terceiro caso vem da primeira medição com provedor
+real e mostra o Verificador em ação, embora não do modo esperado. A especificação pedia uma questão
+discursiva para a habilidade \texttt{EM13MAT508}, que associa progressões geométricas a funções
+exponenciais de domínio discreto. O Gerador escreveu sobre uma colônia de bactérias com 500
+indivíduos no instante $t = 0$ que dobra a cada hora, indexou a progressão a partir de zero e
+formalizou o termo geral como $a_n = 500 \cdot 2^n$. O Verificador da época reprovou quatro das
+cinco afirmações, porque presumia que o primeiro termo de uma progressão correspondia sempre a
+$n = 1$. Na segunda iteração o Gerador acatou o \emph{feedback}, reescreveu a progressão como
+$500 \cdot 2^{n-1}$ e a questão foi aprovada. A questão original estava certa, e a reprovação foi
+indevida. O episódio levou à correção do Verificador, que passou a aceitar as duas convenções de
+indexação, e ilustra um risco que a arquitetura precisa levar em conta, pois um verificador que
+reprova o que está certo não apenas desperdiça uma iteração como induz o Gerador a piorar a
+questão.
+
+Os três casos, somados ao que se viu na Seção~\ref{sec:custo}, permitem uma leitura honesta do
+papel de cada agente na prática. O Crítico foi o principal motor das revisões, o Verificador
+forneceu a garantia de que 72 gabaritos haviam sido recalculados de forma independente e, nas
+execuções analisadas, nenhuma de suas reprovações correspondeu a um gabarito matematicamente
+errado. Isso não significa que o Gerador não erre. O único erro matemático encontrado no acervo
+passou pela conferência porque estava na tradução do enunciado para a formalização, e não no
+cálculo, como se discute na Seção~\ref{sub:rodada1-erros}.
