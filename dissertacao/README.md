@@ -11,9 +11,12 @@ dissertacao/
 ├── main.tex                       # arquivo mestre (compile este)
 ├── referencias.bib                # bibliografia reconstruída — VER "% CONFERIR"
 └── capitulos/
-    ├── cap1_contexto.tex          # Cap. 1 — contexto e desafios
-    ├── cap2_tecnica.tex           # Cap. 2 — fundamentação técnica
-    └── cap3_didatica.tex          # Cap. 3 — referenciais didáticos
+    ├── capa.tex, agradecimento.tex, resumo.tex, siglas.tex   # pré-textuais provisórios
+    ├── introducao.tex             # Introdução (sem número)
+    ├── cap1_contexto.tex ... cap7_produto.tex                # Caps. 1–7
+    ├── conclusao.tex              # Considerações finais (sem número)
+    ├── apendices.tex              # Apêndices A–F
+    └── apendice_*_texto.tex, apendice_tabela_respostas.tex   # GERADOS por ../gerar_apendices.py
 ```
 
 ## Como compilar

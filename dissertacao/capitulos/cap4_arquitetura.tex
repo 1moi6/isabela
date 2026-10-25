@@ -12,20 +12,20 @@
 Os capítulos anteriores estabeleceram o problema (Capítulo~\ref{cap:contexto}), a hipótese
 arquitetural que responde a ele (Seção~\ref{sec:hipotese}) e os referenciais didáticos que
 fundamentam os critérios de qualidade (Seção~\ref{sec:criterios}). Este capítulo apresenta o
-projeto do sistema que materializa essa hipótese: a especificação de entrada fornecida pelo
-professor, os quatro agentes com seus contratos de interface, o fluxo de execução completo e as
-decisões de projeto --- incluindo as alternativas consideradas e descartadas. A implementação
-concreta, com as escolhas de tecnologia e trechos de código, é objeto do
-Capítulo~\ref{cap:implementacao}.
+projeto do sistema que materializa essa hipótese. Inicialmente descreve-se a especificação de
+entrada fornecida pelo professor, em seguida os quatro agentes com seus contratos de interface e,
+por fim, o fluxo completo de execução e as decisões de projeto, incluindo as alternativas
+consideradas e descartadas. A implementação concreta, com as escolhas de tecnologia e trechos de
+código, é objeto do Capítulo~\ref{cap:implementacao}.
 
 \section{Visão geral}
 \label{sec:visao-geral}
 
-O sistema é composto por quatro agentes especializados coordenados em um fluxo cíclico de
+O sistema é composto por quatro agentes especializados que trabalham em um fluxo cíclico de
 geração e revisão, conforme a Figura~\ref{fig:componentes}. O professor fornece uma
-\textbf{especificação} --- os parâmetros didáticos da questão desejada --- e recebe, ao final,
-ou uma questão aprovada acompanhada dos veredictos de todos os avaliadores, ou a informação de
-que a especificação foi descartada após esgotar as tentativas de revisão.
+\textbf{especificação} com os parâmetros didáticos da questão desejada e recebe ao final uma de
+duas respostas. Ou recebe uma questão aprovada acompanhada dos veredictos de todos os avaliadores,
+ou é informado de que a especificação foi descartada depois de esgotadas as tentativas de revisão.
 
 \begin{figure}[htbp]
 \centering
@@ -36,7 +36,7 @@ que a especificação foi descartada após esgotar as tentativas de revisão.
 $\downarrow$\\[2pt]
 \fbox{Orquestrador} $\rightarrow$ \fbox{Gerador (LLM)} $\rightarrow$ questão estruturada\\[2pt]
 $\downarrow$\\[2pt]
-\fbox{Verificador Simbólico (SymPy)} \quad e \quad \fbox{Crítico Didático (LLM + rubrica)}\\[2pt]
+\fbox{Verificador Simbólico (SymPy)} $\rightarrow$ \fbox{Crítico Didático (LLM + rubrica)}\\[2pt]
 $\downarrow$\\[2pt]
 aprovada $\rightarrow$ banco curado \qquad
 rejeitada $\rightarrow$ Gerador (com \emph{feedback}) ou descarte
@@ -46,310 +46,326 @@ rejeitada $\rightarrow$ Gerador (com \emph{feedback}) ou descarte
 \label{fig:componentes}
 \end{figure}
 
-Três princípios de projeto, derivados diretamente da fundamentação técnica, governam a
-arquitetura. O primeiro é a \textbf{separação de responsabilidades}: cada agente executa uma
-função única e bem delimitada, e nenhum agente acumula os papéis de gerar e avaliar
-(Seção~\ref{sub:sma}). O segundo é a \textbf{verificação independente por mecanismo distinto}: a
-correção matemática é julgada por um sistema de computação algébrica, não por um segundo LLM,
-de modo que os erros dos dois componentes tenham naturezas estruturalmente diferentes
-(Seção~\ref{sec:hipotese}). O terceiro é a \textbf{rastreabilidade}: toda iteração do ciclo ---
-incluindo as tentativas rejeitadas --- é registrada e apresentada ao professor, que recebe não
-apenas o produto final, mas a história da sua produção.
+Três princípios de projeto derivados da fundamentação técnica governam essa arquitetura. O
+primeiro é a \textbf{separação de responsabilidades}, segundo a qual cada agente executa uma
+função única e bem delimitada e nenhum deles acumula os papéis de gerar e de avaliar
+(Seção~\ref{sub:sma}). O segundo é a \textbf{verificação independente por mecanismo distinto}, já
+que a correção matemática é julgada por um sistema de computação algébrica e não por um segundo
+modelo de linguagem, de modo que os erros dos dois componentes tenham naturezas estruturalmente
+diferentes (Seção~\ref{sec:hipotese}). O terceiro é a \textbf{rastreabilidade}, pois toda iteração
+do ciclo é registrada e apresentada ao professor, inclusive as tentativas rejeitadas. Assim o
+professor recebe não apenas o produto final mas também a história da sua produção.
 
 \section{Especificação de entrada}
 \label{sec:especificacao}
 
-A especificação é o contrato entre o professor e o sistema. Ela é composta por seis parâmetros
-obrigatórios e dois opcionais, todos validados antes do início do ciclo:
+A especificação é o contrato entre o professor e o sistema. Ela reúne seis parâmetros
+obrigatórios e dois opcionais, todos validados antes do início do ciclo.
 
 \begin{itemize}
-\item \textbf{Habilidade BNCC} --- o código da habilidade (por exemplo, \texttt{EM13MAT302}),
-  validado contra um catálogo local derivado da BNCC; códigos desconhecidos são rejeitados na
-  entrada, antes de qualquer chamada ao LLM. É o \emph{primeiro} parâmetro, e não por acaso: a
+\item \textbf{Habilidade BNCC.} É o código da habilidade, como \texttt{EM13MAT302}, conferido
+  contra um catálogo local derivado da BNCC, de modo que códigos desconhecidos são recusados antes
+  de qualquer chamada ao modelo de linguagem. Trata-se do primeiro parâmetro e não por acaso, pois a
   habilidade é a unidade normativa do planejamento do professor e é ela que delimita os temas
   disponíveis (Seção~\ref{sub:bncc-habilidades}).
-\item \textbf{Tema ou temas} --- o tópico matemático, escolhido \emph{dentro} da habilidade:
-  função afim, função quadrática, função exponencial, progressão aritmética ou progressão
-  geométrica. Uma habilidade pode cobrir mais de um tema, e o catálogo registra como eles se
-  combinam. Em \texttt{EM13MAT302} a enumeração é do repertório coberto, e combinar os dois
-  temas num mesmo problema é opção do professor; já em \texttt{EM13MAT507}, cujo texto é
+\item \textbf{Tema ou temas.} O tópico matemático é escolhido dentro da habilidade entre funções
+  afim, quadrática, exponencial, logarítmica, trigonométrica e definida por várias sentenças e
+  progressões aritmética e geométrica. Uma habilidade pode cobrir mais de um tema, e o catálogo
+  registra como eles se combinam. Em \texttt{EM13MAT302} os temas enumeram o repertório coberto e
+  combiná-los num mesmo problema é opção do professor. Já em \texttt{EM13MAT507}, cujo texto pede
   ``identificar e associar sequências numéricas (PA) a funções afins de domínios discretos'', a
-  articulação entre os temas \emph{é} a habilidade --- pedir apenas a progressão a
-  descaracteriza, e o sistema recusa a especificação. Com mais de um tema, a questão pedida é
-  uma só, articulando-os, e não dois itens justapostos.
-\item \textbf{Nível cognitivo} --- um dos seis processos da Taxonomia de Bloom Revisada
+  articulação entre os temas \emph{é} a habilidade, e por isso pedir apenas a progressão a
+  descaracteriza e o sistema recusa a especificação. Com mais de um tema a questão pedida continua
+  sendo uma só, que os articula, e não dois itens justapostos.
+\item \textbf{Nível cognitivo.} É um dos seis processos da Taxonomia de Bloom Revisada
   (Seção~\ref{sub:bloom}). O catálogo registra os níveis compatíveis com os verbos de cada
-  habilidade; pedir um nível fora deles é permitido --- o professor pode ter suas razões ---, mas
-  a interface avisa e a divergência fica registrada no ciclo, como dado da avaliação empírica.
-\item \textbf{Dificuldade} --- fácil, média ou difícil, com descritores operacionais que
-  acompanham o \emph{prompt} (fácil: aplicação direta; média: articulação de dois ou mais
-  passos; difícil: estratégia não evidente ou análise de casos).
-\item \textbf{Natureza} --- teórica (manipulação e propriedades, sem contexto externo) ou
-  aplicada (situação-problema com contexto realista).
-\item \textbf{Formato} --- discursiva ou múltipla escolha com quatro alternativas.
-\item \textbf{Contexto temático} (opcional) --- um domínio para ambientar a questão aplicada
-  (esportes, finanças pessoais etc.).
-\item \textbf{Restrições} (opcionais) --- condições adicionais em linguagem natural (por
-  exemplo, ``apenas coeficientes inteiros'').
+  habilidade, e pedir um nível fora deles é permitido porque o professor pode ter as suas razões.
+  Nesse caso a interface avisa e a divergência fica registrada no ciclo como dado da avaliação
+  empírica.
+\item \textbf{Dificuldade.} São quatro níveis acompanhados de descritores operacionais que seguem
+  junto com o \emph{prompt}. O nível básico pede um único passo com números pequenos e enunciado
+  curto, o fácil pede aplicação direta com poucos passos, o médio pede a articulação de dois ou mais
+  passos e o difícil pede estratégia não evidente ou análise de casos. O nível básico foi acrescentado
+  depois da primeira rodada de avaliação docente (Seção~\ref{sub:rodada1-dificuldade}).
+\item \textbf{Natureza.} A questão pode ser teórica, voltada à manipulação e às propriedades sem
+  contexto externo, ou aplicada, com uma situação-problema de contexto realista.
+\item \textbf{Formato.} A questão pode ser discursiva ou de múltipla escolha com quatro
+  alternativas.
+\item \textbf{Contexto temático} (opcional). É um domínio para ambientar a questão aplicada, como
+  esportes ou finanças pessoais.
+\item \textbf{Restrições} (opcionais). São condições adicionais escritas em linguagem natural, por
+  exemplo ``apenas coeficientes inteiros''.
 \end{itemize}
 
-A validação antecipada do código BNCC merece destaque: ela impede, por construção, que o
-sistema produza questões associadas a habilidades inexistentes --- um erro que um LLM cometeria
-com naturalidade e que seria invisível ao professor que não tem o documento da BNCC de memória.
+A validação antecipada do código BNCC merece destaque porque impede por construção que o sistema
+produza questões associadas a habilidades inexistentes. Um modelo de linguagem cometeria esse erro
+com naturalidade, e ele passaria despercebido pelo professor que não tem o documento da BNCC de
+memória. Pela mesma lógica o sistema avisa, sem bloquear, quando a combinação pedida já se mostrou
+problemática nas medições. É o caso do nível básico combinado ao processo \emph{criar}, que falhou
+em duas de três tentativas porque uma questão de um único passo dificilmente exige do estudante a
+construção de algo novo.
 
-A habilidade, porém, não entra no sistema apenas como rótulo a ser validado. O catálogo associa
-a cada habilidade um conjunto de \textbf{exigências}: o que a questão precisa efetivamente
-exibir para realizá-la. Para \texttt{EM13MAT402} --- ``converter representações algébricas de
-funções polinomiais de 2º grau para representações geométricas no plano cartesiano'' --- exige-se
-que a questão faça o estudante transitar entre a forma algébrica e o gráfico; pedir apenas as
-raízes não realiza a habilidade, ainda que o conteúdo seja o correto e a matemática esteja certa.
-Essas exigências são repassadas ao Gerador como requisito de elaboração e ao Crítico como
-âncora do critério de alinhamento curricular. Sem elas, o alinhamento à BNCC dependeria de um
-juízo em prosa do LLM sobre se a questão ``é sobre o assunto'' --- e uma questão correta,
-clara e sobre o conteúdo certo poderia ser aprovada sem cumprir a habilidade declarada, um
-erro silencioso de natureza curricular, análogo ao erro silencioso matemático discutido na
-Seção~\ref{sec:erro-silencioso}.
+A habilidade, porém, não entra no sistema apenas como rótulo a ser validado. O catálogo associa a
+cada habilidade um conjunto de \textbf{exigências}, isto é, aquilo que a questão precisa
+efetivamente exibir para realizá-la. A \texttt{EM13MAT402}, por exemplo, pede ``converter
+representações algébricas de funções polinomiais de 2º grau para representações geométricas no
+plano cartesiano'', e por isso exige-se que a questão faça o estudante transitar entre a forma
+algébrica e o gráfico. Pedir apenas as raízes não realiza essa habilidade, ainda que o conteúdo
+seja o correto e a matemática esteja certa. Essas exigências são repassadas ao Gerador como
+requisito de elaboração e ao Crítico como âncora do critério de alinhamento curricular. Sem elas o
+alinhamento à BNCC dependeria de um juízo em prosa do modelo sobre se a questão ``é sobre o
+assunto'', e uma questão correta, clara e sobre o conteúdo certo poderia ser aprovada sem cumprir a
+habilidade declarada. Seria um erro silencioso de natureza curricular, análogo ao erro silencioso
+matemático discutido na Seção~\ref{sec:erro-silencioso}.
 
 \section{Agente Gerador}
 \label{sec:ag-gerador}
 
-O Gerador é o único agente criativo do sistema. Recebe a especificação (e, nas iterações de
-revisão, o \emph{feedback} estruturado do Orquestrador) e produz a questão completa como objeto
-estruturado, nunca como texto livre. Sua saída contém: o enunciado; a resolução passo a passo;
-o gabarito em linguagem natural; as alternativas, quando múltipla escolha, cada distrator
-anotado com o erro sistemático de estudante que ele representa; e o campo mais importante do
-ponto de vista arquitetural, a \textbf{formalização verificável}.
+O Gerador é o único agente criativo do sistema. Ele recebe a especificação e, nas iterações de
+revisão, também o \emph{feedback} estruturado do Orquestrador, e produz a questão completa como
+objeto estruturado e nunca como texto livre. A saída contém o enunciado, a resolução passo a passo,
+o gabarito em linguagem natural e, quando a questão é de múltipla escolha, as alternativas, cada
+distrator anotado com o erro de estudante que ele representa. Contém ainda o campo mais importante
+do ponto de vista arquitetural, que é a \textbf{formalização verificável}.
 
 A formalização verificável é a ponte entre a prosa da questão e o verificador simbólico. Trata-se
-de um objeto com quatro campos --- o \emph{tipo} de verificação, a \emph{expressão} em sintaxe
-SymPy, a \emph{resposta esperada} (o gabarito, na mesma sintaxe) e \emph{parâmetros} auxiliares ---
-que o Gerador preenche no momento da criação da questão. Essa decisão contorna o segundo limite
-da verificação simbólica apontado na Seção~\ref{sub:cas-limites}: o Verificador nunca precisa
-interpretar o enunciado em linguagem natural, pois quem traduz a prosa para a forma simbólica é o
-próprio agente que a escreveu --- e a tradução é, ela mesma, parte do objeto auditável que o
-professor pode inspecionar. Contornar não é eliminar: o limite muda de lugar, e a fidelidade da
-tradução ao enunciado passa a ser um ponto que nenhum agente confere. A consequência para o que
-a garantia promete é tratada na Seção~\ref{sec:garantia}.
+de um objeto que informa o \emph{tipo} de verificação, a \emph{expressão} em sintaxe SymPy, a
+\emph{resposta esperada} na mesma sintaxe e os \emph{parâmetros} auxiliares, e que o Gerador
+preenche no momento em que cria a questão. Essa decisão contorna o segundo limite da verificação
+simbólica apontado na Seção~\ref{sub:cas-limites}, porque o Verificador nunca precisa interpretar o
+enunciado em linguagem natural. Quem traduz a prosa para a forma simbólica é o próprio agente que a
+escreveu, e a tradução passa a ser parte do objeto auditável que o professor pode inspecionar.
+Contornar, contudo, não é eliminar. O limite muda de lugar e a fidelidade da tradução ao enunciado
+passa a ser um ponto que nenhum agente confere, e a consequência disso para o que a garantia
+promete é tratada na Seção~\ref{sec:garantia}.
 
-O Gerador produz uma \textbf{lista} dessas formalizações, e não uma só, porque uma questão faz
-com frequência mais de uma afirmação verificável: quando articula dois temas, quando a habilidade
-cobra uma propriedade além do resultado. Guardar uma única formalização significaria conferir
-metade da questão e deixar a outra metade passar sem conferência nenhuma --- exatamente o tipo de
-silêncio que esta arquitetura existe para eliminar. O Verificador agrega os vereditos por
-conjunção (Seção~\ref{sec:ag-verificador}). Quando a questão não admite formalização nos tipos
-suportados, a lista fica vazia e a questão segue o caminho do veredicto \emph{não-verificável}.
+O Gerador produz uma \textbf{lista} dessas formalizações e não uma só, porque uma questão faz com
+frequência mais de uma afirmação verificável, seja quando articula dois temas, seja quando a
+habilidade cobra uma propriedade além do resultado. Guardar uma única formalização significaria
+conferir metade da questão e deixar a outra metade passar sem conferência alguma, que é
+exatamente o tipo de silêncio que esta arquitetura existe para eliminar. O Verificador agrega então
+os veredictos por conjunção (Seção~\ref{sec:ag-verificador}). Quando a questão não admite
+formalização nos tipos suportados a lista fica vazia, e a questão segue o caminho do veredicto
+\emph{não verificável}.
 
-Entre os tipos suportados, um merece destaque por não seguir o formato dos demais. As estratégias
-usuais respondem à pergunta ``o resultado afirmado é o que o SymPy calcula?''. Há habilidades em
-que essa pergunta não cabe: a \texttt{EM13MAT501} pede investigar uma tabela e \emph{expressar
-algebricamente a generalização}, e não há um valor a comparar --- há uma expressão que precisa
-reproduzir os pontos dados e ter o grau declarado. O tipo \emph{propriedade} verifica predicados
-sobre a expressão produzida em vez de comparar gabaritos, e é o que permite conferir simbolicamente
-a generalização de padrões (\texttt{EM13MAT501} e \texttt{EM13MAT502}) e a associação entre uma
-progressão e a função de domínio discreto correspondente (\texttt{EM13MAT507} e
-\texttt{EM13MAT508}) --- afirmações que antes ficavam fora do alcance do núcleo simbólico ainda
-que a habilidade estivesse no recorte.
+Entre os tipos suportados um merece destaque por não seguir o formato dos demais. As estratégias
+usuais respondem à pergunta sobre se o resultado afirmado é o que o SymPy calcula. Há habilidades,
+no entanto, em que essa pergunta não cabe. A \texttt{EM13MAT501} pede investigar uma tabela e
+expressar algebricamente a generalização, de modo que não há um valor a comparar e sim uma
+expressão que precisa reproduzir os pontos dados e ter o grau declarado. O tipo
+\emph{propriedade} verifica esses predicados sobre a expressão produzida em vez de comparar
+gabaritos. É ele que permite conferir simbolicamente a generalização de padrões nas habilidades
+\texttt{EM13MAT501} e \texttt{EM13MAT502} e a associação entre uma progressão e a função de domínio
+discreto correspondente nas habilidades \texttt{EM13MAT507} e \texttt{EM13MAT508}, afirmações que
+de outro modo ficariam fora do alcance do núcleo simbólico.
 
-O \emph{prompt} do Gerador é um artefato versionado da pesquisa (reproduzido no Apêndice A) e
-possui três blocos: a instrução de papel (elaborador experiente de questões para o EM), as
-regras obrigatórias --- incluindo a exigência de saída exclusivamente em JSON e a proibição de
-sinalizar o procedimento de resolução no enunciado, em atenção ao efeito Topaze
-(Seção~\ref{sub:tsd}) --- e o esquema do objeto de saída.
+O \emph{prompt} do Gerador é um artefato versionado da pesquisa, reproduzido no
+Apêndice~\ref{ap:prompts}. Ele se organiza em três blocos. O primeiro define o papel de
+elaborador experiente de questões para o Ensino Médio, o segundo reúne as regras obrigatórias,
+entre elas a saída exclusivamente em JSON e a proibição de sinalizar no enunciado o procedimento de
+resolução, em atenção ao efeito Topaze (Seção~\ref{sub:tsd}), e o terceiro descreve o esquema do
+objeto de saída. Uma última etapa acontece depois da geração e fora do modelo. A ordem das
+alternativas é sorteada pelo próprio sistema, e as menções por letra no gabarito e na resolução são
+renumeradas junto. A medida foi tomada porque, deixado a si mesmo, o modelo colocava a alternativa
+correta em primeiro lugar em quase todas as questões, padrão que um dos professores da primeira
+rodada de avaliação percebeu (Seção~\ref{sub:rodada1-comentarios}).
 
 \section{Agente Verificador Simbólico}
 \label{sec:ag-verificador}
 
 O Verificador resolve a questão de forma independente e compara o resultado com o gabarito
-proposto. É o único agente sem LLM: opera exclusivamente sobre a formalização verificável, por
-meio do SymPy, e por isso seu julgamento é determinístico e reprodutível
-(Seção~\ref{sec:cas}).
-
-A verificação é organizada por \textbf{estratégias por tipo de questão}:
+proposto. É o único agente que não usa modelo de linguagem, pois opera exclusivamente sobre a
+formalização verificável por meio do SymPy, e por isso seu julgamento é determinístico e
+reprodutível (Seção~\ref{sec:cas}). A verificação se organiza em \textbf{estratégias por tipo de
+questão}.
 
 \begin{itemize}
-\item \textbf{Equações} --- o conjunto-solução é calculado simbolicamente e comparado com o
-  gabarito por igualdade exata (a diferença entre cada par de soluções deve simplificar a zero).
-  A comparação detecta tanto soluções incorretas quanto \emph{gabaritos incompletos} --- uma
-  raiz esquecida, erro frequente de LLMs.
-\item \textbf{Propriedades de funções} --- zeros, vértice, valor em um ponto e extremos, cada um
-  calculado pela via simbólica adequada (resolução, derivada, substituição).
-\item \textbf{Progressões} --- termo geral e soma de PA e PG, calculados pelas fórmulas fechadas,
-  incluindo o caso degenerado da PG de razão unitária.
-\item \textbf{Propriedades de expressões} --- em vez de comparar um resultado, confere predicados
-  sobre a expressão que o estudante deve produzir: que ela reproduza os pontos de uma tabela, que
-  tenha o grau declarado, que apresente apenas os termos de uma forma dada, ou que coincida com
-  uma progressão nos primeiros termos.
-\item \textbf{Verificação numérica complementar} --- quando a simplificação simbólica não é
-  conclusiva, as expressões são avaliadas em pontos aleatórios com semente fixa; a concordância
-  gera o veredicto \emph{aprovado com ressalva numérica} (Seção~\ref{sub:cas-limites}).
+\item \textbf{Equações.} O conjunto-solução é calculado simbolicamente e comparado com o gabarito,
+  e a comparação detecta tanto soluções incorretas quanto \emph{gabaritos incompletos}, como uma raiz
+  esquecida. Só as soluções reais contam, a menos que o próprio gabarito traga números complexos, e
+  quando a questão restringe o domínio o conjunto calculado é restrito da mesma forma.
+\item \textbf{Propriedades de funções.} Zeros, vértice, valor em um ponto, máximo e mínimo,
+  domínio, imagem, período e crescimento são calculados cada um pela via simbólica adequada.
+\item \textbf{Progressões.} O termo geral e a soma de progressões aritméticas e geométricas são
+  calculados pelas fórmulas fechadas, incluindo o caso degenerado da progressão geométrica de razão
+  unitária.
+\item \textbf{Propriedades de expressões.} Em vez de comparar um resultado, conferem-se predicados
+  sobre a expressão que o estudante deve produzir, como reproduzir os pontos de uma tabela, ter o
+  grau declarado, apresentar apenas os termos de uma forma dada ou coincidir com uma progressão nos
+  primeiros termos.
 \end{itemize}
 
-Como a questão traz uma lista de formalizações, o Verificador aplica a estratégia de cada uma e
-\textbf{agrega os vereditos por conjunção}: a questão vale o que vale a sua afirmação mais fraca.
-Uma reprovação basta para reprovar --- não adianta o termo geral da progressão estar correto se a
-função afim associada está errada. E uma afirmação não formalizável rebaixa o conjunto ao veredicto
-\emph{aprovado parcialmente}, em vez de deixá-lo passar como se tudo tivesse sido conferido.
+Um cuidado atravessa todas essas estratégias. Quando o gabarito usa números decimais e a única
+diferença em relação ao valor exato é o ruído da representação, como em uma taxa de juros escrita
+como $1{,}08$ e não como $27/25$, a concordância numérica não é tratada como divergência. Nesses
+casos o veredicto é \emph{aprovado com ressalva numérica} (Seção~\ref{sub:cas-limites}), e a
+ressalva fica registrada para o professor.
 
-A saída é, assim, um veredicto de cinco valores --- \emph{aprovado}, \emph{rejeitado},
-\emph{não-verificável}, \emph{aprovado com ressalva numérica} ou \emph{aprovado parcialmente} ---
-acompanhado de justificativa e, quando houver, do resultado calculado independentemente. Esse
-resultado calculado integra o \emph{feedback} devolvido ao Gerador em caso de rejeição: o agente
-que errou recebe não apenas a informação de que errou, mas o valor correto contra o qual revisar
-seu trabalho. Para o Orquestrador, apenas a rejeição muda o curso do ciclo: as demais seguem ao
-Crítico, e a distinção entre elas é o que define a \emph{garantia} declarada ao professor
+Como a questão traz uma lista de formalizações, o Verificador aplica a estratégia de cada uma e
+\textbf{agrega os veredictos por conjunção}, de modo que a questão vale o que vale a sua afirmação
+mais fraca. Uma reprovação basta para reprovar a questão, pois não adianta o termo geral da
+progressão estar correto se a função afim associada estiver errada. Do mesmo modo, uma afirmação
+não formalizável rebaixa o conjunto ao veredicto \emph{aprovado parcialmente} em vez de deixá-lo
+passar como se tudo tivesse sido conferido.
+
+A saída é assim um veredicto de cinco valores, que pode ser \emph{aprovado}, \emph{rejeitado},
+\emph{não verificável}, \emph{aprovado com ressalva numérica} ou \emph{aprovado parcialmente}. Ele
+vem acompanhado de justificativa e, quando houver, do resultado calculado independentemente. Esse
+resultado integra o \emph{feedback} devolvido ao Gerador em caso de rejeição, e assim o agente que
+errou recebe não apenas a informação de que errou mas também o valor contra o qual revisar o seu
+trabalho. Para o Orquestrador apenas a rejeição muda o curso do ciclo, e os demais veredictos
+seguem ao Crítico. A distinção entre eles é o que define a \emph{garantia} declarada ao professor
 (Seção~\ref{sec:garantia}).
 
-Um princípio de robustez completa o projeto deste agente: formalizações malformadas (sintaxe
-inválida produzida pelo LLM, tipo desconhecido) nunca interrompem o ciclo com erro --- degradam
-para o veredicto \emph{não-verificável}, e a decisão sobre o que fazer com a questão permanece
-onde deve estar, no Orquestrador.
+Um princípio de robustez completa o projeto deste agente. Formalizações malformadas, como sintaxe
+inválida produzida pelo modelo ou um tipo desconhecido, nunca interrompem o ciclo com erro.
+Elas degradam para o veredicto \emph{não verificável}, e a decisão sobre o que fazer com a questão
+permanece onde deve estar, que é no Orquestrador.
 
 \section{A garantia declarada}
 \label{sec:garantia}
 
 Nem toda habilidade da BNCC admite o mesmo grau de conferência automática, e nem toda questão
-recebe a conferência que sua habilidade admitiria. Deixar isso implícito seria reproduzir, no
-plano dos metadados, o problema que o sistema combate: o professor veria questões aparentemente
-equivalentes, sem saber quais tiveram o gabarito recalculado e quais passaram apenas pelo
-julgamento de um modelo de linguagem. O sistema torna essa distinção explícita em dois níveis.
+recebe a conferência que a sua habilidade admitiria. Deixar isso implícito seria reproduzir no plano
+dos metadados o próprio problema que o sistema combate, pois o professor veria questões
+aparentemente equivalentes sem saber quais tiveram o gabarito recalculado e quais passaram apenas
+pelo julgamento de um modelo de linguagem. Por essa razão o sistema torna a distinção explícita em
+dois níveis.
 
-A \textbf{verificabilidade esperada} é declarada por habilidade, no catálogo, e afirma o que ela
-admite em princípio. A \texttt{EM13MAT302} admite conferência plena: seu gabarito é um valor que
-o SymPy recalcula. Já a \texttt{EM13MAT402} pede converter uma representação algébrica em
-geométrica; a matéria matemática da questão é conferível, mas se o enunciado de fato exige a
-conversão de registro é juízo que nenhum sistema de computação algébrica emite. Sua
-verificabilidade esperada é, portanto, parcial. Essa classificação é leitura nossa --- não texto
-da Base --- e cada habilidade registra a razão que a sustenta.
+A \textbf{verificabilidade esperada} é declarada por habilidade no catálogo e afirma o que ela
+admite em princípio. A \texttt{EM13MAT302} admite conferência plena, uma vez que o seu gabarito é um
+valor que o SymPy recalcula. Já a \texttt{EM13MAT402} pede converter uma representação algébrica em
+geométrica, e embora a matéria matemática da questão seja conferível, saber se o enunciado de fato
+exige a conversão de registro é um juízo que nenhum sistema de computação algébrica emite. A sua
+verificabilidade esperada é portanto parcial. Essa classificação é leitura nossa e não texto da
+Base, e cada habilidade registra no catálogo a razão que a sustenta.
 
-A \textbf{garantia obtida} é uma propriedade de cada questão, derivada do veredicto do
-Verificador, e responde ao que aquela questão de fato recebeu: gabarito conferido, conferido em
-parte, ou sem conferência automática. É ela que aparece junto da questão na interface e permite
-filtrar o banco curado --- e o terceiro rótulo é redigido como instrução ao professor, não como
-etiqueta, porque é disso que se trata.
+A \textbf{garantia obtida}, por sua vez, é uma propriedade de cada questão derivada do veredicto
+do Verificador e responde ao que aquela questão de fato recebeu. Ela pode ser \emph{gabarito
+conferido}, \emph{conferido em parte} ou \emph{sem conferência automática}. É essa garantia que
+aparece junto da questão na interface e que permite filtrar o banco curado, e o terceiro rótulo é
+redigido como instrução ao professor e não como etiqueta, porque é disso que se trata.
 
 Mesmo o rótulo mais forte tem um alcance preciso, e convém dizê-lo com todas as letras.
-\emph{Gabarito conferido} significa que o gabarito é consistente com a formalização declarada
-pelo Gerador --- não que a formalização traduza fielmente o enunciado. Se o Gerador lê mal o
-próprio enunciado e formaliza essa leitura errada, gabarito e formalização concordam entre si, o
-Verificador confirma a concordância, e a questão sai conferida com o erro. O caso não é
-hipotético: a primeira rodada de avaliação docente encontrou uma questão assim no acervo
-(Subseção~\ref{sub:rodada1-erros}), e o Verificador aprova tanto a versão errada quanto a
-corrigida. O rótulo, portanto, elimina uma classe de erro --- o cálculo errado sobre um problema
-bem posto --- e deixa outra à vista do professor: a leitura errada do problema.
+\emph{Gabarito conferido} significa que o gabarito é consistente com a formalização declarada pelo
+Gerador, e não que a formalização traduza fielmente o enunciado. Se o Gerador lê mal o próprio
+enunciado e formaliza essa leitura errada, gabarito e formalização concordam entre si, o
+Verificador confirma a concordância e a questão sai conferida com o erro. O caso não é hipotético,
+já que a primeira rodada de avaliação docente encontrou uma questão assim no acervo
+(Seção~\ref{sub:rodada1-erros}), e o Verificador aprova tanto a versão errada quanto a
+corrigida. O rótulo elimina portanto uma classe de erro, a do cálculo errado sobre um problema bem
+posto, e deixa outra à vista do professor, que é a da leitura errada do problema.
 
-Os dois níveis não coincidem, e é justamente a distância entre eles que interessa: uma habilidade
+Os dois níveis não coincidem, e é justamente a distância entre eles que interessa. Uma habilidade
 pode admitir conferência plena e, numa questão particular, o Gerador não conseguir formalizar o
-problema. Quantificar essa distância --- em que habilidades a garantia prometida não se realiza
-na prática --- é objeto da avaliação empírica, e o registro de cada ciclo já carrega o dado
-necessário.
+problema. Quantificar essa distância é objeto da avaliação empírica, e o registro de cada ciclo já
+carrega o dado necessário para fazê-lo.
 
 \section{Agente Crítico Didático}
 \label{sec:ag-critico}
 
 O Crítico avalia a qualidade pedagógica da questão com base na rubrica consolidada na
-Seção~\ref{sec:criterios}. Como a correção matemática já foi julgada pelo Verificador, o
-Crítico avalia os cinco critérios restantes --- clareza do enunciado, adequação ao nível
-cognitivo, alinhamento à habilidade BNCC, plausibilidade dos distratores e originalidade ---
-atribuindo a cada um nota de 1 a 5 e comentário objetivo.
+Seção~\ref{sec:criterios}. Como a correção matemática já foi julgada pelo Verificador, ele se
+ocupa dos cinco critérios restantes, que são a clareza do enunciado, a adequação ao nível
+cognitivo, o alinhamento à habilidade BNCC, a plausibilidade dos distratores e a originalidade, e
+atribui a cada um nota de 1 a 5 acompanhada de comentário objetivo.
 
-O critério de alinhamento à BNCC recebe tratamento distinto dos demais: em vez de pedir um juízo
-global sobre o assunto da questão, o \emph{prompt} apresenta ao Crítico as exigências da
-habilidade declarada (Seção~\ref{sec:especificacao}) e o instrui a julgá-las uma a uma. Abordar o
-conteúdo certo não basta: se a questão não faz o que a habilidade pede, a nota é baixa ainda que
-o enunciado esteja claro e a matemática correta.
+O critério de alinhamento à BNCC recebe tratamento distinto dos demais. Em vez de pedir um juízo
+global sobre o assunto da questão, o \emph{prompt} apresenta ao Crítico as exigências da habilidade
+declarada (Seção~\ref{sec:especificacao}) e o instrui a julgá-las uma a uma. Abordar o conteúdo
+certo não basta, e se a questão não faz o que a habilidade pede a nota é baixa ainda que o
+enunciado esteja claro e a matemática correta.
 
-A rubrica é traduzida em \emph{prompt} (Apêndice A) com uma instrução de decisão explícita: a
-questão é aprovada somente se nenhum critério receber nota inferior a 3. Em caso de reprovação,
-o Crítico é obrigado a preencher um campo de \textbf{sugestões de revisão} com instruções
-acionáveis --- o que mudar, e não apenas o que está errado --- que o Orquestrador repassa ao
-Gerador. O parecer completo (notas, comentários, decisão e sugestões) é um objeto estruturado
-que acompanha a questão até o professor.
+A rubrica é traduzida em \emph{prompt} (Apêndice~\ref{ap:prompts}) com uma instrução de decisão
+explícita, segundo a qual a questão é aprovada somente se nenhum critério receber nota inferior a
+3. Em caso de reprovação o Crítico é obrigado a preencher um campo de \textbf{sugestões de revisão}
+com instruções acionáveis, que dizem o que mudar e não apenas o que está errado, e o Orquestrador
+as repassa ao Gerador. O parecer completo, com notas, comentários, decisão e sugestões, é um
+objeto estruturado que acompanha a questão até o professor.
 
 \section{Agente Orquestrador}
 \label{sec:ag-orquestrador}
 
-O Orquestrador coordena o ciclo e concentra toda a política de decisão do sistema. Ele não
-gera, não verifica e não avalia: decide. Sua política, deliberadamente simples e auditável, é:
+O Orquestrador coordena o ciclo e concentra toda a política de decisão do sistema. Ele não gera,
+não verifica e não avalia, apenas decide. A sua política é deliberadamente simples e auditável.
 
 \begin{enumerate}
-\item \textbf{Rejeição do Verificador} --- a questão volta ao Gerador com o veredicto, a
-  justificativa e o resultado calculado; \emph{não passa pelo Crítico}, pois não há sentido em
-  avaliar didaticamente uma questão matematicamente incorreta.
-\item \textbf{Veredicto não-verificável} --- a questão \emph{segue} ao Crítico. A
-  impossibilidade de verificação automática não é defeito da questão; a aprovação final carrega
-  a marca de revisão prioritária pelo professor.
-\item \textbf{Reprovação do Crítico} --- a questão volta ao Gerador com as sugestões de revisão.
-\item \textbf{Aprovação dos dois avaliadores} --- a questão é aprovada e entra no banco curado.
-\item \textbf{Critério de parada} --- três iterações sem aprovação implicam descarte. O limite
-  evita ciclos improdutivos (e o custo correspondente) quando a especificação é inviável ou o
-  Gerador não converge.
+\item \textbf{Rejeição do Verificador.} A questão volta ao Gerador com o veredicto, a justificativa
+  e o resultado calculado e \emph{não passa pelo Crítico}, pois não há sentido em avaliar
+  didaticamente uma questão matematicamente incorreta.
+\item \textbf{Veredicto não verificável ou parcial.} A questão \emph{segue} ao Crítico, porque a
+  impossibilidade de verificação automática não é defeito da questão. A aprovação final carrega
+  então a garantia correspondente e sinaliza ao professor que a revisão dele é prioritária.
+\item \textbf{Reprovação do Crítico.} A questão volta ao Gerador com as sugestões de revisão.
+\item \textbf{Aprovação dos dois avaliadores.} A questão é aprovada e pode entrar no banco curado.
+\item \textbf{Critério de parada.} Três iterações sem aprovação implicam descarte, limite que evita
+  ciclos improdutivos e o custo correspondente quando a especificação é inviável ou o Gerador não
+  converge.
 \end{enumerate}
 
-A \textbf{memória de execução} completa o papel do agente: cada iteração --- questão gerada,
-veredicto do Verificador, parecer do Crítico e \emph{feedback} enviado --- é registrada em um
-objeto de resultado que acompanha o ciclo inteiro. Esse registro cumpre dupla função:
-rastreabilidade para o professor (que pode inspecionar por que uma questão precisou de duas
-tentativas) e material de análise para a avaliação empírica do sistema.
+A \textbf{memória de execução} completa o papel do agente. Cada iteração, com a questão gerada, o
+veredicto do Verificador, o parecer do Crítico e o \emph{feedback} enviado, é registrada em um
+objeto de resultado que acompanha o ciclo inteiro. Esse registro cumpre dupla função, pois oferece
+rastreabilidade ao professor, que pode inspecionar por que uma questão precisou de duas tentativas,
+e fornece o material de análise para a avaliação empírica do sistema.
 
 \section{Fluxo de execução completo}
 \label{sec:fluxo}
 
-O percurso típico de uma especificação pelo sistema pode ser descrito em cinco tempos:
+O percurso típico de uma especificação pelo sistema pode ser descrito em cinco tempos.
 
 \begin{enumerate}
-\item O professor submete a especificação; a validação de entrada rejeita imediatamente códigos
-  BNCC desconhecidos.
-\item O Orquestrador aciona o Gerador, que produz a questão estruturada com sua formalização
-  verificável.
-\item O Verificador resolve a formalização e emite seu veredicto; se rejeitar, o ciclo retorna
-  ao passo 2 com \emph{feedback}, sem consultar o Crítico.
-\item O Crítico avalia a questão pela rubrica; se reprovar, o ciclo retorna ao passo 2 com as
+\item O professor submete a especificação, e a validação de entrada recusa imediatamente códigos
+  BNCC desconhecidos e combinações de temas que descaracterizam a habilidade.
+\item O Orquestrador aciona o Gerador, que produz a questão estruturada com as suas formalizações
+  verificáveis.
+\item O Verificador resolve as formalizações e emite o seu veredicto. Se rejeitar, o ciclo retorna
+  ao segundo passo com \emph{feedback} e sem consultar o Crítico.
+\item O Crítico avalia a questão pela rubrica. Se reprovar, o ciclo retorna ao segundo passo com as
   sugestões de revisão.
-\item Aprovada por ambos --- ou esgotadas as três iterações --- o Orquestrador registra o
-  resultado completo, e a questão aprovada é persistida no banco curado com seus metadados e
-  histórico.
+\item Aprovada por ambos ou esgotadas as três iterações, o Orquestrador registra o resultado
+  completo, e a questão aprovada é entregue ao professor com seus metadados e seu histórico.
 \end{enumerate}
 
-Dois exemplos ilustram o valor do ciclo. No primeiro, o Gerador produz uma questão de progressão
-geométrica cujo gabarito omite o primeiro termo ($3^5 = 243$ em vez de $2 \cdot 3^5 = 486$) ---
-um erro silencioso clássico, embutido em uma resolução fluente. O Verificador calcula o termo de
-forma independente, rejeita o gabarito e devolve o valor correto; a segunda iteração é aprovada.
-No segundo exemplo, uma questão matematicamente impecável é reprovada pelo Crítico por
-inconsistência de nível: especificada como \emph{analisar}, exigia apenas a aplicação de um
-algoritmo anunciado no próprio enunciado; a revisão eleva a demanda cognitiva. Os dois casos ---
-detalhados, com os objetos completos, no Capítulo~\ref{cap:implementacao} --- correspondem
-exatamente às duas dimensões de qualidade que a hipótese arquitetural (Seção~\ref{sec:hipotese})
-se propõe a garantir.
+Os dois retornos ao Gerador correspondem exatamente às duas dimensões de qualidade que a hipótese
+arquitetural (Seção~\ref{sec:hipotese}) se propõe a garantir. No primeiro o Verificador encontra
+uma divergência entre o gabarito e o que o SymPy calcula, e o Gerador recebe o valor correto contra
+o qual revisar. No segundo uma questão matematicamente correta é reprovada pelo Crítico, por
+exemplo porque reproduz um modelo de enunciado excessivamente batido ou porque não exige o processo
+cognitivo declarado, e a revisão parte das sugestões do parecer. Execuções reais dos dois caminhos,
+com os objetos completos registrados pelo sistema, são apresentadas na
+Seção~\ref{sec:exemplos}.
 
 \section{Decisões de projeto e alternativas descartadas}
 \label{sec:decisoes}
 
 Quatro decisões estruturais merecem justificativa explícita.
 
-\textbf{Por que quatro agentes, e não três ou cinco.} A divisão reflete as quatro funções
-irredutíveis do problema: criar, verificar matemática, avaliar didática e decidir. Fundir
-verificador e crítico em um único avaliador destruiria a propriedade central da arquitetura ---
-a independência de mecanismos (Seção~\ref{sec:hipotese}); adicionar um quinto agente (por
-exemplo, um revisor de linguagem) aumentaria custo e latência sem função que os existentes não
-cubram.
+\textbf{Por que quatro agentes e não três ou cinco.} A divisão reflete as quatro funções
+irredutíveis do problema, que são criar, verificar a matemática, avaliar a didática e decidir.
+Fundir verificador e crítico em um único avaliador destruiria a propriedade central da arquitetura,
+que é a independência de mecanismos (Seção~\ref{sec:hipotese}). Por outro lado, acrescentar um
+quinto agente, como um revisor de linguagem, aumentaria custo e latência sem cumprir função que os
+agentes existentes não cubram.
 
-\textbf{Por que verificação independente, e não auto-verificação.} Solicitar ao próprio LLM que
-confira seu trabalho é sujeito aos mesmos vieses da geração: um modelo que erra um cálculo tende
-a errar também a conferência, e a literatura de \emph{self-consistency}
-(Seção~\ref{sub:selfconsistency}) mostra que a repetição reduz, mas não elimina, erros
-correlacionados. O SymPy oferece garantia de natureza diferente: para as classes tratáveis, o
-erro do gabarito é \emph{detectado}, não apenas tornado menos provável.
+\textbf{Por que verificação independente e não autoverificação.} Pedir ao próprio modelo que
+confira o seu trabalho sujeita a conferência aos mesmos vieses da geração, pois um modelo que erra
+um cálculo tende a errar também ao conferi-lo. A literatura de \emph{self-consistency}
+(Seção~\ref{sub:selfconsistency}) mostra que a repetição reduz mas não elimina erros
+correlacionados. O SymPy oferece uma garantia de outra natureza, já que para as classes tratáveis o
+erro do gabarito é \emph{detectado} e não apenas tornado menos provável.
 
-\textbf{Por que orquestração em código puro, e não um \emph{framework} de agentes.} A
-Seção~\ref{sub:orquestracao} apresentou LangGraph e CrewAI como candidatos. A implementação
-optou por não adotar \emph{framework} algum: o fluxo tem quatro nós e uma política de decisão de
-cinco regras, e expressá-lo diretamente em código torna a política legível por inteiro em uma
-única função --- qualidade valiosa em um trabalho acadêmico cujo leitor é professor de
-Matemática, não engenheiro de software. Um \emph{framework} se justificaria com fluxos maiores
-ou paralelismo real entre avaliadores; a decisão é revisitada na discussão de trabalhos futuros.
+\textbf{Por que orquestração em código e não um \emph{framework} de agentes.} A
+Seção~\ref{sub:orquestracao} apresentou LangGraph e CrewAI como candidatos, mas a implementação
+optou por não adotar \emph{framework} algum. O fluxo tem quatro nós e uma política de decisão de
+cinco regras, e expressá-lo diretamente em código torna a política legível por inteiro em uma única
+função. Essa qualidade é valiosa em um trabalho acadêmico cujo leitor é professor de Matemática e
+não engenheiro de software. Um \emph{framework} se justificaria com fluxos maiores ou com
+paralelismo real entre avaliadores, e a decisão é retomada entre os desdobramentos discutidos nas
+considerações finais.
 
-\textbf{Por que JSON estruturado, e não texto livre.} Toda comunicação entre agentes usa objetos
-validados por esquema. Texto livre exigiria que cada agente interpretasse a prosa do anterior
---- reintroduzindo, dentro do sistema, exatamente a ambiguidade que a arquitetura existe para
-controlar. A validação por esquema também converte falhas de formato do LLM em erros detectáveis
-e tratáveis, em vez de corrupção silenciosa de dados.
+\textbf{Por que JSON estruturado e não texto livre.} Toda comunicação entre agentes usa objetos
+validados por esquema. Texto livre exigiria que cada agente interpretasse a prosa do anterior e
+reintroduziria dentro do sistema exatamente a ambiguidade que a arquitetura existe para controlar.
+Além disso, a validação por esquema converte falhas de formato do modelo em erros detectáveis e
+tratáveis, em vez de corrupção silenciosa de dados.

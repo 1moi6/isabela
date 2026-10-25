@@ -1,0 +1,113 @@
+\chapter*{Introdução}
+\addcontentsline{toc}{chapter}{Introdução}
+\label{cap:introducao}
+
+% =====================================================================
+% PAPEL DESTA INTRODUÇÃO:
+%   Apresenta o problema, a pergunta, a hipótese, os objetivos, a
+%   justificativa, o produto educacional e a estrutura do texto. NÃO
+%   desenvolve conceitos: cada um deles tem casa própria nos capítulos
+%   e aqui aparece apenas com a remissão correspondente.
+% =====================================================================
+
+Em poucos anos os modelos de linguagem de grande escala deixaram os laboratórios de pesquisa e
+passaram a fazer parte da rotina de quem ensina. Ferramentas conversacionais como o ChatGPT, o
+Gemini e o Claude estão a um clique de qualquer professor e respondem em segundos a pedidos que
+antes custavam horas de trabalho, entre eles o de redigir questões para uma lista de exercícios
+ou para uma avaliação. No ensino de Matemática essa promessa é especialmente atraente, porque a
+elaboração de boas questões exige tempo, repertório e cuidado com detalhes que nem sempre cabem
+na jornada de um professor da Educação Básica.
+
+A mesma rapidez traz consigo um problema que esta dissertação toma como ponto de partida. Os
+modelos de linguagem escrevem sobre Matemática com grande fluência e no entanto não garantem a
+correção daquilo que escrevem. Erros de cálculo, gabaritos incompletos e resoluções que saltam
+etapas aparecem redigidos com a mesma segurança das respostas corretas, de modo que nada no texto
+avisa o leitor de que algo está errado. Esse fenômeno, que aqui se denomina \emph{erro
+silencioso} e que é discutido na Seção~\ref{sec:erro-silencioso}, transfere ao professor uma
+tarefa de revisão minuciosa que muitas vezes anula o ganho de tempo prometido pela ferramenta. Ao
+lado do erro matemático há ainda um segundo risco menos visível, pois uma questão pode estar
+correta e mesmo assim ser inadequada para o nível da turma ou não realizar a habilidade da Base
+Nacional Comum Curricular que declara cobrir.
+
+Diante desse cenário a pesquisa se organiza em torno de uma pergunta central. \textbf{Como apoiar
+o professor de Matemática do Ensino Médio na geração de questões com modelos de linguagem
+garantindo correção matemática verificável e adequação didática reconhecida?} A resposta proposta
+parte da constatação de que nenhum componente isolado resolve o problema. O modelo de linguagem é
+o único capaz de transformar uma especificação pedagógica em um enunciado plausível, mas é
+justamente ele quem produz o erro silencioso. Por outro lado um sistema de computação algébrica
+calcula com exatidão e não é capaz de redigir uma questão. Daí decorre a hipótese de trabalho,
+argumentada por inteiro na Seção~\ref{sec:hipotese}, segundo a qual a combinação de um modelo de
+linguagem gerador com um verificador simbólico determinístico, um agente crítico de natureza
+didática e um orquestrador de ciclos de revisão produz questões mais confiáveis do que qualquer
+desses componentes produziria sozinho.
+
+Para examinar essa hipótese o trabalho tem como objetivo geral projetar, implementar e avaliar um
+sistema multiagente para a geração assistida de questões de Matemática do Ensino Médio, com
+mecanismos automáticos de verificação da correção matemática e de avaliação da qualidade
+didática, submetendo as questões produzidas ao julgamento de professores em exercício. Esse
+objetivo se desdobra nos seguintes objetivos específicos.
+
+\begin{enumerate}
+\item Caracterizar a partir da literatura as limitações dos modelos de linguagem em raciocínio
+  matemático e as estratégias contemporâneas de mitigação.
+\item Definir com base na BNCC do Ensino Médio e em referenciais didáticos consolidados uma
+  especificação de entrada que permita ao professor descrever a questão que deseja.
+\item Projetar uma arquitetura multiagente com papéis bem definidos de geração, verificação
+  simbólica, crítica didática e orquestração.
+\item Implementar um protótipo funcional em Python restrito a um recorte de habilidades do Ensino
+  Médio.
+\item Construir um banco curado de questões geradas e aprovadas pelo sistema e alinhadas a
+  habilidades da BNCC.
+\item Avaliar as questões geradas por meio de um painel de professores de Matemática.
+\item Disponibilizar o sistema, o banco de questões e um manual de uso como produto educacional.
+\end{enumerate}
+
+O recorte adotado acompanha a unidade temática que a própria BNCC usa como exemplo de
+reagrupamento de habilidades, a das funções polinomiais de primeiro e segundo graus, e a estende
+por analogia às funções exponenciais, logarítmicas, trigonométricas e definidas por várias
+sentenças e às progressões aritméticas e geométricas. Ao todo são quinze habilidades, apresentadas
+na Seção~\ref{sub:bncc-habilidades}. A escolha não é apenas de conveniência computacional, já que
+equações, funções e sequências admitem formalização simbólica e portanto conferência
+determinística da resposta, ao passo que a unidade escolhida corresponde a um bloco de ensino que
+o professor reconhece no próprio planejamento.
+
+O desenvolvimento seguiu a abordagem da pesquisa em ciência do design, adequada ao mestrado
+profissional por unir a construção de um artefato à produção de conhecimento sobre ele. O
+trabalho foi conduzido em ciclos sucessivos de construção e avaliação, descritos no início do
+Capítulo~\ref{cap:implementacao}, nos quais cada versão do sistema foi posta à prova com
+provedores reais de modelos de linguagem antes de seguir para a etapa seguinte. Essa escolha
+metodológica mostrou-se decisiva, uma vez que vários dos defeitos mais relevantes encontrados ao
+longo da pesquisa só apareceram quando o sistema foi exercitado com gerações reais e não com os
+testes automatizados.
+
+A relevância do trabalho para o PROFMAT se manifesta em duas frentes. De um lado o produto
+educacional resultante é diretamente aplicável à prática docente e foi concebido para ser usado
+por professores que não programam. De outro o trabalho contribui para o debate sobre o uso
+responsável da inteligência artificial na Educação Matemática, indo além da descrição das
+ferramentas para examinar de que modo seus erros podem ser tornados visíveis ao professor. Em vez
+de prometer um sistema que não erra, a dissertação propõe um sistema que declara com precisão o
+que foi conferido em cada questão e o que continua dependendo do julgamento docente, posição que
+se apoia na compreensão do professor como mediador indispensável discutida na
+Seção~\ref{sec:papel-mediador}.
+
+O produto educacional é composto por três entregáveis articulados, descritos no
+Capítulo~\ref{cap:produto}. O primeiro é o próprio sistema multiagente, com uma interface web por
+meio da qual o professor especifica, acompanha e avalia as questões geradas. O segundo é um banco
+curado de questões aprovadas pelo ciclo completo do sistema, que pode ser usado mesmo por quem
+não deseja instalar programa algum. O terceiro é o manual do professor, que orienta a instalação e
+o uso e sobretudo explica em linguagem acessível os limites da ferramenta.
+
+O texto está organizado em sete capítulos, além desta introdução e das considerações finais. O
+Capítulo~\ref{cap:contexto} situa o uso da inteligência artificial na educação e no ensino de
+Matemática e apresenta o erro silencioso do ponto de vista de quem ensina. O
+Capítulo~\ref{cap:tecnica} reúne a fundamentação técnica sobre modelos de linguagem, sistemas
+multiagentes e computação algébrica e termina com a formulação da hipótese arquitetural. O
+Capítulo~\ref{cap:didatica} apresenta os referenciais didáticos que sustentam tanto a especificação
+de entrada quanto os critérios de qualidade usados pelo sistema. Em seguida o
+Capítulo~\ref{cap:arquitetura} descreve o projeto do sistema em nível conceitual e o
+Capítulo~\ref{cap:implementacao} trata de sua implementação, incluindo custo, desempenho e
+exemplos reais de execução. O Capítulo~\ref{cap:avaliacao} relata a avaliação das questões por
+professores de Matemática da rede pública e o Capítulo~\ref{cap:produto} descreve o produto
+educacional do ponto de vista de quem o recebe. Por fim as considerações finais retomam a pergunta
+de pesquisa à luz dos resultados, discutem as limitações do estudo e apontam desdobramentos
+possíveis.

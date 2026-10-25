@@ -1,0 +1,95 @@
+\chapter*{Considerações finais}
+\addcontentsline{toc}{chapter}{Considerações finais}
+\label{cap:conclusao}
+
+% =====================================================================
+% PAPEL DESTAS CONSIDERAÇÕES: retomar a pergunta e a hipótese à luz dos
+% resultados (Caps. 5 e 6), sintetizar contribuições, declarar limitações
+% e desdobramentos. NÃO introduz dado novo: todo número aqui já apareceu
+% em capítulo anterior, que é citado.
+% =====================================================================
+
+Esta dissertação partiu de uma pergunta prática, a de como apoiar o professor de Matemática do
+Ensino Médio na geração de questões com modelos de linguagem garantindo correção matemática
+verificável e adequação didática reconhecida. A resposta proposta foi um sistema multiagente em que
+um modelo de linguagem redige a questão, um verificador simbólico recalcula o gabarito de forma
+independente, um crítico didático avalia a questão segundo uma rubrica fundamentada e um orquestrador
+decide entre aprovar, devolver para revisão ou descartar. O percurso de construção e avaliação desse
+sistema permite agora retomar a pergunta com mais precisão do que no início.
+
+O sistema mostrou-se capaz de produzir questões utilizáveis. No acervo de 90 especificações que
+cobriu as quinze habilidades do recorte, 85 terminaram em questão aprovada, a maior parte delas na
+primeira iteração, e o custo e o tempo medidos são compatíveis com o uso cotidiano de um professor
+(Seção~\ref{sec:custo}). Quando essas questões chegaram a professores da rede pública, oito em cada
+dez decisões as aceitaram com ou sem ajuste, e nenhuma recusa foi motivada por erro matemático
+(Capítulo~\ref{cap:avaliacao}). Do ponto de vista do produto, portanto, o objetivo de oferecer ao
+professor rascunhos de qualidade alinhados à BNCC foi alcançado.
+
+A hipótese arquitetural, por sua vez, recebe uma resposta mais matizada, e é nela que se encontram os
+resultados mais interessantes do trabalho. Com o modelo usado na geração do acervo, o ciclo de revisão
+trabalhou sobretudo na dimensão didática, já que a grande maioria das revisões foi pedida pelo Crítico.
+O Verificador, por outro lado, não encontrou nenhum gabarito matematicamente errado nas execuções
+analisadas, e as suas reprovações ou eram indevidas ou apontavam inconsistências na própria
+formalização. A sua contribuição apareceu de outra forma, como garantia declarada, uma vez que 72 das
+85 questões chegaram ao professor com o gabarito recalculado de modo independente e com essa
+informação registrada junto da questão. Ao mesmo tempo o único erro matemático do acervo atravessou o
+sistema inteiro e um professor atento, porque estava na tradução do enunciado para a formalização e
+não no cálculo (Seção~\ref{sub:rodada1-erros}). Esse episódio confirma a premissa do erro silencioso,
+já que o gabarito errado passou por quem fez a conta certa na margem da folha, e ao mesmo tempo
+delimita com exatidão o alcance da verificação simbólica. Ela elimina o cálculo errado sobre um
+problema bem formalizado e não protege contra a leitura errada do problema.
+
+Daí decorre a principal contribuição conceitual da dissertação, que é tratar a garantia como algo a
+ser declarado com precisão e não como selo genérico de qualidade. O sistema distingue o que cada
+habilidade admite de conferência automática do que cada questão de fato recebeu, e diz ao professor
+em palavras simples o que o rótulo mais forte significa e o que ele não significa
+(Seção~\ref{sec:garantia}). Em vez de prometer um sistema que não erra, o trabalho oferece um sistema
+que torna visível onde o erro ainda pode estar, o que é coerente com a compreensão do professor como
+mediador indispensável defendida na Seção~\ref{sec:papel-mediador}.
+
+Outras contribuições merecem registro. A primeira é a especificação de entrada que parte da habilidade
+da BNCC e não do tema, acompanhada das exigências que a questão precisa exibir para realizar a
+habilidade, o que transforma o alinhamento curricular de rótulo em critério verificável pelo Crítico.
+A segunda é o tipo de verificação por propriedades, que estende a conferência simbólica a habilidades
+de generalização de padrões e de associação entre progressões e funções, nas quais não há um valor a
+comparar. A terceira é de natureza metodológica. Os testes automatizados, por mais numerosos, não
+encontraram os defeitos que importavam, e foram as execuções com provedor real que revelaram onze
+deles no Verificador, todos do mesmo lado da balança, o de reprovar gabaritos corretos
+(Seção~\ref{sec:reprodutibilidade}). Para quem desenvolve sistemas desse tipo, a lição é que um
+verificador que reprova o que está certo não é inofensivo, porque induz o gerador a piorar uma questão
+que estava correta.
+
+O estudo tem limitações que precisam ser ditas com clareza. A mais importante é que o painel formal,
+desenhado para testar a hipótese com itens comuns, desenho cego e medida de concordância, não foi
+aplicado no prazo desta dissertação (Seção~\ref{sec:painel-formal}). A avaliação realizada é formativa,
+com cinco professores que viram lotes diferentes, e descreve o que aconteceu sem estimar propriedades
+do sistema. Além disso todas as gerações analisadas usaram um único modelo comercial, de modo que nada
+se pode afirmar ainda sobre modelos menores ou abertos. A fidelidade da formalização ao enunciado não é
+conferida por nenhum agente, e o sistema produz apenas texto, sem as figuras que três dos cinco
+professores pediram. O recorte de quinze habilidades, embora coerente com uma unidade que a própria
+BNCC reconhece, deixa de fora a geometria, a estatística e a probabilidade. Por fim, os professores
+mostraram trabalhar com uma referência curricular diferente da usada no catálogo, ponto que precisa ser
+esclarecido porque a habilidade declarada é a âncora do alinhamento.
+
+Essas limitações apontam os desdobramentos mais imediatos. O primeiro é aplicar o painel formal sob
+aprovação de comitê de ética, produzindo de propósito os espécimes de erro de que o bloco de detecção
+precisa. O segundo é executar a comparação entre modelos já preparada no repositório, que testaria a
+hipótese pelo lado oposto, pois se a verificação simbólica cumpre o que se afirma, um modelo mais fraco
+e mais barato deveria errar mais e ainda assim convergir com mais iterações, e se não convergir terá
+sido encontrado o piso de capacidade da arquitetura. Ambos os resultados interessam ao professor sem
+orçamento, para quem um modelo aberto executado localmente seria o caminho natural. O terceiro é
+atacar o ponto cego revelado pela Q061, por exemplo pedindo a um segundo agente que formalize o mesmo
+enunciado de forma independente e comparando as duas formalizações antes da verificação. Há ainda
+desdobramentos de alcance maior, como gerar figuras para as habilidades de conversão entre registros,
+diversificar contextos e dados numéricos entre ciclos, ampliar o catálogo para as demais habilidades
+do Ensino Médio que admitem verificação simbólica, adotar um \emph{framework} de orquestração caso o
+fluxo passe a exigir paralelismo entre avaliadores e, mais adiante, investigar os efeitos do uso
+dessas questões em sala de aula, o que esta pesquisa deliberadamente não fez.
+
+Uma última consideração diz respeito ao uso responsável da inteligência artificial na Educação
+Matemática. Os modelos de linguagem já estão nas mãos dos professores, e a questão relevante deixou de
+ser se eles serão usados para passar a ser como. Este trabalho procurou mostrar que é possível
+construir em torno desses modelos mecanismos que tornem os seus erros visíveis, que declarem com
+honestidade o que foi e o que não foi conferido e que devolvam ao professor, com informação melhor, a
+decisão que sempre foi dele. Uma ferramenta assim não diminui a responsabilidade docente, mas permite
+que ela seja exercida onde de fato importa.

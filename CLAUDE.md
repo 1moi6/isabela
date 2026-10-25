@@ -10,7 +10,9 @@ descreve**: um sistema multiagente para geração assistida de questões de Mate
 (LLM gerador + verificador simbólico via SymPy + crítico didático + orquestrador).
 
 Dois artefatos:
-- `dissertacao/` — o texto em LaTeX (Caps. 1–7 escritos; falta o material pré-textual).
+- `dissertacao/` — o texto em LaTeX: Introdução, Caps. 1–7, Considerações finais e Apêndices A–F
+  escritos; pré-textuais provisórios (capa, resumo, abstract, siglas) até a migração para o abntex2.
+- `banco_curado/` — o banco do produto (85 questões, JSON + PDF), gerado por `sistema/montar_banco.py`.
 - `sistema/` — o código Python do sistema (produto educacional; ver `sistema/README.md`).
 
 ## Trabalhar no código (`sistema/`)
@@ -270,8 +272,18 @@ Cada arquivo de capítulo tem um cabeçalho em comentário `% =====` que reafirm
 
 ## Tarefas abertas
 
-Elementos pré-textuais (resumo, abstract, folha de rosto, listas); validação da bibliografia
-(`% CONFERIR`); migração para `abntex2cite`.
+Migração para o template oficial (abntex2/`abntex2cite`), que traz ficha catalográfica e folha de
+aprovação; validação da bibliografia (`% CONFERIR`); agradecimentos (`capitulos/agradecimento.tex` é
+rascunho neutro) e TCLE (Apêndice D é modelo; trocar pelo texto assinado, se diferente) ficam com a
+aluna. Painel formal (Seção 6.7) e comparação entre modelos seguem como limitação declarada.
+
+**Apêndices gerados:** `apendice_prompts_texto.tex`, `apendice_exemplos_texto.tex` e
+`apendice_tabela_respostas.tex` saem de `dissertacao/gerar_apendices.py` (rode da raiz). Mudou prompt,
+banco ou resposta de avaliação? Regere — não edite à mão.
+
+**Estilo pedido pelo orientador (out/2026):** pontuação só quando necessária, conectivos entre as
+ideias em vez de travessões e parênteses, poucas subseções de terceiro nível, prosa corrida. Os Caps.
+4–7, a Introdução e as Considerações já seguem isso; os Caps. 1–3 (texto original da aluna) ainda não.
 
 A expansão do catálogo tem plano próprio em `plano_expansao_verificacao.md`, com a
 classificação das 45 habilidades por verificabilidade. Feitas: Fases 0, 1, 3 e 2a/2b — 15 das 45
